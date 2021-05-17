@@ -83,8 +83,8 @@ try:
                     response.raise_for_status()
                     nb_availabilities = response.json()["total"]
 
-                    message = datetime.datetime.now().strftime("%H:%M:%S") + " " + str(nb_availabilities) + \
-                        " new appointments found: " + center_url + \
+                    message = datetime.datetime.now().strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                        " neue Impftermine gefunden: " + center_url + \
                         "?pid=practice-"+str(practice_ids)
 
                     vaccination_id = "{}.{}.{}".format(visit_motive_ids, agenda_ids, practice_ids)
