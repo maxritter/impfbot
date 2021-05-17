@@ -18,10 +18,18 @@ try:
     print("COVID-19 Vaccination Finder by Max Ritter")
     print("Searching for appointments now..")
     client = Client(PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
+    t=time.time()
     while True:
+        # Eventually clear list
+        if time.time()-t>3600:
+            print("Clearing list now..")
+            already_sent_ids.clear()
+            t=time.time()
+
         for center_url in centers_urls:
             try:
                 center = center_url.split("/")[5]
+                print(center)
                 raw_data = requests.get(
                     "https://www.doctolib.de/booking/{}.json".format(center))
                 json_data = raw_data.json()
@@ -89,6 +97,5 @@ try:
             except KeyError as e:
                 print("KeyError: " + str(e))
 
-        time.sleep(60)
 except KeyboardInterrupt:
     print("Mischief managed.")
