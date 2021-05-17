@@ -1,13 +1,13 @@
 import datetime
 import requests
-from pushover import Client
+import telegram
 import time
 import json
 
 already_sent_ids = []
 
-PUSHOVER_TOKEN = "aaa8hh4sncnbwhxx9hz9xwoknes7g1"
-PUSHOVER_USER = "ufpz29yh4cmp626isi4sv3jvnntdj4"
+TELEGRAM_MUC_TOKEN = "1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo"
+TELEGRAM_MUC_CHAT_ID = "-1001464001536"
 
 with open('centers-url.txt') as centers_url_txt:
     centers_urls = centers_url_txt.readlines()
@@ -17,7 +17,7 @@ centers_urls = [center.strip() for center in centers_urls
 try:
     print("COVID-19 Vaccination Finder by Max Ritter")
     print("Searching for appointments now..")
-    client = Client(PUSHOVER_USER, api_token=PUSHOVER_TOKEN)
+    telegram_bot = telegram.Bot(token=TELEGRAM_MUC_TOKEN)
     t=time.time()
     while True:
         # Eventually clear list
@@ -86,10 +86,12 @@ try:
                     message = datetime.datetime.now().strftime("%H:%M:%S") + " " + str(nb_availabilities) + \
                         " new appointments found: " + center_url + \
                         "?pid=practice-"+str(practice_ids)
-                    if nb_availabilities > 0 and visit_motive_ids not in already_sent_ids:
-                        already_sent_ids.append(visit_motive_ids)
+
+                    vaccination_id = "{}.{}.{}".format(visit_motive_ids, agenda_ids, practice_ids)
+                    if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
+                        already_sent_ids.append(vaccination_id)
                         print(message)
-                        client.send_message(message, title="Covid-19 Vaccination MUC")
+                        telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
 
             except json.decoder.JSONDecodeError:
                 print("Doctolib might be ko")
