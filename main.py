@@ -29,7 +29,6 @@ try:
         for center_url in centers_urls:
             try:
                 center = center_url.split("/")[5]
-                print(center)
                 raw_data = requests.get(
                     "https://www.doctolib.de/booking/{}.json".format(center))
                 json_data = raw_data.json()
