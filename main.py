@@ -3,8 +3,11 @@ import requests
 import telegram
 import time
 import json
+import pytz
 
 already_sent_ids = []
+
+timezone = pytz.timezone("Europe/Berlin")
 
 TELEGRAM_MUC_TOKEN = "1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo"
 TELEGRAM_MUC_CHAT_ID = "-1001464001536"
@@ -39,10 +42,14 @@ try:
                 data = json_data["data"]
 
                 visit_motives = [visit_motive for visit_motive in data["visit_motives"]
-                                 if "Erste Impfung" in visit_motive["name"] or \
-                                    "Erstimpfung" in visit_motive["name"] or \
-                                    "1. Impfung" in visit_motive["name"] or \
-                                    "1.Impfung" in visit_motive["name"]]
+                                 if "erste impfung" in visit_motive["name"].lower() or \
+                                    "erstimpfung" in visit_motive["name"].lower() or \
+                                    "1. impfung" in visit_motive["name"].lower() or \
+                                    "1.impfung" in visit_motive["name"].lower() or \
+                                    ("biontech" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
+                                    ("astrazeneca" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
+                                    ("moderna" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
+                                    ("johnson" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower()))]
                 if not visit_motives:
                     continue
 
@@ -83,15 +90,16 @@ try:
                     response.raise_for_status()
                     nb_availabilities = response.json()["total"]
 
-                    message = datetime.datetime.now().strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
-                        " neue Impftermine gefunden: " + center_url + \
+                    d = datetime.datetime.now()
+                    message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                        " freie Impftermine: " + center_url + \
                         "?pid=practice-"+str(practice_ids)
 
                     vaccination_id = "{}.{}.{}".format(visit_motive_ids, agenda_ids, practice_ids)
                     if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
                         already_sent_ids.append(vaccination_id)
                         print(message)
-                        telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
+                        #telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
 
             except json.decoder.JSONDecodeError:
                 print("Doctolib might be ko")
