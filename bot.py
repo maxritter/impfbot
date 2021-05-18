@@ -40,12 +40,12 @@ try:
                 visit_motives = [visit_motive for visit_motive in data["visit_motives"]
                                  if "erste impfung" in visit_motive["name"].lower() or
                                     "erstimpfung" in visit_motive["name"].lower() or
-                                    "1. impfung" in visit_motive["name"].lower() or
-                                    "1.impfung" in visit_motive["name"].lower() or
-                                    ("biontech" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
-                                    ("astrazeneca" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
-                                    ("moderna" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
-                                    ("johnson" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower()))]
+                                    "einzelimpfung" in visit_motive["name"].lower() or
+                                    ("biontech" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
+                                    ("astrazeneca" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
+                                    ("moderna" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
+                                    ("johnson" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
+                                    ("janssen" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower())]
                 if not visit_motives:
                     continue
 
