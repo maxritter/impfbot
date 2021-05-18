@@ -99,7 +99,7 @@ try:
                     if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
                         already_sent_ids.append(vaccination_id)
                         print(message)
-                        #telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
+                        telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
 
             except json.decoder.JSONDecodeError:
                 print("Doctolib might be ko")
