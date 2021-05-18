@@ -44,10 +44,25 @@ try:
                 # Determine Vaccine
                 vaccine_names = []
                 vaccine_ids = []
+                vaccine_days = []
                 for visit_motive in visit_motives:
+                    # If new patients are not allowed, we can not take this one
+                    try:
+                        if not visit_motive['allow_new_patients']:
+                            continue
+                    except:
+                        pass
+
+                    # Extract some information
                     visit_motive_name = visit_motive['name'].lower()
                     visit_motive_id = visit_motive['id']
+                    visit_motive_covid_vaccination = False
+                    try:
+                        visit_motive_covid_vaccination = visit_motive['first_shot_motive']
+                    except:
+                        pass
 
+                    # Check if this is a Covid vaccination
                     if "erste impfung" in visit_motive_name or \
                         "erstimpfung" in visit_motive_name or \
                         "einzelimpfung" in visit_motive_name or \
@@ -55,7 +70,8 @@ try:
                         ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or \
                         ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or \
                         ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                            ("janssen" in visit_motive_name and not "zweit" in visit_motive_name):
+                        ("janssen" in visit_motive_name and not "zweit" in visit_motive_name) or \
+                            visit_motive_covid_vaccination:
 
                         if "biontech" in visit_motive_name:
                             vaccine_names.append("BioNTech")
@@ -69,6 +85,14 @@ try:
                             vaccine_names.append("COVID-19 Impfstoff")
 
                         vaccine_ids.append(visit_motive_id)
+
+                        visit_motive_day = 0
+                        try:
+                            if(visit_motive['vaccination_days_range'] is not None and visit_motive['vaccination_days_range'] > 0):
+                                visit_motive_day = visit_motive['vaccination_days_range']
+                        except:
+                            pass
+                        vaccine_days.append(visit_motive_day)
 
                 if len(vaccine_ids) == 0 or len(vaccine_names) == 0:
                     continue
@@ -127,6 +151,9 @@ try:
                             message = message + \
                                 "für {} ".format(
                                     vaccine_names[vaccine_counter])
+                            if vaccine_days[vaccine_counter] != 0:
+                                "mit Abstand zur 2. Impfung von {} Tagen ".format(
+                                    vaccine_days[vaccine_counter])
                             if len(place_address.split(",")) == 2:
                                 message = message + \
                                     "in {}".format(
