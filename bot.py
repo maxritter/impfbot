@@ -101,7 +101,7 @@ try:
                             "visit_motive_ids": visit_motive_ids,
                             "agenda_ids": agenda_ids,
                             "practice_ids": practice_ids,
-                            "limit": 21
+                            "limit": 14
                         }
 
                         try:
