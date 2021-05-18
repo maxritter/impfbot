@@ -21,13 +21,13 @@ try:
     print("COVID-19 Vaccination Finder by Max Ritter")
     print("Searching for appointments now..")
     telegram_bot = telegram.Bot(token=TELEGRAM_MUC_TOKEN)
-    t=time.time()
+    t = time.time()
     while True:
         # Eventually clear list
-        if time.time()-t>3600:
+        if time.time()-t > 3600:
             print("Clearing list now..")
             already_sent_ids.clear()
-            t=time.time()
+            t = time.time()
 
         for center_url in centers_urls:
             try:
@@ -42,13 +42,13 @@ try:
                 data = json_data["data"]
 
                 visit_motives = [visit_motive for visit_motive in data["visit_motives"]
-                                 if "erste impfung" in visit_motive["name"].lower() or \
-                                    "erstimpfung" in visit_motive["name"].lower() or \
-                                    "1. impfung" in visit_motive["name"].lower() or \
-                                    "1.impfung" in visit_motive["name"].lower() or \
-                                    ("biontech" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
-                                    ("astrazeneca" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
-                                    ("moderna" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or \
+                                 if "erste impfung" in visit_motive["name"].lower() or
+                                    "erstimpfung" in visit_motive["name"].lower() or
+                                    "1. impfung" in visit_motive["name"].lower() or
+                                    "1.impfung" in visit_motive["name"].lower() or
+                                    ("biontech" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
+                                    ("astrazeneca" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
+                                    ("moderna" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower())) or
                                     ("johnson" in visit_motive["name"].lower() and not ("zweit" in visit_motive["name"].lower() or "2." in visit_motive["name"].lower()))]
                 if not visit_motives:
                     continue
@@ -90,16 +90,24 @@ try:
                     response.raise_for_status()
                     nb_availabilities = response.json()["total"]
 
-                    d = datetime.datetime.now()
-                    message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
-                        " freie Impftermine: " + center_url + \
-                        "?pid=practice-"+str(practice_ids)
-
-                    vaccination_id = "{}.{}.{}".format(visit_motive_ids, agenda_ids, practice_ids)
+                    vaccination_id = "{}.{}.{}".format(
+                        visit_motive_ids, agenda_ids, practice_ids)
                     if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
-                        already_sent_ids.append(vaccination_id)
+                        d = datetime.datetime.now()
+
+                        if nb_availabilities == 1:
+                            message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                                " freier Impftermin: " + center_url + \
+                                "?pid=practice-"+str(practice_ids)
+                        else:
+                            message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                                " freie Impftermine: " + center_url + \
+                                "?pid=practice-"+str(practice_ids)
+
                         print(message)
-                        telegram_bot.sendMessage(chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
+                        telegram_bot.sendMessage(
+                            chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
+                        already_sent_ids.append(vaccination_id)
 
             except json.decoder.JSONDecodeError:
                 print("Doctolib might be ko")
