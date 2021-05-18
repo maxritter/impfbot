@@ -3,13 +3,11 @@ import requests
 import telegram
 import time
 import json
+import sys
 
 already_sent_ids = []
 
-TELEGRAM_MUC_TOKEN = "1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo"
-TELEGRAM_MUC_CHAT_ID = "-1001464001536"
-
-with open('centers-url.txt') as centers_url_txt:
+with open(sys.argv[1]) as centers_url_txt:
     centers_urls = centers_url_txt.readlines()
 centers_urls = [center.strip() for center in centers_urls
                 if not center.startswith("#")]
@@ -17,8 +15,10 @@ centers_urls = [center.strip() for center in centers_urls
 try:
     print("COVID-19 Vaccination Finder by Max Ritter")
     print("Searching for appointments now..")
-    telegram_bot = telegram.Bot(token=TELEGRAM_MUC_TOKEN)
+
+    telegram_bot = telegram.Bot(token=sys.argv[2])
     t = time.time()
+
     while True:
         # Eventually clear list
         if time.time()-t > 3600:
@@ -74,11 +74,9 @@ try:
                     params = {
                         "start_date": start_date,
                         "visit_motive_ids": visit_motive_ids,
-                        "insurance_sector": "public",
-                        "allow_new_patients": True,
                         "agenda_ids": agenda_ids,
                         "practice_ids": practice_ids,
-                        "limit": 7
+                        "limit": 21
                     }
                     response = requests.get(
                         "https://www.doctolib.de/availabilities.json",
@@ -102,7 +100,7 @@ try:
 
                         print(message)
                         telegram_bot.sendMessage(
-                            chat_id=TELEGRAM_MUC_CHAT_ID, text=message)
+                            chat_id=sys.argv[3], text=message)
                         already_sent_ids.append(vaccination_id)
 
             except json.decoder.JSONDecodeError:
