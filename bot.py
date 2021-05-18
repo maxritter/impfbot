@@ -36,71 +36,116 @@ try:
                     print(json_data)
                     continue
                 data = json_data["data"]
-
-                visit_motives = [visit_motive for visit_motive in data["visit_motives"]
-                                 if "erste impfung" in visit_motive["name"].lower() or
-                                    "erstimpfung" in visit_motive["name"].lower() or
-                                    "einzelimpfung" in visit_motive["name"].lower() or
-                                    ("biontech" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
-                                    ("astrazeneca" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
-                                    ("moderna" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
-                                    ("johnson" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower()) or
-                                    ("janssen" in visit_motive["name"].lower() and not "zweit" in visit_motive["name"].lower())]
+                visit_motives = [
+                    visit_motive for visit_motive in data["visit_motives"]]
                 if not visit_motives:
+                    continue
+
+                # Determine Vaccine
+                vaccine_names = []
+                vaccine_ids = []
+                for visit_motive in visit_motives:
+                    visit_motive_name = visit_motive['name'].lower()
+                    visit_motive_id = visit_motive['id']
+
+                    if "erste impfung" in visit_motive_name or \
+                        "erstimpfung" in visit_motive_name or \
+                        "einzelimpfung" in visit_motive_name or \
+                        ("biontech" in visit_motive_name and not "zweit" in visit_motive_name) or \
+                        ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or \
+                        ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or \
+                        ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or \
+                            ("janssen" in visit_motive_name and not "zweit" in visit_motive_name):
+
+                        if "biontech" in visit_motive_name:
+                            vaccine_names.append("BioNTech")
+                        elif "astrazeneca" in visit_motive_name:
+                            vaccine_names.append("AstraZeneca")
+                        elif "moderna" in visit_motive_name:
+                            vaccine_names.append("Moderna")
+                        elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
+                            vaccine_names.append("Johnson & Johnson")
+                        else:
+                            vaccine_names.append("COVID-19 Impfstoff")
+
+                        vaccine_ids.append(visit_motive_id)
+
+                if len(vaccine_ids) == 0 or len(vaccine_names) == 0:
                     continue
 
                 places = [place for place in data["places"]]
                 if not places:
                     continue
 
-                for place in places:
+                vaccine_counter = 0
+                for vaccine_id in vaccine_ids:
+                    for place in places:
 
-                    start_date = datetime.datetime.today().date().isoformat()
-                    visit_motive_ids = visit_motives[0]["id"]
-                    practice_ids = place["practice_ids"][0]
-                    place_name = place["formal_name"]
-                    place_address = place["full_address"]
+                        start_date = datetime.datetime.today().date().isoformat()
+                        visit_motive_ids = vaccine_id
+                        practice_ids = place["practice_ids"][0]
+                        place_name = place["formal_name"]
+                        place_address = place["full_address"]
 
-                    agendas = [agenda for agenda in data["agendas"]
-                               if agenda["practice_id"] == practice_ids and
-                               not agenda["booking_disabled"] and
-                               visit_motive_ids in agenda["visit_motive_ids"]]
-                    if not agendas:
-                        continue
+                        agendas = [agenda for agenda in data["agendas"]
+                                   if agenda["practice_id"] == practice_ids and
+                                   not agenda["booking_disabled"] and
+                                   visit_motive_ids in agenda["visit_motive_ids"]]
+                        if not agendas:
+                            continue
 
-                    agenda_ids = "-".join([str(agenda["id"])
-                                           for agenda in agendas])
-                    params = {
-                        "start_date": start_date,
-                        "visit_motive_ids": visit_motive_ids,
-                        "agenda_ids": agenda_ids,
-                        "practice_ids": practice_ids,
-                        "limit": 21
-                    }
-                    response = requests.get(
-                        "https://www.doctolib.de/availabilities.json",
-                        params=params,
-                    )
-                    response.raise_for_status()
-                    nb_availabilities = response.json()["total"]
+                        agenda_ids = "-".join([str(agenda["id"])
+                                               for agenda in agendas])
+                        params = {
+                            "start_date": start_date,
+                            "visit_motive_ids": visit_motive_ids,
+                            "agenda_ids": agenda_ids,
+                            "practice_ids": practice_ids,
+                            "limit": 21
+                        }
 
-                    vaccination_id = "{}.{}.{}".format(
-                        visit_motive_ids, agenda_ids, practice_ids)
-                    if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
+                        try:
+                            response = requests.get(
+                                "https://www.doctolib.de/availabilities.json",
+                                params=params,
+                            )
+                            response.raise_for_status()
+                            nb_availabilities = response.json()["total"]
+                        except:
+                            continue
+                        vaccination_id = "{}.{}.{}".format(
+                            visit_motive_ids, agenda_ids, practice_ids)
 
-                        if nb_availabilities == 1:
-                            message = str(nb_availabilities) + \
-                                " freier Impftermin: " + center_url + \
-                                "?pid=practice-"+str(practice_ids)
-                        else:
-                            message = str(nb_availabilities) + \
-                                " freie Impftermine: " + center_url + \
-                                "?pid=practice-"+str(practice_ids)
+                        # Appointment(s) found
+                        if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
+                            # Construct message
+                            message = str(nb_availabilities)
+                            if nb_availabilities == 1:
+                                message = message + " freier Impftermin "
+                            else:
+                                message = message + " freie Impftermine "
+                            message = message + \
+                                "für {} ".format(
+                                    vaccine_names[vaccine_counter])
+                            if len(place_address.split(",")) == 2:
+                                message = message + \
+                                    "in {}".format(
+                                        place_address.split(",")[1].strip())
+                            message = message + \
+                                ". Hier buchen: {}?pid=practice-{}".format(center_url,
+                                                                           practice_ids)
 
-                        print(sys.argv[1] + ": " + message)
-                        telegram_bot.sendMessage(
-                            chat_id=sys.argv[4], text=message)
-                        already_sent_ids.append(vaccination_id)
+                            # Print message out on server with city in front
+                            print(sys.argv[1] + ": " + message)
+
+                            # Send message to telegram channel for the specific city
+                            telegram_bot.sendMessage(
+                                chat_id=sys.argv[4], text=message)
+
+                            # Do not send it out again for 60 minutes
+                            already_sent_ids.append(vaccination_id)
+
+                    vaccine_counter = vaccine_counter + 1
 
             except json.decoder.JSONDecodeError:
                 print("Doctolib might be ko")
