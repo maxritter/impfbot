@@ -7,16 +7,15 @@ import sys
 
 already_sent_ids = []
 
-with open(sys.argv[1]) as centers_url_txt:
+with open(sys.argv[2]) as centers_url_txt:
     centers_urls = centers_url_txt.readlines()
 centers_urls = [center.strip() for center in centers_urls
                 if not center.startswith("#")]
 
 try:
-    print("COVID-19 Vaccination Finder by Max Ritter")
-    print("Searching for appointments now..")
+    print("Searching for appointments in {} now..".format(sys.argv[1]))
 
-    telegram_bot = telegram.Bot(token=sys.argv[2])
+    telegram_bot = telegram.Bot(token=sys.argv[3])
     t = time.time()
 
     while True:
@@ -98,9 +97,9 @@ try:
                                 " freie Impftermine: " + center_url + \
                                 "?pid=practice-"+str(practice_ids)
 
-                        print(message)
+                        print(sys.argv[1] + ": " + message)
                         telegram_bot.sendMessage(
-                            chat_id=sys.argv[3], text=message)
+                            chat_id=sys.argv[4], text=message)
                         already_sent_ids.append(vaccination_id)
 
             except json.decoder.JSONDecodeError:
