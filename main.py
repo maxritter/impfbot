@@ -3,11 +3,8 @@ import requests
 import telegram
 import time
 import json
-import pytz
 
 already_sent_ids = []
-
-timezone = pytz.timezone("Europe/Berlin")
 
 TELEGRAM_MUC_TOKEN = "1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo"
 TELEGRAM_MUC_CHAT_ID = "-1001464001536"
@@ -93,14 +90,13 @@ try:
                     vaccination_id = "{}.{}.{}".format(
                         visit_motive_ids, agenda_ids, practice_ids)
                     if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
-                        d = datetime.datetime.now()
 
                         if nb_availabilities == 1:
-                            message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                            message = str(nb_availabilities) + \
                                 " freier Impftermin: " + center_url + \
                                 "?pid=practice-"+str(practice_ids)
                         else:
-                            message = timezone.localize(d).strftime("%H:%M:%S") + " - " + str(nb_availabilities) + \
+                            message = str(nb_availabilities) + \
                                 " freie Impftermine: " + center_url + \
                                 "?pid=practice-"+str(practice_ids)
 
