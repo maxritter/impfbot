@@ -125,7 +125,9 @@ try:
                             "visit_motive_ids": visit_motive_ids,
                             "agenda_ids": agenda_ids,
                             "practice_ids": practice_ids,
-                            "limit": 14
+                            "insurance_sector": "public",
+                            "destroy_temporary": "true",
+                            "limit": 7
                         }
 
                         try:
@@ -152,7 +154,7 @@ try:
                                 "für {} ".format(
                                     vaccine_names[vaccine_counter])
                             if vaccine_days[vaccine_counter] != 0:
-                                "mit Abstand zur 2. Impfung von {} Tagen ".format(
+                                message = message + "mit Abstand zur 2. Impfung von {} Tagen ".format(
                                     vaccine_days[vaccine_counter])
                             if len(place_address.split(",")) == 2:
                                 message = message + \
