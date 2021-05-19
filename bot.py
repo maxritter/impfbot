@@ -7,6 +7,68 @@ import sys
 
 already_sent_ids = []
 
+
+def check_hnomedic_api():
+    url = "https://onlinetermine.zollsoft.de/includes/searchTermine_app_feature.php"
+    headers = {
+        "accept": "*/*",
+        "accept-language": "en-US,en;q=0.9",
+        "cache-control": "no-cache",
+        "cookie": "sec_session_id=caa60b6cfa29689425205c27f21a1ca8",
+        "origin": "https://onlinetermine.zollsoft.de",
+        "pragma": "no-cache",
+        "referer": "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident=6087dd08bd763",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+        "x-requested-with": "XMLHttpRequest",
+    }
+    payload = {
+        "versichert": "",
+        "terminsuche": "",
+        "uniqueident": "6087dd08bd763",
+    }
+
+    res = requests.post(url, headers=headers, data=payload)
+    res.raise_for_status()
+    result = res.json()
+    nb_availabilities = len(result["termine"])
+
+    if nb_availabilities > 0:
+        # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
+        for entry in result["termine"]:
+            date, time, _, _, location, _, _, _, _, _ = entry
+            if location not in already_sent_ids:
+                # Determine Vaccine
+                vaccine = "COVID-19 Impfstoff"
+                if "biontech" in location.lower():
+                    vaccine = "BioNTech"
+                elif "astrazeneca" in location.lower():
+                    vaccine = "AstraZeneca"
+                elif "moderna" in location.lower():
+                    vaccine = "Moderna"
+                elif "johnson" in location.lower() or "janssen" in location.lower():
+                    vaccine = "Johnson & Johnson"
+
+                # Construct message
+                message = "1 freier Impftermin für {} am {} um {} Uhr".format(
+                    vaccine, date, time)
+                if len(location.split("|")) == 2:
+                    message = message + \
+                        " in {}".format(
+                            location.split("|")[0].strip())
+                message = message + \
+                    ". Hier buchen: https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident=6087dd08bd763"
+
+                # Print message out on server with city in front
+                print(sys.argv[1] + ": " + message)
+
+                # Send message to telegram channel for the specific city
+                telegram_bot.sendMessage(
+                    chat_id=sys.argv[4], text=message)
+
+                # Do not send it out again for 60 minutes
+                already_sent_ids.append(location)
+
+
 with open(sys.argv[2]) as centers_url_txt:
     centers_urls = centers_url_txt.readlines()
 centers_urls = [center.strip() for center in centers_urls
@@ -25,6 +87,14 @@ try:
             already_sent_ids.clear()
             t = time.time()
 
+        # For Munich, we have an additional API
+        if sys.argv[1] == 'Munich':
+            try:
+                check_hnomedic_api()
+            except Exception as e:
+                print("ERROR during HNOMedic check: " + e)
+
+        # Check Doctolib
         for center_url in centers_urls:
             try:
                 center = center_url.split("/")[5]
