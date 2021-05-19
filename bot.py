@@ -36,7 +36,9 @@ def check_hnomedic_api():
         # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
         for entry in result["termine"]:
             date, time, _, _, location, _, _, _, _, _ = entry
-            if location not in already_sent_ids:
+            vaccination_id = "{}.{}.{}".format(
+                date, time, location)
+            if vaccination_id not in already_sent_ids:
                 # Determine Vaccine
                 vaccine = "COVID-19 Impfstoff"
                 if "biontech" in location.lower():
@@ -66,7 +68,7 @@ def check_hnomedic_api():
                     chat_id=sys.argv[4], text=message)
 
                 # Do not send it out again for 60 minutes
-                already_sent_ids.append(location)
+                already_sent_ids.append(vaccination_id)
 
 
 with open(sys.argv[2]) as centers_url_txt:
