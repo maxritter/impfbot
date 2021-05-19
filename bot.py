@@ -94,7 +94,7 @@ try:
             try:
                 check_hnomedic_api()
             except Exception as e:
-                print("ERROR during HNOMedic check: " + e)
+                print("ERROR during HNOMedic check: " + str(e))
 
         # Check Doctolib
         for center_url in centers_urls:
@@ -192,6 +192,15 @@ try:
 
                         agenda_ids = "-".join([str(agenda["id"])
                                                for agenda in agendas])
+                        headers = {
+                            "accept": "*/*",
+                            "accept-language": "en-US,en;q=0.9",
+                            "cache-control": "no-cache",
+                            "origin": "https://www.doctolib.de/",
+                            "pragma": "no-cache",
+                            "referer": "https://www.doctolib.de/",
+                            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+                        }
                         params = {
                             "start_date": start_date,
                             "visit_motive_ids": visit_motive_ids,
@@ -206,11 +215,14 @@ try:
                             response = requests.get(
                                 "https://www.doctolib.de/availabilities.json",
                                 params=params,
+                                headers=headers
                             )
                             response.raise_for_status()
                             nb_availabilities = response.json()["total"]
-                        except:
+                        except Exception as e:
+                            print("ERROR during Doctolib check: " + str(e))
                             continue
+
                         vaccination_id = "{}.{}.{}".format(
                             visit_motive_ids, agenda_ids, practice_ids)
 
