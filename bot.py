@@ -135,15 +135,15 @@ try:
                         pass
 
                     # Check if this is a Covid vaccination
-                    if "erste impfung" in visit_motive_name or \
-                        "erstimpfung" in visit_motive_name or \
-                        "einzelimpfung" in visit_motive_name or \
-                        ("biontech" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                        ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                        ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                        ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                        ("janssen" in visit_motive_name and not "zweit" in visit_motive_name) or \
-                            visit_motive_covid_vaccination:
+                    if (visit_motive_covid_vaccination or
+                        "erste impfung" in visit_motive_name or
+                        "erstimpfung" in visit_motive_name or
+                        "einzelimpfung" in visit_motive_name) and \
+                        (("biontech" in visit_motive_name and not "zweit" in visit_motive_name) or
+                         ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or
+                         ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or
+                         ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or
+                         ("janssen" in visit_motive_name and not "zweit" in visit_motive_name)):
 
                         if "biontech" in visit_motive_name:
                             vaccine_names.append("BioNTech")
@@ -154,7 +154,7 @@ try:
                         elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
                             vaccine_names.append("Johnson & Johnson")
                         else:
-                            vaccine_names.append("COVID-19 Impfstoff")
+                            continue
 
                         vaccine_ids.append(visit_motive_id)
 
@@ -208,7 +208,7 @@ try:
                             "practice_ids": practice_ids,
                             "insurance_sector": "public",
                             "destroy_temporary": "true",
-                            "limit": 7
+                            "limit": 14
                         }
 
                         try:
@@ -219,6 +219,7 @@ try:
                             )
                             response.raise_for_status()
                             nb_availabilities = response.json()["total"]
+                            availabilities = response.json()["availabilities"]
                         except Exception as e:
                             print("ERROR during Doctolib check: " + str(e))
                             continue
@@ -228,6 +229,22 @@ try:
 
                         # Appointment(s) found
                         if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
+                            # Parse all available dates
+                            all_available_dates = []
+                            date_counter = 0
+                            for availability in availabilities:
+                                if(date_counter >= 5):
+                                    break
+
+                                if len(availability["slots"]) > 0:
+                                    d = datetime.datetime.strptime(
+                                        availability.get("date"), '%Y-%m-%d')
+                                    all_available_dates.append(
+                                        datetime.date.strftime(d, "%d.%m.%y"))
+                                    date_counter = date_counter + 1
+                            if date_counter == 0:
+                                continue
+
                             # Construct message
                             message = str(nb_availabilities)
                             if nb_availabilities == 1:
@@ -244,6 +261,10 @@ try:
                                 message = message + \
                                     "in {}".format(
                                         place_address.split(",")[1].strip())
+                            if all_available_dates:
+                                verbose_dates = ", ".join(all_available_dates)
+                                message = message + \
+                                    f". Früheste Termine: {verbose_dates}"
                             message = message + \
                                 ". Hier buchen: {}?pid=practice-{}".format(center_url,
                                                                            practice_ids)
