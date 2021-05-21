@@ -77,7 +77,7 @@ centers_urls = [center.strip() for center in centers_urls
                 if not center.startswith("#")]
 
 try:
-    print("Searching for appointments in {} now..".format(sys.argv[1]))
+    print(sys.argv[1] + ": Searching for appointments now..")
 
     telegram_bot = telegram.Bot(token=sys.argv[3])
     t = time.time()
@@ -92,7 +92,7 @@ try:
             t = time.time()
 
         # For Munich, we have an additional API
-        if sys.argv[1] == 'Munich':
+        if sys.argv[1] == 'Munich1':
             try:
                 check_hnomedic_api()
             except Exception as e:
