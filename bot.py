@@ -264,18 +264,13 @@ try:
                         if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
                             # Parse all available dates
                             all_available_dates = []
-                            date_counter = 0
                             for availability in availabilities:
-                                if(date_counter >= 5):
-                                    break
-
                                 if len(availability["slots"]) > 0:
                                     d = datetime.datetime.strptime(
                                         availability.get("date"), '%Y-%m-%d')
                                     all_available_dates.append(
                                         datetime.date.strftime(d, "%d.%m.%y"))
-                                    date_counter = date_counter + 1
-                            if date_counter == 0:
+                            if len(all_available_dates) == 0:
                                 continue
 
                             # Construct message
@@ -297,7 +292,7 @@ try:
                             if all_available_dates:
                                 verbose_dates = ", ".join(all_available_dates)
                                 message = message + \
-                                    f". Früheste Termine: {verbose_dates}"
+                                    f". Verfügbare Termine: {verbose_dates}"
                             message = message + \
                                 ". Hier buchen: {}?pid=practice-{}".format(center_url,
                                                                            practice_ids)
