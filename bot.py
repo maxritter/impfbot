@@ -83,9 +83,11 @@ try:
     t = time.time()
 
     while True:
+        print(sys.argv[1] + ": Starting a new round at " +
+              str(datetime.datetime.now()))
+
         # Eventually clear list
         if time.time()-t > 3600:
-            print("Clearing list now..")
             already_sent_ids.clear()
             t = time.time()
 
@@ -94,7 +96,8 @@ try:
             try:
                 check_hnomedic_api()
             except Exception as e:
-                print("ERROR during HNOMedic check: " + str(e))
+                print(sys.argv[1] +
+                      ": ERROR during HNOMedic check - " + str(e))
 
         # Check Doctolib
         for center_url in centers_urls:
@@ -104,8 +107,9 @@ try:
                     "https://www.doctolib.de/booking/{}.json".format(center))
                 json_data = raw_data.json()
                 if json_data.get("status") == 404:
-                    print("Center {} not found".format(center))
-                    print(json_data)
+                    print(sys.argv[1] + ": " +
+                          "Center {} not found".format(center))
+                    print(sys.argv[1] + ": " + json_data)
                     continue
                 data = json_data["data"]
                 visit_motives = [
@@ -221,7 +225,8 @@ try:
                             nb_availabilities = response.json()["total"]
                             availabilities = response.json()["availabilities"]
                         except Exception as e:
-                            print("ERROR during Doctolib check: " + str(e))
+                            print(
+                                sys.argv[1] + ": ERROR during Doctolib check - " + str(e))
                             continue
 
                         vaccination_id = "{}.{}.{}".format(
@@ -282,9 +287,13 @@ try:
                     vaccine_counter = vaccine_counter + 1
 
             except json.decoder.JSONDecodeError:
-                print("Doctolib might be ko")
+                print(sys.argv[1] + ": Doctolib might be ko")
             except KeyError as e:
-                print("KeyError: " + str(e))
+                print(sys.argv[1] + ": KeyError - " + str(e))
+            except Exception as e:
+                print(sys.argv[1] +
+                      ": ERROR during Doctolib check - " + str(e))
+
 
 except KeyboardInterrupt:
     print("Mischief managed.")
