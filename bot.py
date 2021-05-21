@@ -8,95 +8,98 @@ import sys
 already_sent_ids = []
 
 
-def check_hnomedic_api():
-    booking_url = "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident=6087dd08bd763"
-    url = "https://onlinetermine.zollsoft.de/includes/searchTermine_app_feature.php"
-    headers = {
-        "accept": "*/*",
-        "accept-language": "en-US,en;q=0.9",
-        "cache-control": "no-cache",
-        "cookie": "sec_session_id=caa60b6cfa29689425205c27f21a1ca8",
-        "origin": "https://onlinetermine.zollsoft.de",
-        "pragma": "no-cache",
-        "referer": "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident=6087dd08bd763",
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-        "x-requested-with": "XMLHttpRequest",
-    }
-    payload = {
-        "versichert": "",
-        "terminsuche": "",
-        "uniqueident": "6087dd08bd763",
-    }
+def check_zollsoft_api():
+    unique_ids = ["6087dd08bd763", "607feb7a343fb"]
+    for unique_id in unique_ids:
+        booking_url = "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident={}".format(
+            unique_id)
+        url = "https://onlinetermine.zollsoft.de/includes/searchTermine_app_feature.php"
+        headers = {
+            "accept": "*/*",
+            "accept-language": "en-US,en;q=0.9",
+            "cache-control": "no-cache",
+            "cookie": "sec_session_id=caa60b6cfa29689425205c27f21a1ca8",
+            "origin": "https://onlinetermine.zollsoft.de",
+            "pragma": "no-cache",
+            "referer": "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident={}".format(unique_id),
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+            "x-requested-with": "XMLHttpRequest",
+        }
+        payload = {
+            "versichert": "",
+            "terminsuche": "",
+            "uniqueident": unique_id,
+        }
 
-    res = requests.post(url, headers=headers, data=payload)
-    res.raise_for_status()
-    result = res.json()
-    nb_availabilities = len(result["termine"])
+        res = requests.post(url, headers=headers, data=payload)
+        res.raise_for_status()
+        result = res.json()
+        nb_availabilities = len(result["termine"])
 
-    if nb_availabilities > 0:
-        # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
-        biontech_dates = []
-        astra_dates = []
-        moderna_dates = []
-        johnson_dates = []
-        for entry in result["termine"]:
-            date, _, _, _, location, _, _, _, _, _ = entry
-            vaccination_id = "{}.{}.{}".format(
-                date, time, location)
-            if vaccination_id not in already_sent_ids and "2. Corona-Impfung" not in location:
-                # Determine Vaccine
-                d = datetime.datetime.strptime(date, '%Y/%m/%d')
-                if "biontech" in location.lower():
-                    biontech_dates.append(
-                        datetime.date.strftime(d, "%d.%m.%y"))
-                elif "astrazeneca" in location.lower():
-                    astra_dates.append(
-                        datetime.date.strftime(d, "%d.%m.%y"))
-                elif "moderna" in location.lower():
-                    moderna_dates.append(
-                        datetime.date.strftime(d, "%d.%m.%y"))
-                elif "johnson" in location.lower() or "janssen" in location.lower():
-                    johnson_dates.append(
-                        datetime.date.strftime(d, "%d.%m.%y"))
+        if nb_availabilities > 0:
+            # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
+            biontech_dates = []
+            astra_dates = []
+            moderna_dates = []
+            johnson_dates = []
+            for entry in result["termine"]:
+                date, _, _, _, location, _, _, _, _, _ = entry
+                vaccination_id = "{}.{}.{}".format(
+                    date, time, location)
+                if vaccination_id not in already_sent_ids and "2. Corona-Impfung" not in location:
+                    # Determine Vaccine
+                    d = datetime.datetime.strptime(date, '%Y/%m/%d')
+                    if "biontech" in location.lower():
+                        biontech_dates.append(
+                            datetime.date.strftime(d, "%d.%m.%y"))
+                    elif "astrazeneca" in location.lower():
+                        astra_dates.append(
+                            datetime.date.strftime(d, "%d.%m.%y"))
+                    elif "moderna" in location.lower():
+                        moderna_dates.append(
+                            datetime.date.strftime(d, "%d.%m.%y"))
+                    elif "johnson" in location.lower() or "janssen" in location.lower():
+                        johnson_dates.append(
+                            datetime.date.strftime(d, "%d.%m.%y"))
 
-                # Do not send it out again for 60 minutes
-                already_sent_ids.append(vaccination_id)
+                    # Do not send it out again for 60 minutes
+                    already_sent_ids.append(vaccination_id)
 
-        if len(biontech_dates) > 0:
-            num_dates = len(biontech_dates)
-            verbose_dates = ", ".join(list(set(biontech_dates)))
-            message = "{} freie Impftermine für BioNTech in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                num_dates, verbose_dates, booking_url)
-            print(sys.argv[1] + ": " + message)
-            telegram_bot.sendMessage(
-                chat_id=sys.argv[4], text=message)
+            if len(biontech_dates) > 0:
+                num_dates = len(biontech_dates)
+                verbose_dates = ", ".join(list(set(biontech_dates)))
+                message = "{} freie Impftermine für BioNTech in München. Verfügbare Termine: {}. Hier buchen: {}".format(
+                    num_dates, verbose_dates, booking_url)
+                print(sys.argv[1] + ": " + message)
+                telegram_bot.sendMessage(
+                    chat_id=sys.argv[4], text=message)
 
-        if len(astra_dates) > 0:
-            num_dates = len(astra_dates)
-            verbose_dates = ", ".join(list(set(astra_dates)))
-            message = "{} freie Impftermine für AstraZeneca in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                num_dates, verbose_dates, booking_url)
-            print(sys.argv[1] + ": " + message)
-            telegram_bot.sendMessage(
-                chat_id=sys.argv[4], text=message)
+            if len(astra_dates) > 0:
+                num_dates = len(astra_dates)
+                verbose_dates = ", ".join(list(set(astra_dates)))
+                message = "{} freie Impftermine für AstraZeneca in München. Verfügbare Termine: {}. Hier buchen: {}".format(
+                    num_dates, verbose_dates, booking_url)
+                print(sys.argv[1] + ": " + message)
+                telegram_bot.sendMessage(
+                    chat_id=sys.argv[4], text=message)
 
-        if len(moderna_dates) > 0:
-            num_dates = len(moderna_dates)
-            verbose_dates = ", ".join(list(set(moderna_dates)))
-            message = "{} freie Impftermine für Moderna in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                num_dates, verbose_dates, booking_url)
-            print(sys.argv[1] + ": " + message)
-            telegram_bot.sendMessage(
-                chat_id=sys.argv[4], text=message)
+            if len(moderna_dates) > 0:
+                num_dates = len(moderna_dates)
+                verbose_dates = ", ".join(list(set(moderna_dates)))
+                message = "{} freie Impftermine für Moderna in München. Verfügbare Termine: {}. Hier buchen: {}".format(
+                    num_dates, verbose_dates, booking_url)
+                print(sys.argv[1] + ": " + message)
+                telegram_bot.sendMessage(
+                    chat_id=sys.argv[4], text=message)
 
-        if len(johnson_dates) > 0:
-            num_dates = len(johnson_dates)
-            verbose_dates = ", ".join(list(set(johnson_dates)))
-            message = "{} freie Impftermine für Johnson & Johnson in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                num_dates, verbose_dates, booking_url)
-            print(sys.argv[1] + ": " + message)
-            telegram_bot.sendMessage(
-                chat_id=sys.argv[4], text=message)
+            if len(johnson_dates) > 0:
+                num_dates = len(johnson_dates)
+                verbose_dates = ", ".join(list(set(johnson_dates)))
+                message = "{} freie Impftermine für Johnson & Johnson in München. Verfügbare Termine: {}. Hier buchen: {}".format(
+                    num_dates, verbose_dates, booking_url)
+                print(sys.argv[1] + ": " + message)
+                telegram_bot.sendMessage(
+                    chat_id=sys.argv[4], text=message)
 
 
 with open(sys.argv[2]) as centers_url_txt:
@@ -119,13 +122,13 @@ try:
             already_sent_ids.clear()
             t = time.time()
 
-        # For Munich, we have an additional API
+        # For Munich, we have an additional Zollsoft API
         if sys.argv[1] == 'Munich1':
             try:
-                check_hnomedic_api()
+                check_zollsoft_api()
             except Exception as e:
                 print(sys.argv[1] +
-                      ": ERROR during HNOMedic check - " + str(e))
+                      ": ERROR during Zollsoft API check - " + str(e))
 
         # Check Doctolib
         for center_url in centers_urls:
