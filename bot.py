@@ -281,9 +281,9 @@ try:
                             # Construct message
                             message = str(nb_availabilities)
                             if nb_availabilities == 1:
-                                message = message + " freier Impftermin "
+                                message = message + " freier Impftermin in den nächsten 14 Tagen "
                             else:
-                                message = message + " freie Impftermine "
+                                message = message + " freie Impftermine in den nächsten 14 Tagen "
                             message = message + \
                                 "für {} ".format(
                                     vaccine_names[vaccine_counter])
