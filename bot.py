@@ -249,21 +249,30 @@ try:
                             visit_motive_ids, agenda_ids, practice_ids)
 
                         # Appointment(s) found
-                        if nb_availabilities > 0 and vaccination_id not in already_sent_ids:
+                        if nb_availabilities > 0:
                             # Parse all available dates
-                            all_available_dates = []
+                            available_dates = []
                             for availability in availabilities:
                                 if len(availability["slots"]) > 0:
-                                    d = datetime.datetime.strptime(
-                                        availability.get("date"), '%Y-%m-%d')
-                                    all_available_dates.append(
-                                        datetime.date.strftime(d, "%d.%m.%y"))
-                            if len(all_available_dates) == 0:
+                                    # Parse all available slots
+                                    for slot in availability["slots"]:
+                                        vaccination_id = "{}.{}.{}.{}".format(
+                                            visit_motive_ids, agenda_ids, practice_ids, slot)
+
+                                        # If appointment has not been sent out already
+                                        if vaccination_id not in already_sent_ids:
+                                            d = datetime.datetime.strptime(
+                                                availability.get("date"), '%Y-%m-%d')
+                                            available_dates.append(
+                                                datetime.date.strftime(d, "%d.%m.%y"))
+                                            already_sent_ids.append(
+                                                vaccination_id)
+                            if len(available_dates) == 0:
                                 continue
 
                             # Construct message
-                            message = str(nb_availabilities)
-                            if nb_availabilities == 1:
+                            message = str(len(available_dates))
+                            if len(available_dates) == 1:
                                 message = message + " freier Impftermin in den nächsten 14 Tagen "
                             else:
                                 message = message + " freie Impftermine in den nächsten 14 Tagen "
@@ -277,8 +286,9 @@ try:
                                 message = message + \
                                     "in {}".format(
                                         place_address.split(",")[1].strip())
-                            if all_available_dates:
-                                verbose_dates = ", ".join(all_available_dates)
+                            if available_dates:
+                                verbose_dates = ", ".join(
+                                    list(set(available_dates)))
                                 message = message + \
                                     f". Verfügbare Termine: {verbose_dates}"
                             message = message + \
