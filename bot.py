@@ -8,6 +8,21 @@ import sys
 already_sent_ids = []
 
 
+def send_zollsoft_msg(vaccine_dates, vaccine_name, booking_url):
+    if len(vaccine_dates) > 0:
+        num_dates = len(vaccine_dates)
+        message = str(num_dates)
+        if num_dates == 1:
+            message = message + " freier Impftermin "
+        else:
+            message = message + " freie Impftermine "
+        message = message + "für {} in München. Verfügbare Termine: {}. Hier buchen: {}".format(
+            vaccine_name, ", ".join(list(set(vaccine_dates))), booking_url)
+        print(sys.argv[1] + ": " + message)
+        telegram_bot.sendMessage(
+            chat_id=sys.argv[4], text=message)
+
+
 def check_zollsoft_api():
     unique_ids = ["6087dd08bd763", "607feb7a343fb"]
     for unique_id in unique_ids:
@@ -65,41 +80,11 @@ def check_zollsoft_api():
                     # Do not send it out again for 60 minutes
                     already_sent_ids.append(vaccination_id)
 
-            if len(biontech_dates) > 0:
-                num_dates = len(biontech_dates)
-                verbose_dates = ", ".join(list(set(biontech_dates)))
-                message = "{} freie Impftermine für BioNTech in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                    num_dates, verbose_dates, booking_url)
-                print(sys.argv[1] + ": " + message)
-                telegram_bot.sendMessage(
-                    chat_id=sys.argv[4], text=message)
-
-            if len(astra_dates) > 0:
-                num_dates = len(astra_dates)
-                verbose_dates = ", ".join(list(set(astra_dates)))
-                message = "{} freie Impftermine für AstraZeneca in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                    num_dates, verbose_dates, booking_url)
-                print(sys.argv[1] + ": " + message)
-                telegram_bot.sendMessage(
-                    chat_id=sys.argv[4], text=message)
-
-            if len(moderna_dates) > 0:
-                num_dates = len(moderna_dates)
-                verbose_dates = ", ".join(list(set(moderna_dates)))
-                message = "{} freie Impftermine für Moderna in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                    num_dates, verbose_dates, booking_url)
-                print(sys.argv[1] + ": " + message)
-                telegram_bot.sendMessage(
-                    chat_id=sys.argv[4], text=message)
-
-            if len(johnson_dates) > 0:
-                num_dates = len(johnson_dates)
-                verbose_dates = ", ".join(list(set(johnson_dates)))
-                message = "{} freie Impftermine für Johnson & Johnson in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-                    num_dates, verbose_dates, booking_url)
-                print(sys.argv[1] + ": " + message)
-                telegram_bot.sendMessage(
-                    chat_id=sys.argv[4], text=message)
+            # Eventually send out appointments
+            send_zollsoft_msg(biontech_dates, "BioNTech", booking_url)
+            send_zollsoft_msg(astra_dates, "AstraZeneca", booking_url)
+            send_zollsoft_msg(moderna_dates, "Moderna", booking_url)
+            send_zollsoft_msg(johnson_dates, "Johnson & Johnson", booking_url)
 
 
 with open(sys.argv[2]) as centers_url_txt:
