@@ -399,9 +399,6 @@ https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/hennigsdorf/nor
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/hennigsdorf/kreibig-reinhard
 https://www.doctolib.de/arzt-in-weiterbildung/bernau-bei-berlin/dorit-dueker
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/blankenfelde-mahlow/heike-warda
-https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/werder-havel/julia-rakob
-https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/werder-havel/katrin-gross-riemann
-https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/werder-havel/anja-gross
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/blankenfelde-mahlow/birgit-augustin-blankenfelde-mahlow
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/blankenfelde-mahlow/matthias-augustin-da-gloria-goncalves
 https://www.doctolib.de/frauenarzt/ludwigsfelde/angelika-siebert-westram
@@ -438,5 +435,4 @@ https://www.doctolib.de/gemeinschaftspraxis/berlin/gemeinschaftspraxis-appel-kel
 https://www.doctolib.de/gemeinschaftspraxis/berlin/augenarztpraxis-dres-frano-meyer
 https://www.doctolib.de/gemeinschaftspraxis/falkensee/radiologie-havelland
 https://www.doctolib.de/gemeinschaftspraxis/potsdam/ortho-pd
-https://www.doctolib.de/gemeinschaftspraxis/werder-havel/kinderarztpraxis-werder
 https://www.doctolib.de/gemeinschaftspraxis/potsdam/kardiologen-potsdam

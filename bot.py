@@ -108,7 +108,7 @@ try:
             t = time.time()
 
         # For Munich, we have an additional Zollsoft API
-        if sys.argv[1] == 'Munich':
+        if sys.argv[1] == 'Munich1':
             try:
                 check_zollsoft_api()
             except Exception as e:
