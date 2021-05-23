@@ -10,14 +10,8 @@ already_sent_ids = []
 
 def send_zollsoft_msg(vaccine_dates, vaccine_name, booking_url):
     if len(vaccine_dates) > 0:
-        num_dates = len(vaccine_dates)
-        message = str(num_dates)
-        if num_dates == 1:
-            message = message + " freier Impftermin "
-        else:
-            message = message + " freie Impftermine "
-        message = message + "für {} in München. Verfügbare Termine: {}. Hier buchen: {}".format(
-            vaccine_name, ", ".join(list(set(vaccine_dates))), booking_url)
+        message = "Freie Impftermine für {} in München. Wählbare Tage: {}. Hier buchen: {}".format(
+            vaccine_name, ", ".join(list(set(vaccine_dates)).sort()), booking_url)
         print(sys.argv[1] + ": " + message)
         telegram_bot.sendMessage(
             chat_id=sys.argv[4], text=message)
@@ -271,14 +265,8 @@ try:
                                 continue
 
                             # Construct message
-                            message = str(len(available_dates))
-                            if len(available_dates) == 1:
-                                message = message + " freier Impftermin in den nächsten 14 Tagen "
-                            else:
-                                message = message + " freie Impftermine in den nächsten 14 Tagen "
-                            message = message + \
-                                "für {} ".format(
-                                    vaccine_names[vaccine_counter])
+                            message = "Freie Impftermine für {} ".format(
+                                vaccine_names[vaccine_counter])
                             if vaccine_days[vaccine_counter] != 0:
                                 message = message + "mit Abstand zur 2. Impfung von {} Tagen ".format(
                                     vaccine_days[vaccine_counter])
@@ -288,9 +276,9 @@ try:
                                         place_address.split(",")[1].strip())
                             if available_dates:
                                 verbose_dates = ", ".join(
-                                    list(set(available_dates)))
+                                    list(set(available_dates)).sort())
                                 message = message + \
-                                    f". Verfügbare Termine: {verbose_dates}"
+                                    f". Wählbare Tage: {verbose_dates}"
                             message = message + \
                                 ". Hier buchen: {}?pid=practice-{}".format(center_url,
                                                                            practice_ids)
