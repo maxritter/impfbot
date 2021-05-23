@@ -10,8 +10,9 @@ already_sent_ids = []
 
 def send_zollsoft_msg(vaccine_dates, vaccine_name, booking_url):
     if len(vaccine_dates) > 0:
+        vaccine_dates.sort()
         message = "Freie Impftermine für {} in München. Wählbare Tage: {}. Hier buchen: {}".format(
-            vaccine_name, ", ".join(list(set(vaccine_dates)).sort()), booking_url)
+            vaccine_name, ", ".join(list(set(vaccine_dates))), booking_url)
         print(sys.argv[1] + ": " + message)
         telegram_bot.sendMessage(
             chat_id=sys.argv[4], text=message)
@@ -275,8 +276,9 @@ try:
                                     "in {}".format(
                                         place_address.split(",")[1].strip())
                             if available_dates:
+                                available_dates.sort()
                                 verbose_dates = ", ".join(
-                                    list(set(available_dates)).sort())
+                                    list(set(available_dates)))
                                 message = message + \
                                     f". Wählbare Tage: {verbose_dates}"
                             message = message + \
