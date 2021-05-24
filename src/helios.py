@@ -165,6 +165,8 @@ def helios_gather_locations(city, lat, lon, address, radius=50):
                             ],  # ef323855-2955-4c3a-a0eb-c157608a1e5c
                         }
                     )
+                    helios_name = entry["tenantName"]
+                    print(f"{city}: Helios Location {helios_name} added!")
         return True
 
     except Exception as e:
