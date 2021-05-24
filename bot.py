@@ -91,16 +91,10 @@ try:
     print(sys.argv[1] + ": Searching for appointments now..")
 
     telegram_bot = telegram.Bot(token=sys.argv[3])
-    t = time.time()
 
     while True:
         print(sys.argv[1] + ": Starting a new round at " +
               str(datetime.datetime.now()))
-
-        # Eventually clear list
-        if time.time()-t > 3600:
-            already_sent_ids.clear()
-            t = time.time()
 
         # For Munich, we have an additional Zollsoft API
         if sys.argv[1] == 'Munich1':
