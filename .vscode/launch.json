@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["Essen", "ess.txt", "1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo", "-1001464001536"]
+            "args": ["muc1"]
         }
     ]
 }

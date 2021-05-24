@@ -1,0 +1,17 @@
+{
+  "name": "doctolib-puller",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "install": "^0.13.0",
+    "npm": "^7.12.1",
+    "prompt-sync": "^4.2.0",
+    "geo-distance": "^0.2.0"
+  }
+}
