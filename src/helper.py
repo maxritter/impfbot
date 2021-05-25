@@ -6,16 +6,16 @@ from src import helios, doctolib
 already_sent_ids = None
 telegram_bot = None
 conf = {'muc1': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'chat_id': -1001464001536, 'lat': 48.13836, 'lon': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel'},
-        'muc2': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'chat_id': -1001464001536},
-        'muc3': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'chat_id': -1001464001536},
+        'muc2': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'chat_id': -1001464001536, 'lat': -1, 'lon': -1, 'address': ''},
+        'muc3': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'chat_id': -1001464001536, 'lat': -1, 'lon': -1, 'address': ''},
         'nue': {'token': '1707020702:AAGxjS0uE02HZOyhR8mnvatInjF-Eybsl5w', 'chat_id': -1001159218767, 'lat': 49.4514, 'lon': 11.07471, 'address': '90402 Nuernberg Lorenz'},
         'str': {'token': '1873380443:AAF1PGcSX_Nm5X9_DeXoUvnuvGB53SJ8Kng', 'chat_id': -1001315735957, 'lat': 48.7767, 'lon': 9.18015, 'address': '70173 Stuttgart Mitte'},
         'agb': {'token': '1894787285:AAHxOYeit6cbW8qMamCkyVFdqHADSzXqTvA', 'chat_id': -1001432733051, 'lat': 48.36989, 'lon': 10.90017, 'address': '86150 Augsburg Innenstadt'},
         'cgn': {'token': '1785486821:AAEYmYGc4s8rBQI_Bp9Iunei7uhsyNXG5ak', 'chat_id': -1001439806320, 'lat': 50.93893, 'lon': 6.95752, 'address': '50667 Koeln Altstadt-Nord'},
         'dus': {'token': '1777569089:AAGDKiCGlaGw1pvolsWJQFUAO-Qyqb2Pk-M', 'chat_id': -1001441637885, 'lat': 51.22591, 'lon': 6.77356, 'address': '40213 Duesseldorf Altstadt'},
         'ber1': {'token': '1856093227:AAH57uMO_Fc3-ujR53PRsc0sGTfj_HcOp5E', 'chat_id': -1001311147212, 'lat': 52.52003, 'lon': 13.40489, 'address': '10178 Berlin Mitte'},
-        'ber2': {'token': '1856093227:AAH57uMO_Fc3-ujR53PRsc0sGTfj_HcOp5E', 'chat_id': -1001311147212},
-        'ber3': {'token': '1856093227:AAH57uMO_Fc3-ujR53PRsc0sGTfj_HcOp5E', 'chat_id': -1001311147212},
+        'ber2': {'token': '1856093227:AAH57uMO_Fc3-ujR53PRsc0sGTfj_HcOp5E', 'chat_id': -1001311147212, 'lat': -1, 'lon': -1, 'address': ''},
+        'ber3': {'token': '1856093227:AAH57uMO_Fc3-ujR53PRsc0sGTfj_HcOp5E', 'chat_id': -1001311147212, 'lat': -1, 'lon': -1, 'address': ''},
         'ffm': {'token': '1871460580:AAFBH3JpoI_yT26KIbXstgxIqgGAmI_5ykg', 'chat_id': -1001238323633, 'lat': 50.1126, 'lon': 8.68343, 'address': '60311 Frankfurt am Main Innenstadt'},
         'hh': {'token': '1825855360:AAGDroNCjzRmO_L_e9swc0Z6hCS3saHA7S8', 'chat_id': -1001237010945, 'lat': 53.55, 'lon': 10, 'address': '20457 Hamburg Hamburg-Altstadt'},
         'lej': {'token': '', 'chat_id': -1, 'lat': 51.33983, 'lon': 12.37541, 'address': '04109 Leipzig Zentrum'},
@@ -41,7 +41,7 @@ def is_telegram_enabled(city):
 
 
 def is_helios_enabled(city):
-    return (conf[city]['lat'] and conf[city]['lon'] and conf[city]['address'])
+    return (conf[city]['lat'] != -1 and conf[city]['lon'] != -1 and conf[city]['address'] != '')
 
 
 def send_telegram_msg(city, msg):
