@@ -30,11 +30,11 @@ conf = {'muc1': {'token': '1851471777:AAHqNrWPAuvr7w5QRrjrnGvr0VJaWVC4BCo', 'cha
         'drs': {'token': '1817383072:AAHUNQaWQcmqPXyFIJyx-SkWIJB6iWetWT0', 'chat_id': -1001165597953, 'lat': 51.05174, 'lng': 13.73729, 'address': '01067 Dresden Innere Altstadt'},
         'fr': {'token': '', 'chat_id': -1001436511356, 'lat': 47.9953, 'lng': 7.85242, 'address': '79098 Freiburg im Breisgau Altstadt'},
         'erf': {'token': '', 'chat_id': -1001183027974, 'lat': 50.97961, 'lng': 11.02388, 'address': '99084 Erfurt Altstadt'},
-        'wue': {'token': '', 'chat_id': -1, 'lat': 49.79471, 'lng': 9.93163, 'address': '97070 Wuerzburg Altstadt'},
-        'md': {'token': '', 'chat_id': -1, 'lat': 52.1277, 'lng': 11.63815, 'address': '39104 Magdeburg Altstadt'},
+        'wue': {'token': '', 'chat_id': -1001410779884, 'lat': 49.79471, 'lng': 9.93163, 'address': '97070 Wuerzburg Altstadt'},
+        'md': {'token': '', 'chat_id': -1001183191239, 'lat': 52.1277, 'lng': 11.63815, 'address': '39104 Magdeburg Altstadt'},
         'dtm': {'token': '1819882627:AAFhuzPIz_GikhEwMO9jMuyF7tdKcyi6I_8', 'chat_id': -1001168900922, 'lat': 51.51422, 'lng': 7.46509, 'address': '44137 Dortmund Mitte'},
         'ess': {'token': '1754321830:AAHDjPXowmJdzmvYuwnqrltTXK2b0sR-z0E', 'chat_id': -1001398889913, 'lat': 51.4564, 'lng': 7.00999, 'address': '45127 Essen Innenstadt'},
-        'bs': {'token': '', 'chat_id': -1, 'lat': 52.26382, 'lng': 10.52242, 'address': '38100 Braunschweig Innenstadt'}
+        'bs': {'token': '', 'chat_id': -1001333251690, 'lat': 52.26382, 'lng': 10.52242, 'address': '38100 Braunschweig Innenstadt'}
         }
 
 

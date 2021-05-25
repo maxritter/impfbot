@@ -81,19 +81,19 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
         "limit": 14
     }
 
-    response = requests.get(
-        "https://www.doctolib.de/availabilities.json",
-        params=params,
-        headers=doctolib_headers, 
-        timeout=helper.api_timeout_seconds
-    )
     try:
+        response = requests.get(
+            "https://www.doctolib.de/availabilities.json",
+            params=params,
+            headers=doctolib_headers,
+            timeout=helper.api_timeout_seconds
+        )
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
         helper.warn_log(f'[Doctolib] HTTP issue during fetch of availabilities for start date {start_date},\
                         motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
         return None
-    except requests.exceptions.Timeout as e:  
+    except requests.exceptions.Timeout as e:
         helper.warn_log(f'[Doctolib] Timeout during fetch of availabilities for start date {start_date},\
                         motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
         return None
@@ -136,14 +136,15 @@ def doctolib_check(city):
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
             request_url = f'https://www.doctolib.de/booking/{center}.json'
-            raw_data = requests.get(request_url, timeout=helper.api_timeout_seconds)
             try:
+                raw_data = requests.get(
+                    request_url, timeout=helper.api_timeout_seconds)
                 raw_data.raise_for_status()
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
                     f'[Doctolib] HTTP issue during fetch of bookings for center {center} [{str(e)}]')
                 continue
-            except requests.exceptions.Timeout as e:  
+            except requests.exceptions.Timeout as e:
                 helper.warn_log(
                     f'[Doctolib] Timeout during fetch of bookings for center {center} [{str(e)}]')
                 continue
@@ -243,7 +244,8 @@ def doctolib_check(city):
                 vaccine_counter = vaccine_counter + 1
 
     except json.decoder.JSONDecodeError:
-        helper.warn_log('[Doctolib] Currently not responding, try again later..')
+        helper.warn_log(
+            '[Doctolib] Currently not responding, try again later..')
     except KeyError as e:
         helper.error_log(f'[Doctolib] Key Error [{str(e)}]')
     except Exception as e:
