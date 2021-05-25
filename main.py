@@ -1,5 +1,6 @@
 
 import sys
+import time
 from src.helios import helios_check
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
@@ -15,10 +16,15 @@ def main(args=None):
     # Initialization
     print(f'Init Impfbot for {city.upper()}..')
     helper.init(city)
+    start = time.time()
 
     # Continously check the various APIs
     print(f'{city}: Searching for appointments now..')
     while True:
+        if helper.is_local() and time.time() - start > 1:
+            print("Round time: " + str(int(time.time() - start)) + " seconds")
+            start = time.time()
+
         # For Munich, we have a separate API
         if city == 'muc1':
             zollsoft_check(city)
