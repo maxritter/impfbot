@@ -79,7 +79,7 @@ def helios_check(city):
             for entry in result:
                 dt = parse_dt(entry["begin"])
                 vaccination_id = "{}.{}.{}".format(
-                    location["purposeName"], location['name'], str(dt))
+                    location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H"))
                 if vaccination_id not in helper.already_sent_ids:
                     spots["amount"] += 1
                     spots["dates"].append(dt.strftime("%d.%m.%y"))
@@ -112,13 +112,13 @@ def helios_check(city):
         print(f'{city}: ERROR During Helios check - ' + str(e))
 
 
-def helios_gather_locations(city, lat, lon, address, radius=50):
+def helios_gather_locations(city, lat, lng, address, radius=50):
     global helios_session, helios_config, helios_locations
 
     query = {
         "gpsData": {
             "lat": lat,
-            "lng": lon,
+            "lng": lng,
             "address": address,
         },
         "healthInsuranceTypeUUID": helios_config["healthInsuranceTypeUUID"],

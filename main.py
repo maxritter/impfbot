@@ -16,14 +16,22 @@ def main(args=None):
     # Initialization
     print(f'Init Impfbot for {city.upper()}..')
     helper.init(city)
-    start = time.time()
+    roundTime = time.time()
+    clearTime = time.time()
 
     # Continously check the various APIs
     print(f'{city}: Searching for appointments now..')
     while True:
-        if helper.is_local() and time.time() - start > 1:
-            print("Round time: " + str(int(time.time() - start)) + " seconds")
-            start = time.time()
+        # Show round time in local mode
+        if helper.is_local() and (time.time() - roundTime > 1):
+            print("Round time: " + str(int(time.time() - roundTime)) + " seconds")
+            roundTime = time.time()
+
+        # Clear buffer every hour, especially important for Helios
+        if not helper.is_local() and (time.time() - clearTime >= (60 * 60)):
+            helper.already_sent_ids.clear()
+            f'{city}: Clearing buffer now..'
+            clearTime = time.time()
 
         # For Munich, we have a separate API
         if city == 'muc1':
