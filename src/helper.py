@@ -7,7 +7,7 @@ from logging.handlers import SysLogHandler
 from src import helios, doctolib
 
 # Global variables
-api_timeout_seconds = 5
+api_timeout_seconds = 10
 already_sent_ids = None
 telegram_bot = None
 logger = None
