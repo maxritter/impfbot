@@ -1,4 +1,3 @@
-
 import requests
 import json
 import datetime
@@ -85,9 +84,23 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
     response = requests.get(
         "https://www.doctolib.de/availabilities.json",
         params=params,
-        headers=doctolib_headers
+        headers=doctolib_headers, 
+        timeout=helper.api_timeout_seconds
     )
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        helper.warn_log(f'[Doctolib] HTTP issue during fetch of availabilities for start date {start_date},\
+                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
+        return None
+    except requests.exceptions.Timeout as e:  
+        helper.warn_log(f'[Doctolib] Timeout during fetch of availabilities for start date {start_date},\
+                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
+        return None
+    except Exception as e:
+        helper.error_log(f'[Doctolib] Error during fetch of availabilities for start date {start_date},\
+                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
+        return None
     return response.json()
 
 
@@ -107,8 +120,8 @@ def doctolib_send_message(city, vaccine_name, vaccine_day, place_address, availa
         ". Hier buchen: {}?pid=practice-{}".format(doctolib_url,
                                                    practice_ids)
 
-    # Print message out on server with city in front
-    print(f'{city}: {message}')
+    # Print message out on server
+    helper.info_log(message)
 
     # Send message to telegram channel for the specific city
     helper.send_telegram_msg(city, message)
@@ -123,10 +136,22 @@ def doctolib_check(city):
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
             request_url = f'https://www.doctolib.de/booking/{center}.json'
-            raw_data = requests.get(request_url)
-            json_data = raw_data.json()
-            if json_data.get("status") == 404:
+            raw_data = requests.get(request_url, timeout=helper.api_timeout_seconds)
+            try:
+                raw_data.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                helper.warn_log(
+                    f'[Doctolib] HTTP issue during fetch of bookings for center {center} [{str(e)}]')
                 continue
+            except requests.exceptions.Timeout as e:  
+                helper.warn_log(
+                    f'[Doctolib] Timeout during fetch of bookings for center {center} [{str(e)}]')
+                continue
+            except Exception as e:
+                helper.error_log(
+                    f'[Doctolib] Error during fetch of bookings for center {center} [{str(e)}]')
+                continue
+            json_data = raw_data.json()
             data = json_data["data"]
             visit_motives = [
                 visit_motive for visit_motive in data["visit_motives"]]
@@ -164,7 +189,6 @@ def doctolib_check(city):
                     start_date = datetime.datetime.today().date().isoformat()
                     visit_motive_ids = vaccine_id
                     practice_ids = place["practice_ids"][0]
-                    place_name = place["formal_name"]
                     place_address = place["full_address"]
 
                     # Create agends IDs
@@ -180,6 +204,8 @@ def doctolib_check(city):
                     # Check for availability
                     response_json = doctolib_check_availability(
                         start_date, visit_motive_ids, agenda_ids, practice_ids)
+                    if response_json is None:
+                        continue
                     nb_availabilities = response_json["total"]
                     if nb_availabilities == 0:
                         continue
@@ -217,8 +243,8 @@ def doctolib_check(city):
                 vaccine_counter = vaccine_counter + 1
 
     except json.decoder.JSONDecodeError:
-        print(f'{city}: ERROR Doctolib is not responding')
+        helper.warn_log('[Doctolib] Currently not responding, try again later..')
     except KeyError as e:
-        print(f'{city}: ERROR KeyError - ' + str(e))
+        helper.error_log(f'[Doctolib] Key Error [{str(e)}]')
     except Exception as e:
-        print(f'{city}: ERROR During Doctolib check - ' + str(e))
+        helper.error_log(f'[Doctolib] General Error [{str(e)}]')

@@ -6,10 +6,12 @@ from src import helper
 helios_session = None
 helios_config = None
 helios_locations = None
+helios_init_completed = False
+helios_locations_fetched = False
 
 
-def helios_init():
-    global helios_session, helios_config
+def helios_init_session():
+    global helios_session, helios_config, helios_init_completed
 
     helios_session = requests.Session()
     helios_session.headers = {
@@ -25,23 +27,53 @@ def helios_init():
     helios_config = {}
 
     # grab default uuid for what I assume is public health care
-    res = helios_session.get(
-        "https://patienten.helios-gesundheit.de/assets/environment/environment.json"
-    )
-    res.raise_for_status()
+    try:
+        res = helios_session.get(
+            "https://patienten.helios-gesundheit.de/assets/environment/environment.json", timeout=helper.api_timeout_seconds
+        )
+        res.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        helper.warn_log(
+            f'[Helios] HTTP issue during fetch of environment variables for session [{str(e)}]')
+        return False
+    except requests.exceptions.Timeout as e:
+        helper.warn_log(
+            f'[Helios] Timeout during fetch of environment variables for session [{str(e)}]')
+        return False
+    except Exception as e:
+        helper.error_log(
+            f'[Helios] Error during fetch of environment variables for session [{str(e)}]')
+        return False
+
     helios_config["healthInsuranceTypeUUID"] = res.json()["environment"]["timerbee"][
         "defaultHealthInsuranceTypeUUID"
     ]
 
     # grab uuid for corona vaccinations
-    res = helios_session.get(
-        "https://api.patienten.helios-gesundheit.de/api/appointment/specialty"
-    )
-    res.raise_for_status()
+    try:
+        res = helios_session.get(
+            "https://api.patienten.helios-gesundheit.de/api/appointment/specialty", timeout=helper.api_timeout_seconds
+        )
+        res.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        helper.warn_log(
+            f'[Helios] HTTP issue during fetch of UUID for Corona Vaccinations [{str(e)}]')
+        return False
+    except requests.exceptions.Timeout as e:
+        helper.warn_log(
+            f'[Helios] Timeout during fetch of UUID for Corona Vaccinations [{str(e)}]')
+        return False
+    except Exception as e:
+        helper.error_log(
+            f'[Helios] Error during fetch of UUID for Corona Vaccinations [{str(e)}]')
+        return False
+
     corona = [x for x in res.json() if x["name"] == "Corona-Impfung"].pop()
     # c619bfb1-9e18-404d-b960-dfac6c072490
     helios_config["specialtyUUID"] = corona["uuid"]
     helios_config["treatmentID"] = corona["oid"]  # 58
+    helios_init_completed = True
+    return True
 
 
 def parse_dt(arg):
@@ -50,70 +82,14 @@ def parse_dt(arg):
     return datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
 
 
-def helios_check(city):
-    global helios_session, helios_config, helios_locations
+def helios_gather_locations(lat, lng, address, radius=50):
+    global helios_session, helios_config, helios_locations, helios_locations_fetched
 
-    try:
-        for location in helios_locations:
-            query = {
-                "userGroupUuid": location["userGroupUUID"],
-                "resourceUuids": location["resourceUUIDs"],
-                "purposeQuery": {
-                    "puroseCategoryUUID": location["purposeCategoryUUID"],
-                },
-                "begin": arrow.now().isoformat(),
-                "end": arrow.now().shift(days=14).isoformat(),
-            }
-
-            res = helios_session.post(
-                "https://api.patienten.helios-gesundheit.de/api/appointment/booking/querytimeline",
-                json=query,
-            )
-            res.raise_for_status()
-            result = res.json()
-
-            spots = {
-                "amount": 0,
-                "dates": [],
-            }
-            for entry in result:
-                dt = parse_dt(entry["begin"])
-                vaccination_id = "{}.{}.{}".format(
-                    location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H"))
-                if vaccination_id not in helper.already_sent_ids:
-                    spots["amount"] += 1
-                    spots["dates"].append(dt.strftime("%d.%m.%y"))
-                    helper.already_sent_ids.append(vaccination_id)
-
-            if spots["amount"] > 0:
-                dates = ", ".join(sorted(set(spots["dates"])))
-                vaccine = location["purposeName"]
-                if "biontech" in vaccine.lower():
-                    vaccine = "BioNTech"
-                elif "astra" in vaccine.lower():
-                    vaccine = "AstraZeneca"
-                elif "moderna" in vaccine.lower():
-                    vaccine = "Moderna"
-                elif "johnson" in vaccine.lower() or "janssen" in vaccine.lower():
-                    vaccine = "Johnson & Johnson"
-                else:
-                    vaccine = "COVID-19 Impfstoff"
-
-                url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
-                message = f"Freie Impftermine für {vaccine} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
-
-                # Print message out on server with city in front
-                print(f'{city}: {message}')
-
-                # Send message to telegram channel for the specific city
-                helper.send_telegram_msg(city, message)
-
-    except Exception as e:
-        print(f'{city}: ERROR During Helios check - ' + str(e))
-
-
-def helios_gather_locations(city, lat, lng, address, radius=50):
-    global helios_session, helios_config, helios_locations
+    # Check if init has been completed before
+    if not helios_init_completed:
+        helios_init_session()
+        if not helios_init_completed:
+            return False
 
     query = {
         "gpsData": {
@@ -127,11 +103,24 @@ def helios_gather_locations(city, lat, lng, address, radius=50):
     }
 
     try:
-        res = helios_session.post(
-            "https://api.patienten.helios-gesundheit.de/api/appointment/multitenant/resources/query",
-            json=query,
-        )
-        res.raise_for_status()
+        try:
+            res = helios_session.post(
+                "https://api.patienten.helios-gesundheit.de/api/appointment/multitenant/resources/query",
+                json=query, timeout=helper.api_timeout_seconds
+            )
+            res.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            helper.warn_log(
+                f'[Helios] HTTP issue during gathering of locations [{str(e)}]')
+            return False
+        except requests.exceptions.Timeout as e:
+            helper.warn_log(
+                f'[Helios] Timeout during gathering of locations [{str(e)}]')
+            return False
+        except Exception as e:
+            helper.error_log(
+                f'[Helios] Error during gathering of locations [{str(e)}]')
+            return False
 
         # store just the stuff we care about and need for the next step
         helios_locations = []
@@ -166,9 +155,120 @@ def helios_gather_locations(city, lat, lng, address, radius=50):
                         }
                     )
                     helios_name = entry["tenantName"]
-                    print(f"{city}: Helios Location {helios_name} added!")
+                    helper.info_log(f'Helios Location {helios_name} added!')
+        helios_locations_fetched = True
         return True
 
     except Exception as e:
-        print(f'{city}: ERROR During Helios Gather Locations - ' + str(e))
+        helper.error_log(f'[Helios] General error during gather [{str(e)}]')
         return False
+
+
+def helios_fetch_locations(city):
+    if not helios_gather_locations(helper.conf[city]['lat'], helper.conf[city]['lng'], helper.conf[city]['address']):
+        helper.warn_log('Unable to gather Helios locations..')
+
+
+def helios_check(city):
+    global helios_session, helios_config, helios_locations, helios_init_completed, helios_locations_fetched
+
+    # Check if init has been completed before
+    if not helios_init_completed:
+        helios_init_session()
+        if not helios_init_completed:
+            return False
+
+     # Check if locations have been fetched before
+    if not helios_locations_fetched:
+        helios_fetch_locations(city)
+        if not helios_locations_fetched:
+            return False
+
+    try:
+        for location in helios_locations:
+            query = {
+                "userGroupUuid": location["userGroupUUID"],
+                "resourceUuids": location["resourceUUIDs"],
+                "purposeQuery": {
+                    "puroseCategoryUUID": location["purposeCategoryUUID"],
+                },
+                "begin": arrow.now().isoformat(),
+                "end": arrow.now().shift(days=14).isoformat(),
+            }
+
+            try:
+                res = helios_session.post(
+                    "https://api.patienten.helios-gesundheit.de/api/appointment/booking/querytimeline",
+                    json=query, timeout=helper.api_timeout_seconds
+                )
+                res.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                helper.warn_log(
+                    f'[Helios] HTTP issue during checking Helios API, try to reinit the session [{str(e)}]')
+                helios_init_session()
+                return
+            except requests.exceptions.Timeout as e:
+                helper.warn_log(
+                    f'[Helios] Timeout during checking Helios API [{str(e)}]')
+                return
+            except Exception as e:
+                helper.error_log(
+                    f'[Helios] Error during checking Helios API [{str(e)}]')
+                return
+
+            result = res.json()
+
+            spots = {
+                "amount": 0,
+                "dates": [],
+            }
+            for entry in result:
+                dt = parse_dt(entry["begin"])
+                vaccination_id = "{}.{}.{}".format(
+                    location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H"))
+                if vaccination_id not in helper.already_sent_ids:
+                    spots["amount"] += 1
+                    spots["dates"].append(dt.strftime("%d.%m.%y"))
+                    helper.already_sent_ids.append(vaccination_id)
+
+            if spots["amount"] > 0:
+                dates = ", ".join(sorted(set(spots["dates"])))
+                vaccine = location["purposeName"]
+                if "biontech" in vaccine.lower():
+                    vaccine = "BioNTech"
+                elif "astra" in vaccine.lower():
+                    vaccine = "AstraZeneca"
+                elif "moderna" in vaccine.lower():
+                    vaccine = "Moderna"
+                elif "johnson" in vaccine.lower() or "janssen" in vaccine.lower():
+                    vaccine = "Johnson & Johnson"
+                else:
+                    vaccine = "COVID-19 Impfstoff"
+
+                url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
+                message = f"Freie Impftermine für {vaccine} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
+
+                # Print message out on server
+                helper.info_log(message)
+
+                # Send message to telegram channel for the specific city
+                helper.send_telegram_msg(city, message)
+
+    except Exception as e:
+        helper.error_log(f'[Helios] General error during check [{str(e)}]')
+
+
+def helios_init(city):
+    retry_counter = 0
+    while True:
+        if helios_init_session():
+            break
+        helper.warn_log('[Helios] Unable to init Helios API, try again..')
+        retry_counter = retry_counter + 1
+        if(retry_counter >= 3):
+            helper.warn_log(
+                '[Helios] Unable to init Helios API, start without..')
+            break
+
+    if helios_init_completed:
+        helios_fetch_locations(city)

@@ -9,12 +9,12 @@ def zollsoft_send_message(city, vaccine_dates, vaccine_name, booking_url):
         message = "Freie Impftermine für {} in München. Wählbare Tage: {}. Hier buchen: {}".format(
             vaccine_name, ", ".join(sorted(set(vaccine_dates))), booking_url)
 
-        # Print message out on server with city in front
-        print(f'{city}: {message}')
+        # Print message out on server
+        helper.info_log(message)
 
         # Send message to telegram channel for the specific city
         helper.send_telegram_msg(city, message)
-        
+
 
 def zollsoft_check(city):
     try:
@@ -40,8 +40,23 @@ def zollsoft_check(city):
                 "uniqueident": unique_id,
             }
 
-            res = requests.post(url, headers=headers, data=payload)
-            res.raise_for_status()
+            try:
+                res = requests.post(
+                    url, headers=headers, data=payload, timeout=helper.api_timeout_seconds)
+                res.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                helper.warn_log(
+                    f'[Zollsoft] HTTP issue during fetching data [{str(e)}]')
+                return
+            except requests.exceptions.Timeout as e:
+                helper.warn_log(
+                    f'[Zollsoft] API is currently not reachable [{str(e)}]')
+                return
+            except Exception as e:
+                helper.error_log(
+                    f'[Zollsoft] Error during fetch from API [{str(e)}]')
+                return
+
             result = res.json()
             nb_availabilities = len(result["termine"])
 
@@ -85,4 +100,4 @@ def zollsoft_check(city):
                     city, johnson_dates, "Johnson & Johnson", booking_url)
 
     except Exception as e:
-        print(f'{city}: ERROR During Zollsoft check - ' + str(e))
+        helper.error_log(f'[Zollsoft] General Error [{str(e)}]')
