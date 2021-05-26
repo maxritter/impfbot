@@ -238,16 +238,9 @@ def doctolib_check(city):
                                     helper.already_sent_ids.append(
                                         vaccination_id)
 
-                    # Check if there are dates available to notify the channel
-                    if len(available_dates) == 0:
+                    # Check if there are enough dates available to notify the channel
+                    if len(available_dates) < 3:
                         continue
-
-                    # Special case for medizinisches-versorgungszentrum-mvz-laim-gmbh, as they are posting new appointments all time
-                    try:
-                        if "175048" in str(practice_ids) and len(available_dates) < 5:
-                            continue
-                    except Exception:
-                        pass
 
                     # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
