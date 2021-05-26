@@ -12,8 +12,12 @@ def zollsoft_send_message(city, vaccine_dates, vaccine_name, booking_url):
         # Print message out on server
         helper.info_log(message)
 
-        # Send message to telegram channel for the specific city
-        helper.send_telegram_msg(city, message)
+        # Send message to telegram channels for the specific city
+        helper.send_telegram_msg(city, 'all', message)
+        if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+            helper.send_telegram_msg(city, 'mrna', message)
+        elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+            helper.send_telegram_msg(city, 'vec', message)
 
 
 def zollsoft_check(city):

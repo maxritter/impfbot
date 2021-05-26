@@ -172,17 +172,36 @@ def helios_fetch_locations(city):
 def helios_check(city):
     global helios_session, helios_config, helios_locations, helios_init_completed, helios_locations_fetched
 
-    # Check if init has been completed before
+    # Check if init has been completed
     if not helios_init_completed:
         helios_init_session()
         if not helios_init_completed:
             return False
+    try:
+        _ = helios_config['treatmentID']
+    except Exception:
+        helper.warn_log(
+            '[Helios] Init was not completed during check, try to init..')
+        helios_init_completed = False
+        helios_init_session()
+        if not helios_init_completed:
+            return False
 
-     # Check if locations have been fetched before
+     # Check if locations have been fetched
     if not helios_locations_fetched:
         helios_fetch_locations(city)
         if not helios_locations_fetched:
             return False
+    for location in helios_locations:
+        try:
+            _ = location['facilityID']
+        except Exception:
+            helper.warn_log(
+                '[Helios] Locations were not found during check, try to fetch..')
+            helios_locations_fetched = False
+            helios_fetch_locations(city)
+            if not helios_locations_fetched:
+                return False
 
     try:
         for location in helios_locations:
@@ -233,26 +252,30 @@ def helios_check(city):
 
             if spots["amount"] > 0:
                 dates = ", ".join(sorted(set(spots["dates"])))
-                vaccine = location["purposeName"]
-                if "biontech" in vaccine.lower():
-                    vaccine = "BioNTech"
-                elif "astra" in vaccine.lower():
-                    vaccine = "AstraZeneca"
-                elif "moderna" in vaccine.lower():
-                    vaccine = "Moderna"
-                elif "johnson" in vaccine.lower() or "janssen" in vaccine.lower():
-                    vaccine = "Johnson & Johnson"
+                vaccine_name = location["purposeName"]
+                if "biontech" in vaccine_name.lower():
+                    vaccine_name = "BioNTech"
+                elif "astra" in vaccine_name.lower():
+                    vaccine_name = "AstraZeneca"
+                elif "moderna" in vaccine_name.lower():
+                    vaccine_name = "Moderna"
+                elif "johnson" in vaccine_name.lower() or "janssen" in vaccine_name.lower():
+                    vaccine_name = "Johnson & Johnson"
                 else:
-                    vaccine = "COVID-19 Impfstoff"
+                    vaccine_name = "COVID-19 Impfstoff"
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
-                message = f"Freie Impftermine für {vaccine} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
+                message = f"Freie Impftermine für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
 
-                # Send message to telegram channel for the specific city
-                helper.send_telegram_msg(city, message)
+                # Send message to telegram channels for the specific city
+                helper.send_telegram_msg(city, 'all', message)
+                if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+                    helper.send_telegram_msg(city, 'mrna', message)
+                elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+                    helper.send_telegram_msg(city, 'vec', message)
 
     except Exception as e:
         helper.error_log(f'[Helios] General error during check [{str(e)}]')
