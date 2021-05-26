@@ -222,8 +222,10 @@ def doctolib_check(city):
                         if len(availability["slots"]) > 0:
                             # Parse all available slots
                             for slot in availability["slots"]:
+                                dt_naive = datetime.datetime.strptime(slot["start_date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                                dt = datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
                                 vaccination_id = "{}.{}.{}.{}".format(
-                                    visit_motive_ids, agenda_ids, practice_ids, slot)
+                                    visit_motive_ids, agenda_ids, practice_ids, dt.strftime("%d.%m.%y-%H:%M"))
 
                                 # If appointment has not been sent out already
                                 if vaccination_id not in helper.already_sent_ids:
@@ -233,7 +235,13 @@ def doctolib_check(city):
                                         datetime.date.strftime(d, "%d.%m.%y"))
                                     helper.already_sent_ids.append(
                                         vaccination_id)
+                    
+                    # Check if there are dates available to notify the channel
                     if len(available_dates) == 0:
+                        continue
+
+                    # Special case for medizinisches-versorgungszentrum-mvz-laim-gmbh, as they are posting new appointments all time
+                    if "175048" in str(practice_ids) and len(available_dates) < 10:
                         continue
 
                     # Construct and send message

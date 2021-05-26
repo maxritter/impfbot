@@ -38,9 +38,9 @@ def main(args=None):
             # Check Doctolib list
             doctolib_check(city)
 
-            # Wait at least 60 seconds between the rounds
-            if int(time.time() - roundTime) < 60:
-                time.sleep(abs(60 - int(time.time() - roundTime)))
+            # Wait at least 10 seconds between the rounds
+            if int(time.time() - roundTime) < 10:
+                time.sleep(abs(10 - int(time.time() - roundTime)))
 
             # Show round time in local mode
             if helper.is_local():

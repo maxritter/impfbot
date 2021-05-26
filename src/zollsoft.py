@@ -71,7 +71,7 @@ def zollsoft_check(city):
                 moderna_dates = []
                 johnson_dates = []
                 for entry in result["termine"]:
-                    date, _, _, _, location, _, _, _, _, _ = entry
+                    date, time, _, _, location, _, _, _, _, _ = entry
                     vaccination_id = "{}.{}.{}".format(
                         date, time, location)
                     if vaccination_id not in helper.already_sent_ids and "2. Corona-Impfung" not in location:

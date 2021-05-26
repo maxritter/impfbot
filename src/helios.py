@@ -76,12 +76,6 @@ def helios_init_session():
     return True
 
 
-def parse_dt(arg):
-    dt_naive = datetime.datetime.strptime(arg, "%Y-%m-%dT%H:%M:%S.%fZ")
-    # turn naive into aware datetime. why are you this pointlessly complicated python stdlib!
-    return datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
-
-
 def helios_gather_locations(lat, lng, address, radius=50):
     global helios_session, helios_config, helios_locations, helios_locations_fetched
 
@@ -231,8 +225,8 @@ def helios_check(city):
                     f'[Helios] Timeout during checking Helios API [{str(e)}]')
                 return
             except Exception as e:
-                helper.error_log(
-                    f'[Helios] Error during checking Helios API [{str(e)}]')
+                helper.warn_log(
+                    f'[Helios] General issue during checking Helios API [{str(e)}]')
                 return
 
             result = res.json()
@@ -242,7 +236,8 @@ def helios_check(city):
                 "dates": [],
             }
             for entry in result:
-                dt = parse_dt(entry["begin"])
+                dt_naive = datetime.datetime.strptime(entry["begin"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                dt = datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
                 vaccination_id = "{}.{}.{}".format(
                     location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H"))
                 if vaccination_id not in helper.already_sent_ids:
@@ -265,7 +260,7 @@ def helios_check(city):
                     vaccine_name = "COVID-19 Impfstoff"
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
-                message = f"Freie Impftermine für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
+                message = f"Freie Impftermine für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Aktuell scheint es Probleme mit einzelnen Buchungen zu geben. Bitte beim zuständigen Arzt erfragen, ob der Termin auch wirklich statt findet! Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
