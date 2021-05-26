@@ -216,35 +216,31 @@ def doctolib_check(city):
                     if response_json is None:
                         continue
                     nb_availabilities = response_json["total"]
-                    if city == 'muc4':
-                        if nb_availabilities < 3:
-                            continue
-                    elif nb_availabilities == 0:
+                    if nb_availabilities == 0:
                         continue
 
                     # Parse all available dates
                     available_dates = []
                     slot_counter = 0
                     for availability in response_json["availabilities"]:
-                        if len(availability["slots"]) > 0:
-                            # Parse all available slots
-                            for slot in availability["slots"]:
-                                try:
-                                    date_str = slot["start_date"]
-                                except Exception:
-                                    continue
-                                vaccination_id = "{}.{}.{}.{}".format(
-                                    visit_motive_ids, agenda_ids, practice_ids, date_str)
+                        # Parse all available slots
+                        for slot in availability["slots"]:
+                            try:
+                                date_str = slot["start_date"]
+                            except Exception:
+                                continue
+                            vaccination_id = "{}.{}.{}.{}".format(
+                                visit_motive_ids, agenda_ids, practice_ids, date_str)
 
-                                # If appointment has not been sent out already
-                                if vaccination_id not in helper.already_sent_ids:
-                                    d = datetime.datetime.strptime(
-                                        availability.get("date"), '%Y-%m-%d')
-                                    available_dates.append(
-                                        datetime.date.strftime(d, "%d.%m.%y"))
-                                    helper.already_sent_ids.append(vaccination_id)
-                                    slot_counter = slot_counter + 1
-                    if slot_counter == 0 or len(available_dates) == 0:
+                            # If appointment has not been sent out already
+                            if vaccination_id not in helper.already_sent_ids:
+                                d = datetime.datetime.strptime(
+                                    availability.get("date"), '%Y-%m-%d')
+                                available_dates.append(
+                                    datetime.date.strftime(d, "%d.%m.%y"))
+                                helper.already_sent_ids.append(vaccination_id)
+                                slot_counter = slot_counter + 1
+                    if slot_counter == 0:
                         continue
 
                     # Construct and send message
