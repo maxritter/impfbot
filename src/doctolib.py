@@ -104,8 +104,11 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
     return response.json()
 
 
-def doctolib_send_message(city, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids):
-    message = f'Freie Impftermine für {vaccine_name} '
+def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids):
+    if slot_counter == 1:
+        message = f'{slot_counter} freier Impftermin für {vaccine_name} '
+    else:
+        message = f'{slot_counter} freie Impftermine für {vaccine_name} '
     if vaccine_day != 0:
         message = message + \
             f'mit Abstand zur 2. Impfung von {vaccine_day} Tagen '
@@ -214,11 +217,11 @@ def doctolib_check(city):
                     nb_availabilities = response_json["total"]
                     if nb_availabilities == 0:
                         continue
-                    availabilities = response_json["availabilities"]
 
                     # Parse all available dates
                     available_dates = []
-                    for availability in availabilities:
+                    slot_counter = 0
+                    for availability in response_json["availabilities"]:
                         if len(availability["slots"]) > 0:
                             # Parse all available slots
                             for slot in availability["slots"]:
@@ -235,19 +238,16 @@ def doctolib_check(city):
                                         availability.get("date"), '%Y-%m-%d')
                                     available_dates.append(
                                         datetime.date.strftime(d, "%d.%m.%y"))
-
-                    # Check if there are enough dates available to notify the channel
-                    if len(available_dates) < 3:
+                                    helper.already_sent_ids.append(vaccination_id)
+                                    slot_counter = slot_counter + 1
+                    if slot_counter == 0 or len(available_dates) == 0:
                         continue
 
                     # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
                     vaccine_day = vaccine_days[vaccine_counter]
                     doctolib_send_message(
-                        city, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids)
-
-                    # Do not send it out again
-                    helper.already_sent_ids.append(vaccination_id)
+                        city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids)
 
                 vaccine_counter = vaccine_counter + 1
 
