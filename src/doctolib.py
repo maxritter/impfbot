@@ -222,8 +222,12 @@ def doctolib_check(city):
                         if len(availability["slots"]) > 0:
                             # Parse all available slots
                             for slot in availability["slots"]:
+                                try:
+                                    date_str = slot["start_date"]
+                                except Exception:
+                                    continue
                                 vaccination_id = "{}.{}.{}.{}".format(
-                                    visit_motive_ids, agenda_ids, practice_ids, slot["start_date"])
+                                    visit_motive_ids, agenda_ids, practice_ids, date_str)
 
                                 # If appointment has not been sent out already
                                 if vaccination_id not in helper.already_sent_ids:
