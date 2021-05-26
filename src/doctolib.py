@@ -216,7 +216,10 @@ def doctolib_check(city):
                     if response_json is None:
                         continue
                     nb_availabilities = response_json["total"]
-                    if nb_availabilities == 0:
+                    if city == 'muc4':
+                        if nb_availabilities < 3:
+                            continue
+                    elif nb_availabilities == 0:
                         continue
 
                     # Parse all available dates

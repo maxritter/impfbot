@@ -16,18 +16,11 @@ def main(args=None):
     # Initialization
     helper.init(city)
     roundTime = time.time()
-    clearTime = time.time()
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')
     while True:
         try:
-            # Clear buffer every hour, especially important for Helios
-            if not helper.is_local() and (time.time() - clearTime >= (60 * 60)):
-                helper.already_sent_ids.clear()
-                f'{city}: Clearing buffer now..'
-                clearTime = time.time()
-
             # For Munich, we have a separate API
             if city == 'muc1':
                 zollsoft_check(city)
