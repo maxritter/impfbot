@@ -4,20 +4,25 @@ import time
 from src import helper
 
 
-def zollsoft_send_message(city, vaccine_dates, vaccine_name, booking_url):
-    if len(vaccine_dates) > 0:
-        message = "Freie Impftermine für {} in München. Wählbare Tage: {}. Hier buchen: {}".format(
-            vaccine_name, ", ".join(sorted(set(vaccine_dates))), booking_url)
+def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking_url):
+    # Construct message
+    if slot_counter == 1:
+        message = f'{slot_counter} freier Impftermin '
+    else:
+        message = f'{slot_counter} freie Impftermine '
+    vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
+    message = message + \
+        f'für {vaccine_name} in München. Wählbare Tage: {vaccine_dates_str}. Hier buchen: {booking_url}'
 
-        # Print message out on server
-        helper.info_log(message)
+    # Print message out on server
+    helper.info_log(message)
 
-        # Send message to telegram channels for the specific city
-        helper.send_telegram_msg(city, 'all', message)
-        if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
-            helper.send_telegram_msg(city, 'mrna', message)
-        elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-            helper.send_telegram_msg(city, 'vec', message)
+    # Send message to telegram channels for the specific city
+    helper.send_telegram_msg(city, 'all', message)
+    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+        helper.send_telegram_msg(city, 'mrna', message)
+    elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+        helper.send_telegram_msg(city, 'vec', message)
 
 
 def zollsoft_check(city):
@@ -67,9 +72,13 @@ def zollsoft_check(city):
             if nb_availabilities > 0:
                 # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
                 biontech_dates = []
+                biontech_counter = 0
                 astra_dates = []
+                astra_counter = 0
                 moderna_dates = []
+                moderna_counter = 0
                 johnson_dates = []
+                johnson_counter = 0
                 for entry in result["termine"]:
                     date, time, _, _, location, _, _, _, _, _ = entry
                     vaccination_id = "{}.{}.{}".format(
@@ -78,15 +87,19 @@ def zollsoft_check(city):
                         # Determine Vaccine
                         d = datetime.datetime.strptime(date, '%Y/%m/%d')
                         if "biontech" in location.lower():
+                            biontech_counter = biontech_counter + 1
                             biontech_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         elif "astrazeneca" in location.lower():
+                            astra_counter = astra_counter + 1
                             astra_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         elif "moderna" in location.lower():
+                            moderna_counter = moderna_counter + 1
                             moderna_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         elif "johnson" in location.lower() or "janssen" in location.lower():
+                            johnson_counter = johnson_counter + 1
                             johnson_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
 
@@ -94,14 +107,18 @@ def zollsoft_check(city):
                         helper.already_sent_ids.append(vaccination_id)
 
                 # Eventually send out appointments
-                zollsoft_send_message(
-                    city, biontech_dates, "BioNTech", booking_url)
-                zollsoft_send_message(
-                    city, astra_dates, "AstraZeneca", booking_url)
-                zollsoft_send_message(
-                    city, moderna_dates, "Moderna", booking_url)
-                zollsoft_send_message(
-                    city, johnson_dates, "Johnson & Johnson", booking_url)
+                if biontech_counter > 0:
+                    zollsoft_send_message(
+                        city, biontech_counter, biontech_dates, "BioNTech", booking_url)
+                if astra_counter > 0:
+                    zollsoft_send_message(
+                        city, astra_counter, astra_dates, "AstraZeneca", booking_url)
+                if moderna_counter > 0:
+                    zollsoft_send_message(
+                        city, moderna_counter, moderna_dates, "Moderna", booking_url)
+                if johnson_counter > 0:
+                    zollsoft_send_message(
+                        city, johnson_counter, johnson_dates, "Johnson & Johnson", booking_url)
 
     except Exception as e:
         helper.error_log(f'[Zollsoft] General Error [{str(e)}]')

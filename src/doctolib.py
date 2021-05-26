@@ -106,9 +106,10 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
 
 def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids):
     if slot_counter == 1:
-        message = f'{slot_counter} freier Impftermin für {vaccine_name} '
+        message = f'{slot_counter} freier Impftermin '
     else:
-        message = f'{slot_counter} freie Impftermine für {vaccine_name} '
+        message = f'{slot_counter} freie Impftermine '
+    message = message + f'für {vaccine_name} '
     if vaccine_day != 0:
         message = message + \
             f'mit Abstand zur 2. Impfung von {vaccine_day} Tagen '

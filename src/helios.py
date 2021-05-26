@@ -260,7 +260,13 @@ def helios_check(city):
                     vaccine_name = "COVID-19 Impfstoff"
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
-                message = f"Freie Impftermine für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Aktuell scheint es Probleme mit einzelnen Buchungen zu geben. Bitte beim zuständigen Arzt erfragen, ob der Termin auch wirklich statt findet! Hier buchen: {url}"
+                
+                # Construct message
+                if spots["amount"] == 1:
+                    message = f'{spots["amount"]} freier Impftermin '
+                else:
+                    message = f'{spots["amount"]} freie Impftermine '
+                message = message + f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Aktuell scheint es Probleme mit einzelnen Buchungen zu geben. Bitte nach Buchung beim zuständigen Arzt erfragen, ob der Termin auch wirklich statt findet! Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
