@@ -235,8 +235,6 @@ def doctolib_check(city):
                                         availability.get("date"), '%Y-%m-%d')
                                     available_dates.append(
                                         datetime.date.strftime(d, "%d.%m.%y"))
-                                    helper.already_sent_ids.append(
-                                        vaccination_id)
 
                     # Check if there are enough dates available to notify the channel
                     if len(available_dates) < 3:
