@@ -239,7 +239,7 @@ def helios_check(city):
                 dt_naive = datetime.datetime.strptime(entry["begin"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 dt = datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
                 vaccination_id = "{}.{}.{}".format(
-                    location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H"))
+                    location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H:%M"))
                 if vaccination_id not in helper.already_sent_ids:
                     spots["amount"] += 1
                     spots["dates"].append(dt.strftime("%d.%m.%y"))
