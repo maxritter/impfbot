@@ -99,7 +99,7 @@ def send_telegram_msg(city, type, msg):
 
     channel_id = conf[city][f'{type}_id']
     if not is_local() and channel_id is not None and channel_id != -1:
-        telegram_bot.sendMessage(channel_id=channel_id, text=msg)
+        telegram_bot.sendMessage(chat_id=channel_id, text=msg)
 
 
 def init(city):
