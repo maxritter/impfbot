@@ -22,7 +22,7 @@ def main(args=None):
     while True:
         try:
             # For Munich, we have a separate API
-            if city == 'muc1':
+            if city == 'muc2':
                 zollsoft_check(city)
             # Check Helios clinics
             if helper.is_helios_enabled(city):
@@ -30,10 +30,6 @@ def main(args=None):
 
             # Check Doctolib list
             doctolib_check(city)
-
-            # Wait at least 10 seconds between the rounds
-            if int(time.time() - roundTime) < 10:
-                time.sleep(abs(10 - int(time.time() - roundTime)))
 
             # Show round time in local mode
             if helper.is_local():

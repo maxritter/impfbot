@@ -40,14 +40,16 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
         "erste impfung" in visit_motive_name or
         "erstimpfung" in visit_motive_name or
         "einzelimpfung" in visit_motive_name) and \
-        (("biontech" in visit_motive_name and not "zweit" in visit_motive_name) or
+        (("biontech" in visit_motive_name) or
             ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or
             ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or
             ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or
             ("janssen" in visit_motive_name and not "zweit" in visit_motive_name)):
 
-        if "biontech" in visit_motive_name:
+        if "biontech" in visit_motive_name and not "zweit" in visit_motive_name:
             vaccine_names.append("BioNTech")
+        elif "biontech" in visit_motive_name and "zweit" in visit_motive_name:
+            vaccine_names.append("BioNTech (2. Impfung)")
         elif "astrazeneca" in visit_motive_name:
             vaccine_names.append("AstraZeneca")
         elif "moderna" in visit_motive_name:
@@ -129,7 +131,7 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
 
     # Send message to telegram channels for the specific city
     helper.send_telegram_msg(city, 'all', message)
-    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+    if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
         helper.send_telegram_msg(city, 'mrna', message)
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         helper.send_telegram_msg(city, 'vec', message)
