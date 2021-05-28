@@ -107,7 +107,7 @@ async function getCenterIDs(pageNumber, city, domain, longitude, latitude, maxDi
         lon: splitLng[1]
       }
       const distanceKm = Distance.between(mainCity, compCity).human_readable()['distance'];
-      if (distanceKm <= maxDistance) {
+      if ((distanceKm <= maxDistance) || (distanceKm >= 250)) {
         centerIDs.push('https://' + hostName + splitArr[2])
       }
       counter = counter + 1
@@ -141,10 +141,16 @@ async function startPulling() {
     'krankenhaus',
     'klinik',
     'privatklinik',
+    'zahnarztpraxis',
+    'institut',
+    'med-zentrum-fuer-erwachsene-mit-behinderung-mzeb',
+    'testzentrum-covid',
+    'zmvz-zahnmedizinisches-versorgungszentrum',
+    'radiologie-zentrum',
     'impfung-covid-19-corona',
-    'allgemeinmedizin', 
-    'innere-und-allgemeinmediziner', 
-    'hausarztliche-versorgung', 
+    'allgemeinmedizin',
+    'innere-und-allgemeinmediziner',
+    'hausarztliche-versorgung',
     'impfung-impfberatung'
   ]
   var centerURLs = []
@@ -168,8 +174,8 @@ async function startPulling() {
   }
 
   //Outprint results
-  print("")
-  print("")
+  console.log("-------------------------------------------")
+  console.log("")
   centerURLs = removeDuplicates(centerURLs)
   centerURLs.forEach(async (centerURL) => {
     console.log(centerURL)
