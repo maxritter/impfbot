@@ -21,7 +21,7 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'str': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': 48.7767, 'lng': 9.18015, 'address': '70173 Stuttgart Mitte'},
         'agb': {'all_id': -1001432733051, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.36989, 'lng': 10.90017, 'address': '86150 Augsburg Innenstadt'},
         'cgn1': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': 50.93893, 'lng': 6.95752, 'address': '50667 Koeln Altstadt-Nord'},
-        'cgn2': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': -1, 'lng': -1, 'address': '50667 Koeln Altstadt-Nord'},
+        'cgn2': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': -1, 'lng': -1, 'address': ''},
         'dus': {'all_id': -1001441637885, 'mrna_id': -1001170209652, 'vec_id': -1001371958170, 'lat': 51.22591, 'lng': 6.77356, 'address': '40213 Duesseldorf Altstadt'},
         'ber1': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': 52.52003, 'lng': 13.40489, 'address': '10178 Berlin Mitte'},
         'ber2': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': ''},
