@@ -266,7 +266,7 @@ def helios_check(city):
                     message = f'{spots["amount"]} freier Impftermin '
                 else:
                     message = f'{spots["amount"]} freie Impftermine '
-                message = message + f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Aktuell scheint es Probleme mit einzelnen Buchungen zu geben. Bitte nach Buchung beim zuständigen Arzt erfragen, ob der Termin auch wirklich statt findet! Hier buchen: {url}"
+                message = message + f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
