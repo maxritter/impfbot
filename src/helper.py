@@ -104,7 +104,7 @@ def send_channel_msg(city, type, msg):
         telegram_bot.sendMessage(chat_id=channel_id, text=msg)
 
     # Send to Twitter
-    if is_local() and twitter_bot is not None:
+    if not is_local() and twitter_bot is not None:
         twitter_bot.update_status(msg)
 
 def init(city):
