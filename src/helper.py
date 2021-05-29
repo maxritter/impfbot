@@ -110,7 +110,10 @@ def send_channel_msg(city, type, msg):
     if not is_local() and twitter_bot is not None:
         try:
             twitter_bot.update_status(datetime.datetime.now().strftime(
-                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #vaccine #ImpfenRettetLeben #aermelhoch")
+                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine #ImpfenRettetLeben #JederPieksZaehlt #aermelhoch")
+        except tweepy.TweepError as error:
+            if error.api_code != 187:
+                error_log(f'[Twitter] Error during message send [{str(e)}]')
         except Exception as e:
             error_log(f'[Twitter] Error during message send [{str(e)}]')
 
