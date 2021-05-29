@@ -7,3 +7,4 @@ python-telegram-bot
 lxml
 arrow
 python-dotenv
+tweepy

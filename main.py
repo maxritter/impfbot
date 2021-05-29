@@ -15,7 +15,6 @@ def main(args=None):
 
     # Initialization
     helper.init(city)
-    roundTime = time.time()
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')
@@ -30,12 +29,6 @@ def main(args=None):
 
             # Check Doctolib list
             doctolib_check(city)
-
-            # Show round time in local mode
-            if helper.is_local():
-                helper.info_log(
-                    f'Round time: {int(time.time() - roundTime)} seconds')
-            roundTime = time.time()
 
         except Exception as e:
             helper.error_log(f'[General] Main loop error [{str(e)}]')

@@ -1,5 +1,6 @@
 import platform
 import telegram
+import tweepy
 import sys
 import os
 import datetime
@@ -12,6 +13,7 @@ from src import helios, doctolib
 api_timeout_seconds = 10
 already_sent_ids = None
 telegram_bot = None
+twitter_bot = None
 logger = None
 conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': 48.13836, 'lng': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel'},
         'muc2': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': ''},
@@ -93,16 +95,20 @@ def is_helios_enabled(city):
     return (conf[city]['lat'] != -1 and conf[city]['lng'] != -1 and conf[city]['address'] != '')
 
 
-def send_telegram_msg(city, type, msg):
-    global telegram_bot
+def send_channel_msg(city, type, msg):
+    global telegram_bot, twitter_bot
 
+    # Send to Telegram
     channel_id = conf[city][f'{type}_id']
     if not is_local() and channel_id is not None and channel_id != -1:
         telegram_bot.sendMessage(chat_id=channel_id, text=msg)
 
+    # Send to Twitter
+    if is_local() and twitter_bot is not None:
+        twitter_bot.update_status(msg)
 
 def init(city):
-    global telegram_bot, already_sent_ids, conf
+    global telegram_bot, twitter_bot, already_sent_ids, conf
 
     # For local env, load secrets from file
     if is_local():
@@ -113,7 +119,18 @@ def init(city):
     already_sent_ids = []
     init_logger(city)
     info_log('Init Impfbot..')
+
+    # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
+    twitter_city =  ''.join((x for x in city if not x.isdigit())).upper()
+    twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
+    twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
+    if twitter_token and twitter_token_secret:
+        twitter_auth = tweepy.OAuthHandler(os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
+        twitter_auth.set_access_token(twitter_token, twitter_token_secret)
+        twitter_bot = tweepy.API(twitter_auth)
+    else:
+        warn_log("Twitter is not enabled for this city..")
 
     # Init Doctolib
     doctolib.doctolib_init(city)

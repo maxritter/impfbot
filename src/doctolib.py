@@ -100,7 +100,7 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
                         motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
         return None
     except Exception as e:
-        helper.error_log(f'[Doctolib] Error during fetch of availabilities for start date {start_date},\
+        helper.warn_log(f'[Doctolib] General issue during fetch of availabilities for start date {start_date},\
                         motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
         return None
     return response.json()
@@ -130,11 +130,11 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    helper.send_telegram_msg(city, 'all', message)
+    helper.send_channel_msg(city, 'all', message)
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-        helper.send_telegram_msg(city, 'mrna', message)
+        helper.send_channel_msg(city, 'mrna', message)
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-        helper.send_telegram_msg(city, 'vec', message)
+        helper.send_channel_msg(city, 'vec', message)
 
 
 def doctolib_check(city):
@@ -159,8 +159,8 @@ def doctolib_check(city):
                     f'[Doctolib] Timeout during fetch of bookings for center {center} [{str(e)}]')
                 continue
             except Exception as e:
-                helper.error_log(
-                    f'[Doctolib] Error during fetch of bookings for center {center} [{str(e)}]')
+                helper.warn_log(
+                    f'[Doctolib] General issue during fetch of bookings for center {center} [{str(e)}]')
                 continue
             json_data = raw_data.json()
             data = json_data["data"]
