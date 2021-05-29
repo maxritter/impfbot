@@ -279,7 +279,10 @@ def helios_check(city):
                     helper.send_channel_msg(city, 'vec', message)
 
     except Exception as e:
-        helper.error_log(f'[Helios] General error during check [{str(e)}]')
+        if "duplicate" in str(e):
+            helper.warn_log(f'[Helios] Reponse issue during check [{str(e)}]')
+        else:
+            helper.error_log(f'[Helios] General error during check [{str(e)}]')
 
 
 def helios_init(city):
