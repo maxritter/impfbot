@@ -275,11 +275,13 @@ def helios_check(city):
                 helper.info_log(message)
 
                 # Send message to telegram channels for the specific city
-                helper.send_channel_msg(city, 'all', message)
-                if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
-                    helper.send_channel_msg(city, 'mrna', message)
-                elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-                    helper.send_channel_msg(city, 'vec', message)
+                if message != helper.last_message:
+                    helper.send_channel_msg(city, 'all', message)
+                    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+                        helper.send_channel_msg(city, 'mrna', message)
+                    elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+                        helper.send_channel_msg(city, 'vec', message)
+                    helper.last_message = message
 
     except Exception as e:
         helper.error_log(f'[Helios] General error during check [{str(e)}]')

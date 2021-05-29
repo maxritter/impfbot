@@ -37,7 +37,7 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'bre': {'all_id': -1001224145181, 'mrna_id': -1, 'vec_id': -1, 'lat': 53.0778, 'lng': 8.80385, 'address': '28195 Bremen Altstadt'},
         'h': {'all_id': -1001486720744, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.37387, 'lng': 9.73779, 'address': '30161 Hannover Mitte'},
         'drs': {'all_id': -1001165597953, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.05174, 'lng': 13.73729, 'address': '01067 Dresden Innere Altstadt'},
-        'fr': {'all_id': -1001436511356, 'mrna_id': -1, 'vec_id': -1, 'lat': 47.9953, 'lng': 7.85242, 'address': '79098 Freiburg im Breisgau Altstadt'},
+        'ka': {'all_id': -1001436511356, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.00934, 'lng': 8.3962, 'address': '76137 Karlsruhe Innenstadt-West'},
         'erf': {'all_id': -1001183027974, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.97961, 'lng': 11.02388, 'address': '99084 Erfurt Altstadt'},
         'wue': {'all_id': -1001410779884, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.79471, 'lng': 9.93163, 'address': '97070 Wuerzburg Altstadt'},
         'md': {'all_id': -1001183191239, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.1277, 'lng': 11.63815, 'address': '39104 Magdeburg Altstadt'},
@@ -99,10 +99,7 @@ def is_helios_enabled(city):
 
 
 def send_channel_msg(city, type, msg):
-    global telegram_bot, twitter_bot, last_message
-
-    if msg == last_message:
-        return
+    global telegram_bot, twitter_bot
 
     # Send to Telegram
     channel_id = conf[city][f'{type}_id']
@@ -122,8 +119,6 @@ def send_channel_msg(city, type, msg):
                 error_log(f'[Twitter] Error during message send [{str(e)}]')
         except Exception as e:
             error_log(f'[Twitter] Error during message send [{str(e)}]')
-
-    last_message = msg
 
 
 def init(city):

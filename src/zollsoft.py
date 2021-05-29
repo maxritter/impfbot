@@ -17,11 +17,13 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    helper.send_channel_msg(city, 'all', message)
-    if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-        helper.send_channel_msg(city, 'mrna', message)
-    elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-        helper.send_channel_msg(city, 'vec', message)
+    if message != helper.last_message:
+        helper.send_channel_msg(city, 'all', message)
+        if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
+            helper.send_channel_msg(city, 'mrna', message)
+        elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+            helper.send_channel_msg(city, 'vec', message)
+        helper.last_message = message
 
 
 def zollsoft_check(city):
