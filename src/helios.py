@@ -236,8 +236,10 @@ def helios_check(city):
                 "dates": [],
             }
             for entry in result:
-                dt_naive = datetime.datetime.strptime(entry["begin"], "%Y-%m-%dT%H:%M:%S.%fZ")
-                dt = datetime.datetime.combine(dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
+                dt_naive = datetime.datetime.strptime(
+                    entry["begin"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                dt = datetime.datetime.combine(
+                    dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
                 vaccination_id = "{}.{}.{}".format(
                     location["purposeName"], location['name'], dt.strftime("%d.%m.%y-%H:%M"))
                 if vaccination_id not in helper.already_sent_ids:
@@ -260,13 +262,14 @@ def helios_check(city):
                     vaccine_name = "COVID-19 Impfstoff"
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
-                
+
                 # Construct message
                 if spots["amount"] == 1:
                     message = f'{spots["amount"]} freier Impftermin '
                 else:
                     message = f'{spots["amount"]} freie Impftermine '
-                message = message + f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
+                message = message + \
+                    f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
@@ -279,10 +282,7 @@ def helios_check(city):
                     helper.send_channel_msg(city, 'vec', message)
 
     except Exception as e:
-        if "duplicate" in str(e):
-            helper.warn_log(f'[Helios] Reponse issue during check [{str(e)}]')
-        else:
-            helper.error_log(f'[Helios] General error during check [{str(e)}]')
+        helper.error_log(f'[Helios] General error during check [{str(e)}]')
 
 
 def helios_init(city):

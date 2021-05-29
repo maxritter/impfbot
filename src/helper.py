@@ -101,11 +101,19 @@ def send_channel_msg(city, type, msg):
     # Send to Telegram
     channel_id = conf[city][f'{type}_id']
     if not is_local() and channel_id is not None and channel_id != -1:
-        telegram_bot.sendMessage(chat_id=channel_id, text=msg)
+        try:
+            telegram_bot.sendMessage(chat_id=channel_id, text=msg)
+        except Exception as e:
+            error_log(f'[Telegram] Error during message send [{str(e)}]')
 
     # Send to Twitter
     if not is_local() and twitter_bot is not None:
-        twitter_bot.update_status(msg)
+        try:
+            twitter_bot.update_status(datetime.datetime.now().strftime(
+                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #vaccine #ImpfenRettetLeben #aermelhoch")
+        except Exception as e:
+            error_log(f'[Twitter] Error during message send [{str(e)}]')
+
 
 def init(city):
     global telegram_bot, twitter_bot, already_sent_ids, conf
@@ -122,11 +130,12 @@ def init(city):
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
-    twitter_city =  ''.join((x for x in city if not x.isdigit())).upper()
+    twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
     twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
     twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
     if twitter_token and twitter_token_secret:
-        twitter_auth = tweepy.OAuthHandler(os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
+        twitter_auth = tweepy.OAuthHandler(
+            os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
         twitter_auth.set_access_token(twitter_token, twitter_token_secret)
         twitter_bot = tweepy.API(twitter_auth)
     else:
