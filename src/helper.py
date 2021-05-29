@@ -4,6 +4,7 @@ import tweepy
 import sys
 import os
 import datetime
+import pytz
 import logging
 from logging import Formatter
 from logging.handlers import SysLogHandler
@@ -11,6 +12,7 @@ from src import helios, doctolib
 
 # Global variables
 api_timeout_seconds = 10
+local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
 twitter_bot = None
@@ -113,7 +115,7 @@ def send_channel_msg(city, type, msg):
     # Send to Twitter
     if not is_local() and twitter_bot is not None:
         try:
-            twitter_bot.update_status(datetime.datetime.now().strftime(
+            twitter_bot.update_status(datetime.datetime.now().astimezone(local_timezone).strftime(
                 "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine #ImpfenRettetLeben #JederPieksZaehlt #aermelhoch")
         except tweepy.TweepError as e:
             if e.api_code != 187:
