@@ -14,6 +14,7 @@ api_timeout_seconds = 10
 already_sent_ids = None
 telegram_bot = None
 twitter_bot = None
+last_message = ""
 logger = None
 conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': 48.13836, 'lng': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel'},
         'muc2': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': ''},
@@ -96,7 +97,10 @@ def is_helios_enabled(city):
 
 
 def send_channel_msg(city, type, msg):
-    global telegram_bot, twitter_bot
+    global telegram_bot, twitter_bot, last_message
+
+    if msg == last_message:
+        return
 
     # Send to Telegram
     channel_id = conf[city][f'{type}_id']
@@ -111,11 +115,13 @@ def send_channel_msg(city, type, msg):
         try:
             twitter_bot.update_status(datetime.datetime.now().strftime(
                 "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine #ImpfenRettetLeben #JederPieksZaehlt #aermelhoch")
-        except tweepy.TweepError as error:
-            if error.api_code != 187:
+        except tweepy.TweepError as e:
+            if e.api_code != 187:
                 error_log(f'[Twitter] Error during message send [{str(e)}]')
         except Exception as e:
             error_log(f'[Twitter] Error during message send [{str(e)}]')
+
+    last_message = msg
 
 
 def init(city):
