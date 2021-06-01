@@ -1,5 +1,6 @@
 import arrow
 import requests
+import datetime
 from src import helper
 
 
@@ -54,7 +55,7 @@ def samedi_check(city):
 
         # Go through the different vaccines and construct the URL
         for event_counter in range(0, len(event_names)):
-            url = f"https://patient.samedi.de/api/booking/v3/times?client_id={client_id}&api_key=TESTING&source=bw_v3&event_category_id={event_category_ids[event_counter]}&event_type_id={event_type_ids[event_counter]}&from={date_start}&to={date_end}&insurance_id=public"
+            url = f"https://patient.samedi.de/api/booking/v3/times?client_id={client_id}&api_key=TESTING&source=bw_v3&event_category_id={event_category_ids[event_counter]}&event_type_id={event_type_ids[event_counter]}&from={date_start}&to={date_end}&insurance_id=public&born_on=1992-09-22"
 
             # Send the GET request
             try:
@@ -73,23 +74,35 @@ def samedi_check(city):
                 helper.error_log(
                     f'[Samedi] Error during fetch from API [{str(e)}]')
                 continue
-            
+
             # Parse response and check if there are availabilities
             result = res.json()
             nb_availabilities = len(result["data"])
             if nb_availabilities == 0:
                 continue
-            
+
             # Fetch all slots
             vaccine_dates = []
             for availability_counter in range(0, nb_availabilities):
                 try:
-                    print(event_names[event_counter] + " GEFUNDEN: " +
-                      result["data"][availability_counter])
-                    vaccine_dates.append(
-                        result["data"][availability_counter]["time"])
-                except Exception:
+                    # Create datetime and vaccination ID
+                    dt_naive = datetime.datetime.strptime(
+                        result["data"][availability_counter]["time"], "%Y-%m-%dT%H:%M:%S%z")
+                    dt = datetime.datetime.combine(
+                        dt_naive.date(), dt_naive.time(), datetime.timezone.utc)
+                    vaccination_id = "{}.{}.{}".format(
+                        event_category_ids[event_counter], event_type_ids[event_counter], dt.strftime("%d.%m.%y-%H:%M"))
+
+                    # If appointment has not been sent out already
+                    if vaccination_id not in helper.already_sent_ids:
+                        vaccine_dates.append(dt.strftime("%d.%m.%y"))
+                        helper.already_sent_ids.append(vaccination_id)
+                except Exception as e:
+                    helper.error_log(
+                        f'[Samedi] Error getting time for appointment [{str(e)}]')
                     continue
+            if len(vaccine_dates) == 0:
+                continue
 
             # Send the message out
             samedi_send_message(city, len(vaccine_dates), vaccine_dates,
