@@ -1,9 +1,11 @@
 
 import sys
 import time
+import random
 from src import helios
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
+from src.samedi import samedi_check
 from src import helper
 
 
@@ -20,9 +22,11 @@ def main(args=None):
     helper.info_log('Searching for appointments now..')
     while True:
         try:
-            # For Munich, we have a separate API
-            if city == 'muc2':
+            # For Munich, we have additional APIs to check
+            if city == 'muc4':
                 zollsoft_check(city)
+                samedi_check(city)                
+
             # Check Helios clinics
             if helper.is_helios_enabled(city):
                 helios.helios_check(city)
