@@ -1,11 +1,13 @@
 import platform
 import telegram
 import tweepy
+import time
 import sys
 import os
 import datetime
 import pytz
 import logging
+import requests
 from logging import Formatter
 from logging.handlers import SysLogHandler
 from src import helios, doctolib
@@ -97,6 +99,31 @@ def error_log(msg):
 
 def is_helios_enabled(city):
     return (conf[city]['lat'] != -1 and conf[city]['lng'] != -1 and conf[city]['address'] != '')
+
+
+def send_pushed_msg(msg, url):
+    payload = {
+        "app_key": "TtazyVM75BQPGTNH2bmv",
+        "app_secret": "ucUuJZ93BDgWYH8gLGEgZTHOM1ncxKw9cKEhyThKX8KOYVwCTz7RxwmvCj6RRwS6",
+        "target_type": "channel",
+        "target_alias": "ddwlGz",
+        "content_type": "url",
+        "content_extra": url,
+        "content": msg
+    }
+
+    try:
+        res = requests.post("https://api.pushed.co/1/push", data=payload)
+        res.raise_for_status()
+    except Exception as e:
+        warn_log(
+            f'[Pushed] Issue during sending of message [{str(e)}]')
+        return
+
+
+def delayed_send_channel_msg(city, type, msg):
+    time.sleep(30)
+    send_channel_msg(city, type, msg)
 
 
 def send_channel_msg(city, type, msg):

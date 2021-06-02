@@ -118,24 +118,25 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     if len(place_address.split(",")) == 2:
         place_address_str = place_address.split(",")[1].strip()
         message = message + f'in {place_address_str}'
-    if available_dates:
-        verbose_dates = ", ".join(sorted(set(available_dates)))
-        message = message + \
-            f". Wählbare Tage: {verbose_dates}"
+    verbose_dates = ", ".join(sorted(set(available_dates)))
     message = message + \
-        ". Hier buchen: {}?pid=practice-{}".format(doctolib_url,
-                                                   practice_ids)
+        f". Wählbare Tage: {verbose_dates}."
+    message_long = message + \
+        " Hier buchen: {}?pid=practice-{}".format(doctolib_url,
+                                                  practice_ids)
 
     # Print message out on server
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
     if message != helper.last_message:
-        helper.send_channel_msg(city, 'all', message)
+        helper.send_channel_msg(city, 'all', message_long)
         if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-            helper.send_channel_msg(city, 'mrna', message)
+            helper.send_pushed_msg(
+                message, f'{doctolib_url}?pid=practice-{practice_ids}')
+            helper.send_channel_msg(city, 'mrna', message_long)
         elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-            helper.send_channel_msg(city, 'vec', message)
+            helper.send_channel_msg(city, 'vec', message_long)
         helper.last_message = message
 
 

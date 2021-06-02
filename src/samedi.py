@@ -1,5 +1,6 @@
 import arrow
 import requests
+import threading
 import datetime
 from src import helper
 
@@ -12,18 +13,26 @@ def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking
         message = f'{slot_counter} freie Impftermine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {vaccine_name} in München. Verfügbare Termine: {vaccine_dates_str}. Hier buchen: {booking_url}'
+        f'für {vaccine_name} in München. Verfügbare Termine: {vaccine_dates_str}.'
+    message_long = message + f' Hier buchen: {booking_url}'
 
     # Print message out on server
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
     if message != helper.last_message:
-        helper.send_channel_msg(city, 'all', message)
+        helper.send_pushed_msg(message, booking_url)
+        t_all = threading.Thread(
+            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+        t_all.start()
         if vaccine_name == 'BioNTech':
-            helper.send_channel_msg(city, 'mrna', message)
+            t_mrna = threading.Thread(
+                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+            t_mrna.start()
         elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-            helper.send_channel_msg(city, 'vec', message)
+            t_vec = threading.Thread(
+                target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
+            t_vec.start()
         helper.last_message = message
 
 
