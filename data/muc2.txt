@@ -1,3 +1,4 @@
+https://www.doctolib.de/gemeinschaftspraxis/muenchen/hausaerzte-johanneskirchen
 https://www.doctolib.de/allgemeinmedizin/muenchen/ulrike-zahn
 https://www.doctolib.de/internist/muenchen/florian-krone
 https://www.doctolib.de/allgemeinmedizin/muenchen/orlando-aquiar-perez
@@ -159,4 +160,3 @@ https://www.doctolib.de/internist/muenchen/werner-becker-muenchen
 https://www.doctolib.de/innere-und-allgemeinmediziner/muenchen/jana-brassler
 https://www.doctolib.de/rheumatologie/muenchen/michael-weber-muenchen
 https://www.doctolib.de/allgemeinmedizin/muenchen/annkatrin-machanek
-https://www.doctolib.de/internist/muenchen/valerie-malouvier
