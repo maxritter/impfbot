@@ -132,8 +132,10 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     if message != helper.last_message:
         helper.send_channel_msg(city, 'all', message_long)
         if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-            helper.send_pushed_msg(
-                message, f'{doctolib_url}?pid=practice-{practice_ids}')
+            main_city = ''.join((x for x in city if not x.isdigit())).upper()
+            if main_city == 'MUC':
+                helper.send_pushed_msg(
+                    message, f'{doctolib_url}?pid=practice-{practice_ids}')
             helper.send_channel_msg(city, 'mrna', message_long)
         elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
             helper.send_channel_msg(city, 'vec', message_long)
