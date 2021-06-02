@@ -11,7 +11,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
         message = f'{slot_counter} freie Impftermine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {vaccine_name} in München. Falls nur Termine für die 2. Impfung angezeigt werden, sind die Erstimpfungen bereits wieder ausgebucht. Wählbare Tage: {vaccine_dates_str}. Hier buchen: {booking_url}'
+        f'für {vaccine_name} in München. Wählbare Tage: {vaccine_dates_str}. Hier buchen: {booking_url}'
 
     # Print message out on server
     helper.info_log(message)
