@@ -1,6 +1,7 @@
 import requests
 import datetime
 import arrow
+import threading
 from src import helper
 
 helios_session = None
@@ -269,18 +270,37 @@ def helios_check(city):
                 else:
                     message = f'{spots["amount"]} freie Impftermine '
                 message = message + \
-                    f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}. Hier buchen: {url}"
+                    f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}."
+                message_long = message + f" Hier buchen: {url}"
 
                 # Print message out on server
                 helper.info_log(message)
 
                 # Send message to telegram channels for the specific city
                 if message != helper.last_message:
-                    helper.send_channel_msg(city, 'all', message)
+                    main_city = ''.join(
+                        (x for x in city if not x.isdigit())).upper()
+                    if main_city == 'MUC':
+                        helper.send_pushed_msg(message, url)
+                        t_all = threading.Thread(
+                            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                        t_all.start()
+                    else:
+                        helper.send_channel_msg(city, 'all', message)
                     if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
-                        helper.send_channel_msg(city, 'mrna', message)
+                        if main_city == 'MUC':
+                            t_mrna = threading.Thread(
+                                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+                            t_mrna.start()
+                        else:
+                            helper.send_channel_msg(city, 'mrna', message)
                     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-                        helper.send_channel_msg(city, 'vec', message)
+                        if main_city == 'MUC':
+                            t_vec = threading.Thread(
+                                target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
+                            t_vec.start()
+                        else:
+                            helper.send_channel_msg(city, 'vec', message)
                     helper.last_message = message
 
     except Exception as e:

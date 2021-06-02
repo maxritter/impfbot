@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+import threading
 from src import helper
 
 
@@ -136,7 +137,11 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
             if main_city == 'MUC':
                 helper.send_pushed_msg(
                     message, f'{doctolib_url}?pid=practice-{practice_ids}')
-            helper.send_channel_msg(city, 'mrna', message_long)
+                t_mrna = threading.Thread(
+                    target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+                t_mrna.start()
+            else:
+                helper.send_channel_msg(city, 'mrna', message_long)
         elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
             helper.send_channel_msg(city, 'vec', message_long)
         helper.last_message = message
