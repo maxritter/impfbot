@@ -14,6 +14,7 @@ from src import helios, doctolib
 
 # Global variables
 api_timeout_seconds = 10
+delayed_message_seconds = 15
 local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
@@ -122,7 +123,7 @@ def send_pushed_msg(msg, url):
 
 
 def delayed_send_channel_msg(city, type, msg):
-    time.sleep(30)
+    time.sleep(delayed_message_seconds)
     send_channel_msg(city, type, msg)
 
 
