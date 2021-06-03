@@ -102,7 +102,7 @@ def zollsoft_check(city):
                             biontech_counter = biontech_counter + 1
                             biontech_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
-                        if "biontech" in location.lower() and "2." in location.lower():
+                        elif "biontech" in location.lower() and "2." in location.lower():
                             biontech_second_counter = biontech_second_counter + 1
                             biontech_second_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
@@ -118,6 +118,8 @@ def zollsoft_check(city):
                             johnson_counter = johnson_counter + 1
                             johnson_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
+                        else:
+                            helper.error_log(f'[Zollsoft] Unknown vaccination: {location.lower()}')
 
                         # Do not send it out again for 60 minutes
                         helper.already_sent_ids.append(vaccination_id)

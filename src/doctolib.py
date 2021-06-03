@@ -58,7 +58,7 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
         elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
             vaccine_names.append("Johnson & Johnson")
         else:
-            vaccine_names.append("COVID-19 Impfstoff")
+            helper.error_log(f'[Doctolib] Unknown vaccination: {visit_motive_name}')
 
         vaccine_ids.append(visit_motive_id)
 
@@ -131,19 +131,23 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
 
     # Send message to telegram channels for the specific city
     if message != helper.last_message:
-        helper.send_channel_msg(city, 'all', message_long)
         if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
             main_city = ''.join((x for x in city if not x.isdigit())).upper()
             if main_city == 'MUC':
                 helper.send_pushed_msg(
                     message, f'{doctolib_url}?pid=practice-{practice_ids}')
+                t_all = threading.Thread(
+                    target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                t_all.start()
                 t_mrna = threading.Thread(
                     target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
                 t_mrna.start()
             else:
                 helper.send_channel_msg(city, 'mrna', message_long)
+                helper.send_channel_msg(city, 'all', message_long)
         elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
             helper.send_channel_msg(city, 'vec', message_long)
+            helper.send_channel_msg(city, 'all', message_long)
         helper.last_message = message
 
 

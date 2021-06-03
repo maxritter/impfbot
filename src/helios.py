@@ -260,7 +260,8 @@ def helios_check(city):
                 elif "johnson" in vaccine_name.lower() or "janssen" in vaccine_name.lower():
                     vaccine_name = "Johnson & Johnson"
                 else:
-                    vaccine_name = "COVID-19 Impfstoff"
+                    helper.error_log(
+                        f'[Helios] Unknown vaccination: {vaccine_name}')
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
 
@@ -276,31 +277,25 @@ def helios_check(city):
                 # Print message out on server
                 helper.info_log(message)
 
-                # Send message to telegram channels for the specific city
                 if message != helper.last_message:
-                    main_city = ''.join(
-                        (x for x in city if not x.isdigit())).upper()
-                    if main_city == 'MUC':
-                        helper.send_pushed_msg(message, url)
-                        t_all = threading.Thread(
-                            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-                        t_all.start()
-                    else:
-                        helper.send_channel_msg(city, 'all', message)
                     if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+                        main_city = ''.join(
+                            (x for x in city if not x.isdigit())).upper()
                         if main_city == 'MUC':
+                            helper.send_pushed_msg(
+                                message, url)
+                            t_all = threading.Thread(
+                                target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                            t_all.start()
                             t_mrna = threading.Thread(
                                 target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
                             t_mrna.start()
                         else:
-                            helper.send_channel_msg(city, 'mrna', message)
+                            helper.send_channel_msg(city, 'mrna', message_long)
+                            helper.send_channel_msg(city, 'all', message_long)
                     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-                        if main_city == 'MUC':
-                            t_vec = threading.Thread(
-                                target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
-                            t_vec.start()
-                        else:
-                            helper.send_channel_msg(city, 'vec', message)
+                        helper.send_channel_msg(city, 'vec', message_long)
+                        helper.send_channel_msg(city, 'all', message_long)
                     helper.last_message = message
 
     except Exception as e:
