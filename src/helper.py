@@ -14,7 +14,7 @@ from src import helios, doctolib
 
 # Global variables
 api_timeout_seconds = 10
-delayed_message_seconds = 15
+delayed_message_seconds = 10
 local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
@@ -32,9 +32,10 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'cgn1': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': 50.93893, 'lng': 6.95752, 'address': '50667 Koeln Altstadt-Nord'},
         'cgn2': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': -1, 'lng': -1, 'address': ''},
         'dus': {'all_id': -1001441637885, 'mrna_id': -1001170209652, 'vec_id': -1001371958170, 'lat': 51.22591, 'lng': 6.77356, 'address': '40213 Duesseldorf Altstadt'},
-        'ber1': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': 52.52003, 'lng': 13.40489, 'address': '10178 Berlin Mitte'},
+        'ber1': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': ''},
         'ber2': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': ''},
         'ber3': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': ''},
+        'ber4': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': 52.52003, 'lng': 13.40489, 'address': '10178 Berlin Mitte'},
         'ffm': {'all_id': -1001238323633, 'mrna_id': -1001314044312, 'vec_id': -1001150816653, 'lat': 50.1126, 'lng': 8.68343, 'address': '60311 Frankfurt am Main Innenstadt'},
         'hh': {'all_id': -1001237010945, 'mrna_id': -1001251036735, 'vec_id': -1001235895701, 'lat': 53.55, 'lng': 10, 'address': '20457 Hamburg Hamburg-Altstadt'},
         'lej': {'all_id': -1001487955448, 'mrna_id': -1001460759342, 'vec_id': -1001451326581, 'lat': 51.33983, 'lng': 12.37541, 'address': '04109 Leipzig Zentrum'},
