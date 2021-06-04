@@ -14,7 +14,7 @@ from src import helios, doctolib
 
 # Global variables
 api_timeout_seconds = 10
-delayed_message_seconds = 10
+delayed_message_seconds = 0
 local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
