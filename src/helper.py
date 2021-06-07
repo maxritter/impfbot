@@ -1,4 +1,5 @@
 import platform
+from src.database import init_db
 import telegram
 import tweepy
 import time
@@ -104,6 +105,9 @@ def is_helios_enabled(city):
 
 
 def send_pushed_msg(msg, url):
+    if is_local():
+        return
+
     payload = {
         "app_key": "TtazyVM75BQPGTNH2bmv",
         "app_secret": "ucUuJZ93BDgWYH8gLGEgZTHOM1ncxKw9cKEhyThKX8KOYVwCTz7RxwmvCj6RRwS6",
@@ -162,6 +166,7 @@ def init(city):
     # General inits
     already_sent_ids = []
     init_logger(city)
+    init_db()
     info_log('Init Impfbot..')
 
     # Init Telegram and Twitter

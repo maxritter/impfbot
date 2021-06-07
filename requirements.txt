@@ -8,3 +8,4 @@ lxml
 arrow
 python-dotenv
 tweepy
+psycopg2-binary

@@ -2,7 +2,7 @@ import requests
 import datetime
 import arrow
 import threading
-from src import helper
+from src import helper, database
 
 helios_session = None
 helios_config = None
@@ -277,6 +277,7 @@ def helios_check(city):
                 # Print message out on server
                 helper.info_log(message)
 
+                # Construct and send message
                 if message != helper.last_message:
                     if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
                         main_city = ''.join(
@@ -297,6 +298,9 @@ def helios_check(city):
                         helper.send_channel_msg(city, 'vec', message_long)
                         helper.send_channel_msg(city, 'all', message_long)
                     helper.last_message = message
+
+                # Add to database                    
+                database.insert_vaccination(vaccine_name, spots["amount"], city, "helios")
 
     except Exception as e:
         helper.error_log(f'[Helios] General error during check [{str(e)}]')

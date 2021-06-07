@@ -2,7 +2,7 @@ import arrow
 import requests
 import threading
 import datetime
-from src import helper
+from src import helper, database
 
 
 def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking_url):
@@ -116,6 +116,10 @@ def samedi_check(city):
             # Send the message out
             samedi_send_message(city, len(vaccine_dates), vaccine_dates,
                                 event_names[event_counter], event_urls[event_counter])
+
+            # Add to database
+            database.insert_vaccination(
+                event_names[event_counter], len(vaccine_dates), city, "samedi")
 
     except Exception as e:
         helper.error_log(f'[Samedi] General Error [{str(e)}]')

@@ -2,7 +2,7 @@ import requests
 import json
 import datetime
 import threading
-from src import helper
+from src import helper, database
 
 
 doctolib_urls = None
@@ -58,7 +58,8 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
         elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
             vaccine_names.append("Johnson & Johnson")
         else:
-            helper.error_log(f'[Doctolib] Unknown vaccination: {visit_motive_name}')
+            helper.error_log(
+                f'[Doctolib] Unknown vaccination: {visit_motive_name}')
 
         vaccine_ids.append(visit_motive_id)
 
@@ -264,6 +265,10 @@ def doctolib_check(city):
                     vaccine_day = vaccine_days[vaccine_counter]
                     doctolib_send_message(
                         city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids)
+
+                    # Add to database
+                    database.insert_vaccination(
+                        vaccine_name, slot_counter, city, "doctolib")
 
                 vaccine_counter = vaccine_counter + 1
 
