@@ -23,6 +23,46 @@ def connect_db():
     return None
 
 
+def get_vaccinations_for_query(query):
+    db_conn = connect_db()
+    if db_conn is None:
+        helper.error_log(
+            f'[Database] Unable to get vaccinations for query, as connection failed..')
+
+    try:
+        cur = db_conn.cursor()
+        cur.execute(query)
+        result = cur.fetchone()
+        if not result or not result[0]:
+            return None
+        num_rows = int(result[0])
+        db_conn.commit()
+        cur.close()
+        return num_rows
+    except Exception as e:
+        helper.error_log(
+            f'[Database] Error during get vaccinations for query {query} [{str(e)}]')
+        return None
+
+
+def get_vaccinations_previous_week(city):
+    main_city = ''.join((x for x in city if not x.isdigit())).upper()
+    return get_vaccinations_for_query(f"SELECT SUM(num) FROM stats WHERE city = '{main_city}' AND date BETWEEN NOW() - INTERVAL '8 DAYS' AND NOW() - INTERVAL '7 DAYS'")
+
+
+def get_vaccinations_previous_day(city):
+    main_city = ''.join((x for x in city if not x.isdigit())).upper()
+    return get_vaccinations_for_query(f"SELECT SUM(num) FROM stats WHERE city = '{main_city}' AND date BETWEEN NOW() - INTERVAL '48 HOURS' AND NOW() - INTERVAL '24 HOURS'")
+
+
+def get_vaccinations_last_day(city, vaccine=None):
+    main_city = ''.join((x for x in city if not x.isdigit())).upper()
+    query = f"SELECT SUM(num) FROM stats WHERE city = '{main_city}' AND date BETWEEN NOW() - INTERVAL '24 HOURS' AND NOW()"
+    if vaccine:
+        query = query + f" AND vaccine = '{vaccine}'"
+    return get_vaccinations_for_query(query)
+
+
 def insert_vaccination(vaccine, num, city, platform):
     global db_conn, db_initialized
 

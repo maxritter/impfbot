@@ -278,26 +278,24 @@ def helios_check(city):
                 helper.info_log(message)
 
                 # Construct and send message
-                if message != helper.last_message:
-                    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
-                        main_city = ''.join(
-                            (x for x in city if not x.isdigit())).upper()
-                        if main_city == 'MUC':
-                            helper.send_pushed_msg(
-                                message, url)
-                            t_all = threading.Thread(
-                                target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-                            t_all.start()
-                            t_mrna = threading.Thread(
-                                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
-                            t_mrna.start()
-                        else:
-                            helper.send_channel_msg(city, 'mrna', message_long)
-                            helper.send_channel_msg(city, 'all', message_long)
-                    elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-                        helper.send_channel_msg(city, 'vec', message_long)
+                if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+                    main_city = ''.join(
+                        (x for x in city if not x.isdigit())).upper()
+                    if main_city == 'MUC':
+                        helper.send_pushed_msg(
+                            message, url)
+                        t_all = threading.Thread(
+                            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                        t_all.start()
+                        t_mrna = threading.Thread(
+                            target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+                        t_mrna.start()
+                    else:
+                        helper.send_channel_msg(city, 'mrna', message_long)
                         helper.send_channel_msg(city, 'all', message_long)
-                    helper.last_message = message
+                elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+                    helper.send_channel_msg(city, 'vec', message_long)
+                    helper.send_channel_msg(city, 'all', message_long)
 
                 # Add to database                    
                 database.insert_vaccination(vaccine_name, spots["amount"], city, "helios")

@@ -19,20 +19,18 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    if message != helper.last_message:
-        helper.send_pushed_msg(message, booking_url)
-        t_all = threading.Thread(
-            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-        t_all.start()
-        if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-            t_mrna = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
-            t_mrna.start()
-        elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
-            t_vec = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
-            t_vec.start()
-        helper.last_message = message
+    helper.send_pushed_msg(message, booking_url)
+    t_all = threading.Thread(
+        target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+    t_all.start()
+    if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
+        t_mrna = threading.Thread(
+            target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+        t_mrna.start()
+    elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+        t_vec = threading.Thread(
+            target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
+        t_vec.start()
 
 
 def zollsoft_check(city):
@@ -119,30 +117,36 @@ def zollsoft_check(city):
                             johnson_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         else:
-                            helper.error_log(f'[Zollsoft] Unknown vaccination: {location.lower()}')
+                            helper.error_log(
+                                f'[Zollsoft] Unknown vaccination: {location.lower()}')
 
                         # Do not send it out again for 60 minutes
                         helper.already_sent_ids.append(vaccination_id)
 
                 # Eventually send out appointments and add to database
                 if biontech_counter > 0:
-                    database.insert_vaccination("BioNTech", biontech_counter, city, "zollsoft")
+                    database.insert_vaccination(
+                        "BioNTech", biontech_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, biontech_counter, biontech_dates, "BioNTech", booking_url)
                 if biontech_second_counter > 0:
-                    database.insert_vaccination("BioNTech", biontech_second_counter, city, "zollsoft")
+                    database.insert_vaccination(
+                        "BioNTech", biontech_second_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, biontech_second_counter, biontech_second_dates, "BioNTech (2. Impfung)", booking_url)
                 if astra_counter > 0:
-                    database.insert_vaccination("AstraZeneca", astra_counter, city, "zollsoft")
+                    database.insert_vaccination(
+                        "AstraZeneca", astra_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, astra_counter, astra_dates, "AstraZeneca", booking_url)
                 if moderna_counter > 0:
-                    database.insert_vaccination("Moderna", moderna_counter, city, "zollsoft")
+                    database.insert_vaccination(
+                        "Moderna", moderna_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, moderna_counter, moderna_dates, "Moderna", booking_url)
                 if johnson_counter > 0:
-                    database.insert_vaccination("Johnson", johnson_counter, city, "zollsoft")
+                    database.insert_vaccination(
+                        "Johnson", johnson_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, johnson_counter, johnson_dates, "Johnson & Johnson", booking_url)
 

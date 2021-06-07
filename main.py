@@ -1,7 +1,6 @@
 
 import sys
-import time
-import random
+import schedule
 from src import helios
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
@@ -17,6 +16,7 @@ def main(args=None):
 
     # Initialization
     helper.init(city)
+    schedule.every().day.at("18:55:00").do(helper.send_daily_stats, city)
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')
@@ -33,6 +33,9 @@ def main(args=None):
 
             # Check Doctolib list
             doctolib_check(city)
+
+            # Check if we need to send out our daily stats
+            schedule.run_pending()
 
         except Exception as e:
             helper.error_log(f'[General] Main loop error [{str(e)}]')
