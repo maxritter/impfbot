@@ -2,15 +2,10 @@ import psycopg2
 import os
 from src import helper
 
-db_conn = None
-db_initialized = False
 
-
-def init_db():
-    global db_conn, db_initialized
-
+def connect_db():
     if helper.is_local():
-        return
+        return None
 
     db_user = 'igagjeizjhukhy'
     db_password = os.getenv(f'DATABASE_PASSWORD')
@@ -21,9 +16,11 @@ def init_db():
     try:
         db_conn = psycopg2.connect(
             user=db_user, password=db_password, host=db_host, port=db_port, database=db_dbname)
-        db_initialized = True
+        return db_conn
     except Exception as e:
         helper.error_log(f'[Database] Connection Error [{str(e)}]')
+
+    return None
 
 
 def insert_vaccination(vaccine, num, city, platform):
@@ -32,11 +29,10 @@ def insert_vaccination(vaccine, num, city, platform):
     if helper.is_local():
         return
 
-    if not db_initialized:
-        init_db()
-        if not db_initialized:
-            helper.error_log(
-                f'[Database] Unable to write entry to DB, as connection failed..')
+    db_conn = connect_db()
+    if db_conn is None:
+        helper.error_log(
+            f'[Database] Unable to write entry to DB, as connection failed..')
 
     vaccine_name = vaccine
     if vaccine_name == "BioNTech (2. Impfung)":
@@ -52,5 +48,6 @@ def insert_vaccination(vaccine, num, city, platform):
             f"INSERT INTO public.stats(vaccine, num, city, platform) VALUES ('{vaccine_name}', {num}, '{main_city}', '{platform}')")
         db_conn.commit()
         cur.close()
+        db_conn.close()
     except Exception as e:
         helper.error_log(f'[Database] Insert vaccination error [{str(e)}]')
