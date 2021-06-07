@@ -1,5 +1,4 @@
 import platform
-from src.database import init_db
 import telegram
 import tweepy
 import time
@@ -166,7 +165,6 @@ def init(city):
     # General inits
     already_sent_ids = []
     init_logger(city)
-    init_db()
     info_log('Init Impfbot..')
 
     # Init Telegram and Twitter
