@@ -135,6 +135,7 @@ def send_daily_stats(city):
         return
 
     city_name = conf[city]['city']
+    info_log(f"Sending out daily stats for city {city_name}..")
     if city_name == '':
         return
 
@@ -211,7 +212,7 @@ def send_daily_stats(city):
     msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter 🙏"
 
     # Send to Telegram
-    channel_id = conf[city][f'{type}_id']
+    channel_id = conf[city]['all_id']
     if channel_id is not None and channel_id != -1:
         try:
             telegram_bot.sendMessage(chat_id=channel_id, text=msg)
