@@ -16,7 +16,7 @@ def main(args=None):
 
     # Initialization
     helper.init(city)
-    schedule.every().day.at("21:02:00").do(helper.send_daily_stats, city)
+    schedule.every().day.at("20:30:00").do(helper.send_daily_stats, city)
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')

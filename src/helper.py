@@ -135,16 +135,16 @@ def send_daily_stats(city):
         return
 
     city_name = conf[city]['city']
-    info_log(f"Sending out daily stats for city {city_name}..")
     if city_name == '':
         return
+    info_log(f"Sending out daily stats for city {city_name}..")
 
     vaccinations_all = database.get_vaccinations_last_day(city)
     if not vaccinations_all:
         return
-    msg = f"💉 Tägliche Statistik für {city_name} am {datetime.datetime.today().strftime('%d.%m.%Y')} 💉\n"
+    msg = f"💉💉💉 TÄGLICHE STATISTIK FÜR {city_name.upper()} AM {datetime.datetime.today().strftime('%d.%m.%Y')} 💉💉💉\n\n"
     msg = msg + \
-        f"{vaccinations_all} Impftermine in den letzten 24h, darunter\n"
+        f"{vaccinations_all} Impftermine in den letzten 24h:\n"
 
     vaccinations_astra = database.get_vaccinations_last_day(
         city, 'AstraZeneca')
@@ -189,7 +189,7 @@ def send_daily_stats(city):
             perc = round((vaccinations_yesterday /
                          (vaccinations_all * 1.0) * 100.0) - 100.0, 1)
         msg = msg + \
-            f"\nDas sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}\n"
+            f"\nDas sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}"
 
     vaccinations_last_week = database.get_vaccinations_previous_week(city)
     if vaccinations_last_week:
@@ -205,10 +205,10 @@ def send_daily_stats(city):
             perc = round((vaccinations_last_week /
                          (vaccinations_all * 1.0) * 100.0) - 100.0, 1)
         msg = msg + \
-            f"Und {diff} Impftermine ({perc}%) {comp} als vor einer Woche {symbol}\n"
+            f" und {diff} Impftermine ({perc}%) {comp} als vor einer Woche {symbol}"
 
-    msg = msg + "\nIch arbeite an diesem Projekt in meine freien Zeit,\n"
-    msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️\n"
+    msg = msg + "\n\nIch arbeite an diesem Projekt in meine freien Zeit, "
+    msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️ "
     msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter 🙏"
 
     # Send to Telegram
@@ -218,6 +218,9 @@ def send_daily_stats(city):
             telegram_bot.sendMessage(chat_id=channel_id, text=msg)
         except Exception as e:
             error_log(f'[Telegram] Error during message send [{str(e)}]')
+
+    # Wait some time, so people can read the message
+    time.sleep(120)
 
 
 def send_channel_msg(city, type, msg):
