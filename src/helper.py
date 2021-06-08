@@ -269,7 +269,7 @@ def send_channel_msg(city, type, msg):
             error_log(f'[Telegram] Error during message send [{str(e)}]')
 
     # Send to Twitter
-    if not is_local() and twitter_bot is not None:
+    if not is_local() and twitter_bot is not None and len(msg) <= 280:
         try:
             twitter_bot.update_status(datetime.datetime.now().astimezone(local_timezone).strftime(
                 "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine #ImpfenRettetLeben")

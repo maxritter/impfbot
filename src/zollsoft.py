@@ -13,7 +13,8 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
         f'für {vaccine_name} in München. Wählbare Tage: {vaccine_dates_str}.'
-    message_long = message + f' Hier buchen: {booking_url}'
+    message_long = message + f' Hier buchen: {booking_url}\n'
+    message_long = message_long + "Falls nur Termine für die 2. Impfung angezeigt werden, dann sind alle Erstimpfungen bereits vergeben"
 
     # Print message out on server
     helper.info_log(message)
