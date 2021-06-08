@@ -240,7 +240,7 @@ def send_daily_stats(city):
     msg = msg + '\n\n{} mind. eine Impfdosis in 🇩🇪\n{} vollständig Geimpfte in 🇩🇪'.format(
         bar_erst, bar_voll)
 
-    msg = msg + "\n\nIch arbeite an diesem Projekt in meine freien Zeit, "
+    msg = msg + "\n\nIch arbeite an diesem Projekt in meiner freien Zeit, "
     msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️\n"
     msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter. Vielen Dank 🙏"
 
@@ -269,10 +269,10 @@ def send_channel_msg(city, type, msg):
             error_log(f'[Telegram] Error during message send [{str(e)}]')
 
     # Send to Twitter
-    if not is_local() and twitter_bot is not None and len(msg) <= 280:
+    if not is_local() and twitter_bot is not None and len(msg) <= 225:
         try:
             twitter_bot.update_status(datetime.datetime.now().astimezone(local_timezone).strftime(
-                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine #ImpfenRettetLeben")
+                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine")
         except tweepy.TweepError as e:
             if e.api_code != 187:
                 error_log(f'[Twitter] Error during message send [{str(e)}]')
