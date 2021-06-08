@@ -1,10 +1,11 @@
 
 import sys
 import schedule
-from src import helios
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
 from src.samedi import samedi_check
+from src.jameda import jameda_check
+from src.helios import helios_check
 from src import helper
 
 
@@ -29,7 +30,11 @@ def main(args=None):
 
             # Check Helios clinics
             if helper.is_helios_enabled(city):
-                helios.helios_check(city)
+                helios_check(city)
+
+            # Check Jameda
+            if helper.is_jameda_enabled(city):
+                jameda_check(city)
 
             # Check Doctolib list
             doctolib_check(city)

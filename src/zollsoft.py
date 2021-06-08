@@ -120,7 +120,6 @@ def zollsoft_check(city):
                             helper.error_log(
                                 f'[Zollsoft] Unknown vaccination: {location.lower()}')
 
-                        # Do not send it out again for 60 minutes
                         helper.already_sent_ids.append(vaccination_id)
 
                 # Eventually send out appointments and add to database

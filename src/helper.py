@@ -4,13 +4,15 @@ import tweepy
 import time
 import sys
 import os
+import csv
+import urllib.request
 import datetime
 import pytz
 import logging
 import requests
 from logging import Formatter
 from logging.handlers import SysLogHandler
-from src import database, helios, doctolib
+from src import database, helios, doctolib, jameda
 
 # Global variables
 api_timeout_seconds = 10
@@ -102,6 +104,9 @@ def is_helios_enabled(city):
     return (conf[city]['lat'] != -1 and conf[city]['lng'] != -1 and conf[city]['address'] != '')
 
 
+def is_jameda_enabled(city):
+    return conf[city]['city'] != ''
+
 def send_pushed_msg(msg, url):
     if is_local():
         return
@@ -130,6 +135,25 @@ def delayed_send_channel_msg(city, type, msg):
     send_channel_msg(city, type, msg)
 
 
+def impfstatus_generate_progressbar(percentage):
+    num_chars = 10
+    num_filled = round(percentage*num_chars)
+    num_empty = num_chars-num_filled
+    display_percentage = str(round(percentage*100, 1)).replace('.', ',')
+    msg = '{}{} {}%'.format('▓'*num_filled, '░'*num_empty, display_percentage)
+    return msg
+
+
+def impfstatus_get_current_data(url):
+    tsvstream = urllib.request.urlopen(url)
+    tsv_file_lines = tsvstream.read().decode('utf-8').splitlines()
+    tsv_data_lines = csv.DictReader(tsv_file_lines, delimiter='\t')
+    # skip to last line
+    for line_dict in tsv_data_lines:
+        pass
+    return line_dict
+
+
 def send_daily_stats(city):
     if is_local():
         return
@@ -151,7 +175,7 @@ def send_daily_stats(city):
     if vaccinations_astra:
         astra_perc = (vaccinations_astra / (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_astra} ({round(astra_perc, 1)}%) Impftermine mit AstraZeneca 🇸🇪\n"
+            f"{vaccinations_astra} ({str(round(astra_perc, 1)).replace('.', ',')}%) Impftermine mit AstraZeneca 🇸🇪\n"
 
     vaccinations_biontech = database.get_vaccinations_last_day(
         city, 'BioNTech')
@@ -159,21 +183,21 @@ def send_daily_stats(city):
         biontech_perc = (vaccinations_biontech /
                          (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_biontech} ({round(biontech_perc, 1)}%) Impftermine mit BioNTech 🇩🇪\n"
+            f"{vaccinations_biontech} ({str(round(biontech_perc, 1)).replace('.', ',')}%) Impftermine mit BioNTech 🇩🇪\n"
 
     vaccinations_johnson = database.get_vaccinations_last_day(city, 'Johnson')
     if vaccinations_johnson:
         johnson_perc = (vaccinations_johnson /
                         (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_johnson} ({round(johnson_perc, 1)}%) Impftermine mit Johnson & Johnson 🇺🇸\n"
+            f"{vaccinations_johnson} ({str(round(johnson_perc, 1)).replace('.', ',')}%) Impftermine mit Johnson & Johnson 🇺🇸\n"
 
     vaccinations_moderna = database.get_vaccinations_last_day(city, 'Moderna')
     if vaccinations_moderna:
         moderna_perc = (vaccinations_moderna /
                         (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_moderna} ({round(moderna_perc, 1)}%) Impftermine mit Moderna 🇺🇸\n"
+            f"{vaccinations_moderna} ({str(round(moderna_perc, 1)).replace('.', ',')}%) Impftermine mit Moderna 🇺🇸\n"
 
     vaccinations_yesterday = database.get_vaccinations_previous_day(city)
     if vaccinations_yesterday:
@@ -181,13 +205,13 @@ def send_daily_stats(city):
         if vaccinations_all >= vaccinations_yesterday:
             comp = "mehr"
             symbol = "📈"
-            perc = round(
-                (vaccinations_all / (vaccinations_yesterday * 1.0) * 100.0) - 100.0, 1)
+            perc = str(round(
+                (vaccinations_all / (vaccinations_yesterday * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
         else:
             comp = "weniger"
             symbol = "📉"
-            perc = round((vaccinations_yesterday /
-                         (vaccinations_all * 1.0) * 100.0) - 100.0, 1)
+            perc = str(round((vaccinations_yesterday /
+                              (vaccinations_all * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
         msg = msg + \
             f"\nDas sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}"
 
@@ -197,27 +221,37 @@ def send_daily_stats(city):
         if vaccinations_all >= vaccinations_last_week:
             comp = "mehr"
             symbol = "📈"
-            perc = round(
-                (vaccinations_all / (vaccinations_last_week * 1.0) * 100.0) - 100.0, 1)
+            perc = str(round(
+                (vaccinations_all / (vaccinations_last_week * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
         else:
             comp = "weniger"
             symbol = "📉"
-            perc = round((vaccinations_last_week /
-                         (vaccinations_all * 1.0) * 100.0) - 100.0, 1)
+            perc = str(round((vaccinations_last_week /
+                              (vaccinations_all * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
         msg = msg + \
             f" und {diff} Impftermine ({perc}%) {comp} als vor einer Woche {symbol}"
 
-    msg = msg + "\n\nIch arbeite an diesem Projekt in meine freien Zeit, "
-    msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️ "
-    msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter 🙏"
+    impfstatus_data = impfstatus_get_current_data(
+        "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv")
+    bar_erst = impfstatus_generate_progressbar(
+        float(impfstatus_data.get('impf_quote_erst')))
+    bar_voll = impfstatus_generate_progressbar(
+        float(impfstatus_data.get('impf_quote_voll')))
+    msg = msg + '\n\n{} mind. eine Impfdosis in 🇩🇪\n{} vollständig Geimpfte in 🇩🇪'.format(
+        bar_erst, bar_voll)
 
-    # Send to Telegram
-    channel_id = conf[city]['all_id']
-    if channel_id is not None and channel_id != -1:
-        try:
-            telegram_bot.sendMessage(chat_id=channel_id, text=msg)
-        except Exception as e:
-            error_log(f'[Telegram] Error during message send [{str(e)}]')
+    msg = msg + "\n\nIch arbeite an diesem Projekt in meine freien Zeit, "
+    msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️\n"
+    msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter. Vielen Dank 🙏"
+
+    # Send to Telegram channels
+    channel_ids = [conf[city]['all_id'], conf[city]['mrna_id'], conf[city]['vec_id']]
+    for channel_id in channel_ids:
+        if channel_id is not None and channel_id != -1:
+            try:
+                telegram_bot.sendMessage(chat_id=channel_id, text=msg)
+            except Exception as e:
+                error_log(f'[Telegram] Error during message send [{str(e)}]')
 
     # Wait some time, so people can read the message
     time.sleep(120)
@@ -278,3 +312,7 @@ def init(city):
     # Try to init Helios API
     if is_helios_enabled(city):
         helios.helios_init(city)
+
+    # Try to init Jameda API
+    if is_jameda_enabled(city):
+        jameda.jameda_init(city)
