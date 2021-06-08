@@ -49,7 +49,17 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'md': {'all_id': -1001183191239, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.1277, 'lng': 11.63815, 'address': '39104 Magdeburg Altstadt', 'city': 'Magdeburg'},
         'dtm': {'all_id': -1001168900922, 'mrna_id': -1001312226933, 'vec_id': -1001163809419, 'lat': 51.51422, 'lng': 7.46509, 'address': '44137 Dortmund Mitte', 'city': 'Dortmund'},
         'ess': {'all_id': -1001398889913, 'mrna_id': -1001230771678, 'vec_id': -1001435263461, 'lat': 51.4564, 'lng': 7.00999, 'address': '45127 Essen Innenstadt', 'city': 'Essen'},
-        'bs': {'all_id': -1001333251690, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.26382, 'lng': 10.52242, 'address': '38100 Braunschweig Innenstadt', 'city': 'Braunschweig'}
+        'bs': {'all_id': -1001333251690, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.26382, 'lng': 10.52242, 'address': '38100 Braunschweig Innenstadt', 'city': 'Braunschweig'},
+        'bfe': {'all_id': -1001326829050, 'mrna_id': -1, 'vec_id': -1, 'lat': 52.02465, 'lng': 8.54159, 'address': '33602 Bielefeld Innenstadt', 'city': 'Bielefeld'},
+        'goe': {'all_id': -1001428055753, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.53305, 'lng': 9.93527, 'address': '37073 Goettingen Goettingen', 'city': 'Göttingen'},
+        'sn': {'all_id': -1001444953581, 'mrna_id': -1, 'vec_id': -1, 'lat': 53.62727, 'lng': 11.41548, 'address': '19053 Schwerin Altstadt', 'city': 'Schwerin'},
+        'ko': {'all_id': -1001473711809, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.35225, 'lng': 7.59298, 'address': '56068 Koblenz Mitte', 'city': 'Koblenz'},
+        'da': {'all_id': -1001199440597, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.87333, 'lng': 8.65666, 'address': '64283 Darmstadt Darmstadt', 'city': 'Darmstadt'},
+        'co': {'all_id': -1001290443403, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.25944, 'lng': 10.96027, 'address': '96450 Coburg Coburg', 'city': 'Coburg'},
+        'ke': {'all_id': -1001240810276, 'mrna_id': -1, 'vec_id': -1, 'lat': 47.7267, 'lng': 10.31688, 'address': '87439 Kempten (Allgaeu) Kempten', 'city': 'Kempten'},
+        'ul': {'all_id': -1001346082516, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.40137, 'lng': 9.99204, 'address': '89073 Ulm Mitte', 'city': 'Ulm'},
+        'dui': {'all_id': -1001481729705, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.43501, 'lng': 6.76115, 'address': '47051 Duisburg Altstadt', 'city': 'Duisburg'},
+        'ms': {'all_id': -1001427604433, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.9622, 'lng': 7.62719, 'address': '48143 Muenster Centrum', 'city': 'Münster'}
         }
 
 

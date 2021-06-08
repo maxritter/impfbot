@@ -3,6 +3,7 @@ import requests
 import urllib.parse
 import threading
 from src import helper, database
+from datetime import timedelta
 
 jameda_session = None
 jameda_locations = None
@@ -23,7 +24,7 @@ def jameda_check(city):
         jameda_check_api(city, **location)
 
 
-def jameda_check_api(city, profile_id, service_id, location, vaccine):
+def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
     global jameda_session
 
     try:
@@ -47,6 +48,10 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine):
             helper.warn_log(
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
+        except requests.exceptions.ConnectionError as e:
+            helper.warn_log(
+                f'[Jameda] API is currently not reachable [{str(e)}]')
+            return
         except Exception as e:
             helper.error_log(
                 f'[Jameda] Error during fetch from API [{str(e)}]')
@@ -55,6 +60,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine):
         if type(result) != list:
             # {'code': 2000, 'message': 'There are no open slots, because all slots have been booked already.'}
             return
+
+        coupled_service_id = kwargs.get("coupled_service_id", None)
 
         spots = {
             "amount": 0,
@@ -66,6 +73,55 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine):
                 entry["slot"], profile_id, service_id, vaccine)
             if vaccination_id not in helper.already_sent_ids:
                 dt = dateutil.parser.parse(entry["slot"])
+                if coupled_service_id:
+                    dt_min = dt.replace(hour=0, minute=0) + \
+                        kwargs["coupled_service_min_offset"]
+                    dt_max = dt.replace(hour=0, minute=0) + \
+                        kwargs["coupled_service_max_offset"]
+                    # this service can't be booked on its own!
+                    # specifying from here is important because otherwise we only get stuff in the near future
+                    # but we might need dates in the far future because of how AZ works
+                    params = {
+                        "serviceId": coupled_service_id,
+                        "from": dt_min.isoformat(),
+                    }
+                    try:
+                        res = jameda_session.get(
+                            url,
+                            params=params,
+                        )
+                        coupled_result = res.json()
+                    except requests.exceptions.HTTPError as e:
+                        helper.warn_log(
+                            f'[Jameda] HTTP issue during API check [{str(e)}]')
+                        continue
+                    except requests.exceptions.Timeout as e:
+                        helper.warn_log(
+                            f'[Jameda] API is currently not reachable [{str(e)}]')
+                        continue
+                    except requests.exceptions.ConnectionError as e:
+                        helper.warn_log(
+                            f'[Jameda] API is currently not reachable [{str(e)}]')
+                        continue
+                    except Exception as e:
+                        helper.error_log(
+                            f'[Jameda] Error during fetch from API [{str(e)}]')
+                        continue
+                    if type(coupled_result) != list:
+                        continue
+                    # we need to check if there's any matching slots in the 2nd booking that depends on this first one
+                    matching_second = False
+                    for second in coupled_result:
+                        dt_second = dateutil.parser.parse(second["slot"])
+                        if dt_second > dt_max:
+                            continue
+                        matching_second = True
+                        break
+                    if not matching_second:
+                        # no matching second appointment = this slot is useless to us, the UI will not let us book it
+                        # let's rather let some slots go to waste because of no matching subsequent appointments than just leeting people book them on their own... wow
+                        continue
+
                 spots["amount"] += 1
                 spots["dates"].append(dt.strftime("%d.%m.%y"))
                 helper.already_sent_ids.append(vaccination_id)
@@ -190,6 +246,8 @@ def jameda_gather_locations(location):
             if suggestion["header"] == "Fachbereiche & Symptome":
                 for entry in suggestion["list"]:
                     service_selection = entry["select"]
+                    if "test" in entry["showSelect"].lower():
+                        continue
                     break
             if service_selection is not None:
                 break
@@ -230,10 +288,12 @@ def jameda_gather_locations(location):
 
         jameda_locations = []
         for entry in res.json()["results"]:
+            profile_id = entry["ref_id"]
+
             # let's ask nicely to get the service_id we need from elsewhere :)
             try:
                 service_res = jameda_session.get(
-                    f"https://booking-service.jameda.de/public/resources/{entry['ref_id']}/services"
+                    f"https://booking-service.jameda.de/public/resources/{profile_id}/services"
                 )
                 service_result = service_res.json()
             except requests.exceptions.HTTPError as e:
@@ -254,10 +314,20 @@ def jameda_gather_locations(location):
                 # {'code': 404, 'message': 'Calendar Api: 404 is returned for request GET:/public/resources/81421339/services', 'originalError': {'status': 404, 'data': {'code': 404, 'message': 'The specified refId (81421339) does not have OTB available.'}}}
                 continue
 
+            couplings = []
             vaccines = []
             for service in service_result:
+                service_id = service["id"]
+                if service_id in couplings:
+                    # this is not a service we can book on our own, it depends on us having booked another service first
+                    continue
+
                 title = service["title"].lower()
-                if "corona" in title and not "antikörper" in title and not "test" in title and not "beratung" in title and not "nur" in title:
+                if "corona" in title and not "antikörper" in title and \
+                        not "test" in title and not "beratung" in title and \
+                        not "nur" in title and not "außer" in title and \
+                        not "zweitimpfung" in title and not "test" in title and \
+                        not "impfberatung" in title:
                     if "johnson" in title:
                         vaccine = "Johnson & Johnson"
                     elif "astra" in title:
@@ -271,22 +341,38 @@ def jameda_gather_locations(location):
                         helper.warn_log(
                             f'[Jameda] Unknown vaccination for URL https://www.jameda.de/profil/{entry["ref_id"]}/ ({vaccine})')
                         continue
-                    if "zweitimpfung" in title:
-                        continue
+
+                    location = {
+                        "profile_id": profile_id,
+                        "location": f"{entry['plz']} {entry['ort']}",
+                        "service_id": service_id,
+                    }
+                    if "followingCouplingLinks" in service:
+                        # this service has a dependency to another service, i.e. Erstimpfung and Zweitimpfung coupled into one booking process
+                        # we won't be able to book a Zweitimpfung on its own
+                        # and we can't book the Erstimpfung without booking a Zweitimpfung, which has its own availability and logic for how much time must've passed between the slots
+                        for coupling in service["followingCouplingLinks"]:
+                            location.update(
+                                {
+                                    "coupled_service_id": coupling["serviceId"],
+                                    "coupled_service_min_offset": timedelta(
+                                        hours=coupling["minIntervalToPrevious"]
+                                    ),
+                                    "coupled_service_max_offset": timedelta(
+                                        hours=coupling["maxIntervalToPrevious"]
+                                    ),
+                                }
+                            )
+                            couplings.append(coupling["serviceId"])
+                    location["vaccine"] = vaccine
+
                     if vaccine in vaccines:
                         # some locations have overlapping vaccinations they offer
                         # e.g. https://www.jameda.de/profil/80085713/ has 2x Zweitimpfung and 1x Erstimpfung on the API *shrug
                         continue
                     if service["insuranceType"] != 'STATUTORY_AND_PRIVATE':
                         continue
-                    jameda_locations.append(
-                        {
-                            "profile_id": entry["ref_id"],
-                            "location": f"{entry['plz']} {entry['ort']}",
-                            "service_id": service["id"],
-                            "vaccine": vaccine,
-                        }
-                    )
+                    jameda_locations.append(location)
                     helper.info_log(
                         f'Jameda Clinic {entry["name_kurz"]} at {entry["plz"]} {entry["ort"]} added!')
 
