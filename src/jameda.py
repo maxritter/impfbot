@@ -257,7 +257,7 @@ def jameda_gather_locations(location):
             vaccines = []
             for service in service_result:
                 title = service["title"].lower()
-                if "corona" in title and not "antikörper" in title and not "test" in title and not "beratung" in title:
+                if "corona" in title and not "antikörper" in title and not "test" in title and not "beratung" in title and not "nur" in title:
                     if "johnson" in title:
                         vaccine = "Johnson & Johnson"
                     elif "astra" in title:
