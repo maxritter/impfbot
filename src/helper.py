@@ -61,7 +61,8 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'ke': {'all_id': -1001240810276, 'mrna_id': -1, 'vec_id': -1, 'lat': 47.7267, 'lng': 10.31688, 'address': '87439 Kempten (Allgaeu) Kempten', 'city': 'Kempten'},
         'ul': {'all_id': -1001346082516, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.40137, 'lng': 9.99204, 'address': '89073 Ulm Mitte', 'city': 'Ulm'},
         'dui': {'all_id': -1001481729705, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.43501, 'lng': 6.76115, 'address': '47051 Duisburg Altstadt', 'city': 'Duisburg'},
-        'ms': {'all_id': -1001427604433, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.9622, 'lng': 7.62719, 'address': '48143 Muenster Centrum', 'city': 'Münster'}
+        'ms': {'all_id': -1001427604433, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.9622, 'lng': 7.62719, 'address': '48143 Muenster Centrum', 'city': 'Münster'},
+        'bn': {'all_id': -1001391425907, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.72194, 'lng': 7.08833, 'address': '53115 Bonn Poppelsdorf', 'city': 'Bonn'}
         }
 
 
