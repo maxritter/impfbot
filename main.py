@@ -24,7 +24,7 @@ def main(args=None):
     while True:
         try:
             # For Munich, we have additional APIs to check
-            if city == 'muc4':
+            if city == 'muc6':
                 zollsoft_check(city)
                 samedi_check(city)                
 
