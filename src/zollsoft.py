@@ -82,6 +82,7 @@ def zollsoft_check(city):
             if nb_availabilities > 0:
                 vaccination_counter = 0
                 for entry in result["termine"]:
+                    _, _, _, _, location, _, _, _, _, _ = entry
                     if "2. Corona-Impfung" not in location or "biontech" in location.lower():
                         vaccination_counter = vaccination_counter + 1
                 if vaccination_counter < 5:
