@@ -82,7 +82,7 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
         "practice_ids": practice_ids,
         "insurance_sector": "public",
         "destroy_temporary": "true",
-        "limit": 14
+        "limit": 21
     }
 
     try:
