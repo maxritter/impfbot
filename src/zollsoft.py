@@ -14,7 +14,8 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     message = message + \
         f'für {vaccine_name} in München. Wählbare Tage: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}\n'
-    message_long = message_long + 'Falls auf der Seite nur "2. Impfung mit AstraZeneca" angezeigt wird sind die Termine zur Erstimpfung mit J&J oder Astra schon wieder ausgebucht'
+    if "bd763" in booking_url:
+        message_long = message_long + 'Falls auf der Seite nur "2. Impfung mit AstraZeneca" angezeigt wird sind die Termine zur Erstimpfung mit J&J oder Astra schon wieder ausgebucht'
 
     # Print message out on server
     helper.info_log(message)
@@ -65,20 +66,26 @@ def zollsoft_check(city):
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
                     f'[Zollsoft] HTTP issue during fetching data [{str(e)}]')
-                return
+                continue
             except requests.exceptions.Timeout as e:
                 helper.warn_log(
                     f'[Zollsoft] API is currently not reachable [{str(e)}]')
-                return
+                continue
             except Exception as e:
                 helper.error_log(
                     f'[Zollsoft] Error during fetch from API [{str(e)}]')
-                return
+                continue
 
             result = res.json()
             nb_availabilities = len(result["termine"])
 
-            if nb_availabilities >= 5:
+            if nb_availabilities > 0:
+                vaccination_counter = 0
+                for entry in result["termine"]:
+                    if vaccination_id not in helper.already_sent_ids and ("2. Corona-Impfung" not in location or "biontech" in location.lower()):
+                        vaccination_counter = vaccination_counter + 1
+                if vaccination_counter < 5:
+                    continue
                 # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
                 biontech_dates = []
                 biontech_counter = 0
