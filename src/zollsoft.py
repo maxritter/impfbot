@@ -37,7 +37,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
 
 def zollsoft_check(city):
     try:
-        unique_ids = ["6087dd08bd763", "607feb7a343fb"]
+        unique_ids = ["6087dd08bd763", "607feb7a343fb", "600af8a904bee"]
         for unique_id in unique_ids:
             booking_url = "https://onlinetermine.zollsoft.de/patientenTermine.php?uniqueident={}".format(
                 unique_id)
@@ -113,7 +113,7 @@ def zollsoft_check(city):
                             biontech_second_counter = biontech_second_counter + 1
                             biontech_second_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
-                        elif "astrazeneca" in location.lower():
+                        elif "astrazeneca" in location.lower() or "impfungen" in location.lower():
                             astra_counter = astra_counter + 1
                             astra_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
