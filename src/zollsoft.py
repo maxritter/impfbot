@@ -85,7 +85,7 @@ def zollsoft_check(city):
                     _, _, _, _, location, _, _, _, _, _ = entry
                     if "2. Corona-Impfung" not in location or "biontech" in location.lower():
                         vaccination_counter = vaccination_counter + 1
-                if vaccination_counter < 5:
+                if vaccination_counter <= 1:
                     continue
                 # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
                 biontech_dates = []
