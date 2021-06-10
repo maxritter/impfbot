@@ -12,7 +12,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
         message = f'{slot_counter} freie Impftermine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {vaccine_name} in München. Wählbare Tage: {vaccine_dates_str}.'
+        f'für {vaccine_name}. Wählbare Tage: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}\n'
     if "bd763" in booking_url:
         message_long = message_long + 'Falls auf der Seite nur "2. Impfung mit AstraZeneca" angezeigt wird sind die Termine zur Erstimpfung mit J&J oder Astra schon wieder ausgebucht'

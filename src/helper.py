@@ -119,6 +119,7 @@ def is_helios_enabled(city):
 def is_jameda_enabled(city):
     return conf[city]['city'] != ''
 
+
 def send_pushed_msg(msg, url):
     if is_local():
         return
@@ -178,16 +179,17 @@ def send_daily_stats(city):
     vaccinations_all = database.get_vaccinations_last_day(city)
     if not vaccinations_all:
         return
-    msg = f"💉💉💉 TÄGLICHE STATISTIK FÜR {city_name.upper()} AM {datetime.datetime.today().strftime('%d.%m.%Y')} 💉💉💉\n\n"
+    msg = f"💉 TÄGLICHE STATISTIK {datetime.datetime.today().strftime('%d.%m.%Y')} 💉\n\n"
+    msg = msg + f"Der Bot hat für euch in {city_name} in den letzten 24h "
     msg = msg + \
-        f"{vaccinations_all} Impftermine in den letzten 24h:\n"
+        f"insgesamt {vaccinations_all} Impftermine gefunden, darunter\n"
 
     vaccinations_astra = database.get_vaccinations_last_day(
         city, 'AstraZeneca')
     if vaccinations_astra:
         astra_perc = (vaccinations_astra / (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_astra} ({str(round(astra_perc, 1)).replace('.', ',')}%) Impftermine mit AstraZeneca 🇸🇪\n"
+            f"{vaccinations_astra} ({str(round(astra_perc, 1)).replace('.', ',')}%) Impftermin(e) mit AstraZeneca 🇬🇧\n"
 
     vaccinations_biontech = database.get_vaccinations_last_day(
         city, 'BioNTech')
@@ -195,21 +197,21 @@ def send_daily_stats(city):
         biontech_perc = (vaccinations_biontech /
                          (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_biontech} ({str(round(biontech_perc, 1)).replace('.', ',')}%) Impftermine mit BioNTech 🇩🇪\n"
+            f"{vaccinations_biontech} ({str(round(biontech_perc, 1)).replace('.', ',')}%) Impftermin(e) mit BioNTech 🇩🇪\n"
 
     vaccinations_johnson = database.get_vaccinations_last_day(city, 'Johnson')
     if vaccinations_johnson:
         johnson_perc = (vaccinations_johnson /
                         (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_johnson} ({str(round(johnson_perc, 1)).replace('.', ',')}%) Impftermine mit Johnson & Johnson 🇺🇸\n"
+            f"{vaccinations_johnson} ({str(round(johnson_perc, 1)).replace('.', ',')}%) Impftermin(e) mit Johnson & Johnson 🇧🇪\n"
 
     vaccinations_moderna = database.get_vaccinations_last_day(city, 'Moderna')
     if vaccinations_moderna:
         moderna_perc = (vaccinations_moderna /
                         (vaccinations_all * 1.0)) * 100.0
         msg = msg + \
-            f"{vaccinations_moderna} ({str(round(moderna_perc, 1)).replace('.', ',')}%) Impftermine mit Moderna 🇺🇸\n"
+            f"{vaccinations_moderna} ({str(round(moderna_perc, 1)).replace('.', ',')}%) Impftermin(e) mit Moderna 🇺🇸\n"
 
     vaccinations_yesterday = database.get_vaccinations_previous_day(city)
     if vaccinations_yesterday:
@@ -225,7 +227,7 @@ def send_daily_stats(city):
             perc = str(round((vaccinations_yesterday /
                               (vaccinations_all * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
         msg = msg + \
-            f"\nDas sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}"
+            f"Das sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}"
 
     vaccinations_last_week = database.get_vaccinations_previous_week(city)
     if vaccinations_last_week:
@@ -243,21 +245,26 @@ def send_daily_stats(city):
         msg = msg + \
             f" und {diff} Impftermine ({perc}%) {comp} als vor einer Woche {symbol}"
 
+    msg = msg + f"\n\nHier findet ihr die Live-Statistik über alle von den Bots gefundenen Impftermine pro Tag, Stadt und Typ 📊:"
+    msg = msg + "https://bit.ly/2ShKt41"
+
     impfstatus_data = impfstatus_get_current_data(
         "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv")
     bar_erst = impfstatus_generate_progressbar(
         float(impfstatus_data.get('impf_quote_erst')))
     bar_voll = impfstatus_generate_progressbar(
         float(impfstatus_data.get('impf_quote_voll')))
-    msg = msg + '\n\n{} mind. eine Impfdosis in 🇩🇪\n{} vollständig Geimpfte in 🇩🇪'.format(
-        bar_erst, bar_voll)
+    msg = msg + f"\n\nDie Impfstatistik für ganz Deutschland 🇩🇪:\n"
+    msg = msg + f"{bar_erst} haben mindestens eine Impfdosis\n"
+    msg = msg + f"{bar_voll} sind bereits vollständig geimpft\n\n"
 
-    msg = msg + "\n\nIch arbeite an diesem Projekt in meiner freien Zeit, "
+    msg = msg + "Ich arbeite an diesem Projekt in meiner freien Zeit, "
     msg = msg + "über eine kleine Spende würde ich mich sehr freuen ❤️\n"
     msg = msg + "Das Projekt unterstützen: https://ko-fi.com/maxritter. Vielen Dank 🙏"
 
     # Send to Telegram channels
-    channel_ids = [conf[city]['all_id'], conf[city]['mrna_id'], conf[city]['vec_id']]
+    channel_ids = [conf[city]['all_id'], conf[city]
+                   ['mrna_id'], conf[city]['vec_id']]
     for channel_id in channel_ids:
         if channel_id is not None and channel_id != -1:
             try:
