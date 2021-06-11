@@ -328,7 +328,7 @@ def jameda_gather_locations(location):
                         not "nur" in title and not "außer" in title and \
                         not "zweitimpfung" in title and not "test" in title and \
                         not "impfberatung" in title:
-                    if "johnson" in title:
+                    if "johnson" in title or "janssen" in title:
                         vaccine = "Johnson & Johnson"
                     elif "astra" in title:
                         vaccine = "AstraZeneca"

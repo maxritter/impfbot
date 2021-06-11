@@ -1,5 +1,6 @@
 
 import sys
+import time
 import schedule
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
@@ -21,12 +22,13 @@ def main(args=None):
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')
+    start = time.time()
     while True:
         try:
             # For Munich, we have additional APIs to check
             if city == 'muc6':
                 zollsoft_check(city)
-                samedi_check(city)                
+                samedi_check(city)
 
             # Check Helios clinics
             if helper.is_helios_enabled(city):
@@ -41,6 +43,11 @@ def main(args=None):
 
             # Check if we need to send out our daily stats
             schedule.run_pending()
+
+            # Print out elapsed time
+            end = time.time()
+            helper.info_log(f"Round time: {round(end-start)} seconds")
+            start = time.time()
 
         except Exception as e:
             helper.error_log(f'[General] Main loop error [{str(e)}]')

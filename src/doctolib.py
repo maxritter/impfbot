@@ -1,5 +1,6 @@
 import requests
 import json
+import urllib
 import datetime
 import threading
 from src import helper, database
@@ -26,10 +27,11 @@ def doctolib_init(city):
     doctolib_urls = [doctolib_url.strip() for doctolib_url in doctolib_urls]
 
 
-def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_days):
+def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities):
     # Extract some information
     visit_motive_name = visit_motive['name'].lower()
     visit_motive_id = visit_motive['id']
+    speciality_id = visit_motive['speciality_id']
     visit_motive_covid_vaccination = False
     try:
         visit_motive_covid_vaccination = visit_motive['first_shot_motive']
@@ -38,22 +40,20 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
 
     # Check if this is a Covid vaccination
     if (visit_motive_covid_vaccination or
-        "erste impfung" in visit_motive_name or
-        "erstimpfung" in visit_motive_name or
-        "einzelimpfung" in visit_motive_name) and \
-        (("biontech" in visit_motive_name) or
-            ("astrazeneca" in visit_motive_name and not "zweit" in visit_motive_name) or
-            ("moderna" in visit_motive_name and not "zweit" in visit_motive_name) or
-            ("johnson" in visit_motive_name and not "zweit" in visit_motive_name) or
-            ("janssen" in visit_motive_name and not "zweit" in visit_motive_name)):
+        "impfung" in visit_motive_name) and \
+        (("bion" in visit_motive_name) or
+            ("astra" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
+            ("modern" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
+            ("johnson" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
+            ("janssen" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name)):
 
-        if "biontech" in visit_motive_name and not "zweit" in visit_motive_name:
+        if "bion" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name:
             vaccine_names.append("BioNTech")
-        elif "biontech" in visit_motive_name and "zweit" in visit_motive_name:
+        elif "bion" in visit_motive_name and ("zweit" in visit_motive_name or "2." in visit_motive_name):
             vaccine_names.append("BioNTech (2. Impfung)")
-        elif "astrazeneca" in visit_motive_name:
+        elif "astra" in visit_motive_name:
             vaccine_names.append("AstraZeneca")
-        elif "moderna" in visit_motive_name:
+        elif "modern" in visit_motive_name:
             vaccine_names.append("Moderna")
         elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
             vaccine_names.append("Johnson & Johnson")
@@ -62,6 +62,7 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
                 f'[Doctolib] Unknown vaccination: {visit_motive_name}')
 
         vaccine_ids.append(visit_motive_id)
+        vaccine_specialities.append(speciality_id)
 
         visit_motive_day = 0
         try:
@@ -79,10 +80,10 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
         "start_date": start_date,
         "visit_motive_ids": visit_motive_ids,
         "agenda_ids": agenda_ids,
-        "practice_ids": practice_ids,
         "insurance_sector": "public",
+        "practice_ids": practice_ids,
         "destroy_temporary": "true",
-        "limit": 21
+        "limit": 14
     }
 
     try:
@@ -108,7 +109,7 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
     return response.json()
 
 
-def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids):
+def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality):
     if slot_counter == 1:
         message = f'{slot_counter} freier Impftermin '
     else:
@@ -124,8 +125,7 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     message = message + \
         f". Wählbare Tage: {verbose_dates}."
     message_long = message + \
-        " Hier buchen: {}?pid=practice-{}".format(doctolib_url,
-                                                  practice_ids)
+        f" Hier buchen: {doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any"
 
     # Print message out on server
     helper.info_log(message)
@@ -135,7 +135,7 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
         main_city = ''.join((x for x in city if not x.isdigit())).upper()
         if main_city == 'MUC':
             helper.send_pushed_msg(
-                message, f'{doctolib_url}?pid=practice-{practice_ids}')
+                message, f'{doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any')
             t_all = threading.Thread(
                 target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
             t_all.start()
@@ -185,6 +185,7 @@ def doctolib_check(city):
             # Determine Vaccine
             vaccine_names = []
             vaccine_ids = []
+            vaccine_specialities = []
             vaccine_days = []
             for visit_motive in visit_motives:
                 # If new patients are not allowed, we can not take this one
@@ -196,7 +197,7 @@ def doctolib_check(city):
 
                 # Get information about name, ID and days
                 doctolib_determine_vaccines(
-                    visit_motive, vaccine_names, vaccine_ids, vaccine_days)
+                    visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities)
             if len(vaccine_ids) == 0 or len(vaccine_names) == 0:
                 continue
 
@@ -261,8 +262,9 @@ def doctolib_check(city):
                     # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
                     vaccine_day = vaccine_days[vaccine_counter]
+                    vaccine_speciality = vaccine_specialities[vaccine_counter]
                     doctolib_send_message(
-                        city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, practice_ids)
+                        city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality)
 
                     # Add to database
                     database.insert_vaccination(
