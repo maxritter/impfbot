@@ -249,7 +249,8 @@ def doctolib_check(city):
                                 visit_motive_ids, agenda_ids, practice_ids, date_str)
 
                             # If appointment has not been sent out already
-                            if vaccination_id not in helper.already_sent_ids:
+                            main_city = ''.join((x for x in city if not x.isdigit())).upper()
+                            if vaccination_id not in helper.already_sent_ids or main_city == 'MUC':
                                 d = datetime.datetime.strptime(
                                     availability.get("date"), '%Y-%m-%d')
                                 available_dates.append(
