@@ -241,16 +241,11 @@ def doctolib_check(city):
                     for availability in response_json["availabilities"]:
                         # Parse all available slots
                         for slot in availability["slots"]:
-                            try:
-                                date_str = slot["start_date"]
-                            except Exception:
-                                continue
                             vaccination_id = "{}.{}.{}.{}".format(
-                                visit_motive_ids, agenda_ids, practice_ids, date_str)
+                                visit_motive_ids, agenda_ids, practice_ids, slot)
 
                             # If appointment has not been sent out already
-                            main_city = ''.join((x for x in city if not x.isdigit())).upper()
-                            if vaccination_id not in helper.already_sent_ids or main_city == 'MUC':
+                            if vaccination_id not in helper.already_sent_ids:
                                 d = datetime.datetime.strptime(
                                     availability.get("date"), '%Y-%m-%d')
                                 available_dates.append(
