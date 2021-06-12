@@ -20,7 +20,6 @@ https://www.doctolib.de/allgemeinmedizin/rosenkavalierplatz-17-81925-muenchen/bo
 https://www.doctolib.de/praxis/muenchen/dr-med-weier-praxis-am-goetheplatz
 https://www.doctolib.de/allgemeinmedizin/muenchen/katharina-teubner
 https://www.doctolib.de/allgemeinmedizin/muenchen/sabine-kohlmann
-https://www.doctolib.de/praxis/muenchen/hausaerzte-in-giesing
 https://www.doctolib.de/innere-und-allgemeinmediziner/goetheplatz/martin-liebau
 https://www.doctolib.de/internist/muenchen/senel-gobmeier-kilinc
 https://www.doctolib.de/allgemeinmedizin/muenchen/marcus-mussner
@@ -87,10 +86,6 @@ https://www.doctolib.de/allgemeinmedizin/groebenzell/peter-frank
 https://www.doctolib.de/allgemeinmedizin/groebenzell/ewa-wicherek-groebenzell
 https://www.doctolib.de/gemeinschaftspraxis/poing/ocv
 https://www.doctolib.de/orthopadie/muenchen/leonhard-keil
-https://www.doctolib.de/kardiologie/muenchen/benedikt-bunz
-https://www.doctolib.de/praxis/muenchen/kardiologie-am-promenadeplatz
-https://www.doctolib.de/einzelpraxis/muenchen/hno-praxis-dr-pere-paul
-https://www.doctolib.de/gemeinschaftspraxis/muenchen/hausarzt
 https://www.doctolib.de/innere-und-allgemeinmediziner/muenchen/hannah-bonhag-muenchen
 https://www.doctolib.de/innere-und-allgemeinmediziner/muenchen/marcel-lee
 https://www.doctolib.de/internist/muenchen/werner-becker-muenchen

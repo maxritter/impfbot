@@ -1,11 +1,9 @@
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/cutaris
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/kinder-und-jugendarztpraxis-philipp-schoof-und-dr-arnd-mueller
-https://www.doctolib.de/gemeinschaftspraxis/muenchen/urologie-elisenhof-muenchen
 https://www.doctolib.de/gemeinschaftspraxis/pullach-im-isartal/gemeinschaftspraxen-dr-scharpf-dr-burkhardt-dr-gengenbach-dr-koehne
 https://www.doctolib.de/gemeinschaftspraxis/ottobrunn/orthopaedische-praxis-orthobrunn-ottobrunn
 https://www.doctolib.de/gemeinschaftspraxis/bayern/dr-rinecker-allgemeinmedizinisches-zentrum
 https://www.doctolib.de/gemeinschaftspraxis/dachau/radiologie-dachau
-https://www.doctolib.de/gemeinschaftspraxis/karlsfeld/allgemeinaerzte-im-gesundheitszentrum-karlsfeld
 https://www.doctolib.de/gemeinschaftspraxis/germering/hautarztpraxis-dr-jung
 https://www.doctolib.de/gemeinschaftspraxis/freising/kinderarztpraxis-kinderlachen
 https://www.doctolib.de/allgemeinmedizin/muenchen/barbara-eder
@@ -47,7 +45,6 @@ https://www.doctolib.de/allgemeinmedizin/muenchen/helene-auer
 https://www.doctolib.de/allgemeinmedizin/muenchen/rainer-musselmann
 https://www.doctolib.de/allgemeinmedizin/muenchen/alexandra-reinboth
 https://www.doctolib.de/internist/muenchen/doerte-bertram
-https://www.doctolib.de/orthopadie/muenchen/torben-mueller
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/hausaerzte-johanneskirchen
 https://www.doctolib.de/allgemeinmedizin/muenchen/ulrike-zahn
 https://www.doctolib.de/internist/muenchen/florian-krone
@@ -61,7 +58,6 @@ https://www.doctolib.de/allgemeinmedizin/muenchen/gross-philipp
 https://www.doctolib.de/weiterbildungsassistent/muenchen/johannes-dorr
 https://www.doctolib.de/innere-und-allgemeinmediziner/muenchen/ula-simons
 https://www.doctolib.de/allgemeinmedizin/muenchen/karin-redlich
-https://www.doctolib.de/praktischer-arzt/muenchen/ameli-weber
 https://www.doctolib.de/allgemeinmedizin/muenchen/yannik-riffeser
 https://www.doctolib.de/allgemeinmedizin/muenchen/christian-putzke
 https://www.doctolib.de/allgemeinmedizin/muenchen/marijan-miljak
@@ -71,7 +67,6 @@ https://www.doctolib.de/allgemeinmedizin/muenchen/nikolaus-sonnweber
 https://www.doctolib.de/internist/muenchen/falko-bengen
 https://www.doctolib.de/internist/muenchen/jutta-eckstein
 https://www.doctolib.de/allgemeinmedizin/muenchen/isabel-dr-baenisch
-https://www.doctolib.de/praxis/muenchen/hausarztpraxis-dr-grassl
 https://www.doctolib.de/allgemeinmedizin/muenchen/sieglinde-wrubel
 https://www.doctolib.de/allgemeinmedizin/muenchen/veronika-liebich
 https://www.doctolib.de/allgemeinmedizin/muenchen/claus-juergen-black
@@ -80,7 +75,6 @@ https://www.doctolib.de/allgemeinmedizin/muenchen/andreas-seitz
 https://www.doctolib.de/praxis/muenchen/hausaerzte-heuhausen-dr-braune-dr-hundhausen
 https://www.doctolib.de/allgemeinmedizin/muenchen/julia-fernbacher
 https://www.doctolib.de/internist/muenchen/marion-poettinger
-https://www.doctolib.de/praxis/muenchen/praxis-fuer-allgemein-medizin-dr-goldbrunner-dr-tissen
 https://www.doctolib.de/internist/muenchen/martin-von-wachter
 https://www.doctolib.de/weiterbildungsassistent/muenchen/robert-phillip-koselik
 https://www.doctolib.de/chirurg/muenchen/frau-dr-von-gemmingen

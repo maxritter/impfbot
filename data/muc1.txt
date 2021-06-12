@@ -29,7 +29,6 @@ https://www.doctolib.de/internist/muenchen/markus-trissler
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/muenchen/johanna-harris
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/muenchen/antonia-gavazzeni
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/muenchen/alexander-bernhart
-https://www.doctolib.de/praxis/muenchen/hausarztpraxis-dr-med-markus-von-specht
 https://www.doctolib.de/frauenarzt/muenchen/bettina-brunner
 https://www.doctolib.de/nephrologe/muenchen/ilina-murgan
 https://www.doctolib.de/frauenarzt/muenchen/silke-pritzer
@@ -96,7 +95,6 @@ https://www.doctolib.de/gemeinschaftspraxis/muenchen/hno-praxis-prof-dr-holtmann
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/kinderarztpraxis-muenchen-nord-rosam-wintermeyer
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/zooom-dr-med-erdeljac-priv-doz-dr-med-bartl
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/orthopaedisches-praxiszentrum-dr-neumeier-dr-keyl-dr-baurmann
-https://www.doctolib.de/gemeinschaftspraxis/muenchen/gemeinschaftspraxis-dr-med-ulrike-alcock-dr-med-caroline-bogner
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/gastroenterologie-am-stachus
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/gastroenterologie-im-josephinum
 https://www.doctolib.de/gemeinschaftspraxis/muenchen/gyn-schwabing

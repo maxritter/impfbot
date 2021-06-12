@@ -18,7 +18,6 @@ https://www.doctolib.de/frauenarzt/muenchen/ariadne-kritikos
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/muenchen/anna-maria-iarrapino-demmel
 https://www.doctolib.de/kinderheilkunde-kinder-und-jugendmedizin/muenchen/nathalie-frank
 https://www.doctolib.de/frauenarzt/muenchen/alexandra-kurvin
-https://www.doctolib.de/praxis/muenchen/praxis-dr-pfizenmayer
 https://www.doctolib.de/frauenarzt/muenchen/udo-hesse
 https://www.doctolib.de/arzt/muenchen/susanne-wriedt
 https://www.doctolib.de/frauenarzt/muenchen/brita-von-holle
@@ -52,11 +51,9 @@ https://www.doctolib.de/praxis/miesbach/dr-med-dirk-leutheuser-dr-med-judith-leu
 https://www.doctolib.de/praxis/diessen-am-ammersee/kinderarztpraxis-dr-kirsten-wenner
 https://www.doctolib.de/einzelpraxis/tutzing/indlekofer-birgit
 https://www.doctolib.de/gemeinschaftspraxis/ebersberg/zos
-https://www.doctolib.de/gemeinschaftspraxis/holzkirchen/hno-holzkirchen
 https://www.doctolib.de/gemeinschaftspraxis/starnberg/ofz-orthopaedisches-fachzentrum
 https://www.doctolib.de/gemeinschaftspraxis/aichach/gemeinschaftspraxis-dr-wengert-andersson
 https://www.doctolib.de/gemeinschaftspraxis/weilheim-in-oberbayern/augen-op-und-laserzentrum-weilheim-gmbh
-https://www.doctolib.de/gemeinschaftspraxis/aichach/aerzte-aichach
 https://www.doctolib.de/medizinisches-versorgungszentrum-mvz/muenchen/augenaerzte-pasing
 https://www.doctolib.de/medizinisches-versorgungszentrum-mvz/muenchen/neurozentrum-harlaching-nymphenburg
 https://www.doctolib.de/medizinisches-versorgungszentrum-mvz/muenchen/medicover-muenchen-ost
