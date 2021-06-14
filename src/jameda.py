@@ -144,7 +144,7 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
             # Print message out on server
             helper.info_log(message)
 
-           # Send message to telegram channels for the specific city
+           # Send message to telegram channels for the specific city and add to DB
             if vaccine == 'BioNTech' or vaccine == 'Moderna':
                 main_city = ''.join(
                     (x for x in city if not x.isdigit())).upper()
@@ -158,13 +158,13 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                 else:
                     helper.send_channel_msg(city, 'mrna', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
+                database.insert_vaccination(
+                    vaccine, spots["amount"], city, "jameda")
             elif vaccine == 'AstraZeneca' or vaccine == 'Johnson & Johnson':
                 helper.send_channel_msg(city, 'vec', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-
-            # Add to database
-            database.insert_vaccination(
-                vaccine, spots["amount"], city, "jameda")
+                database.insert_vaccination(
+                    vaccine, spots["amount"], city, "jameda")
 
     except Exception as e:
         helper.error_log(f'[Jameda] General error during check [{str(e)}]')
