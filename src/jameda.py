@@ -53,8 +53,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         if type(result) != list:
@@ -104,8 +104,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                             f'[Jameda] API is currently not reachable [{str(e)}]')
                         continue
                     except Exception as e:
-                        helper.error_log(
-                            f'[Jameda] Error during fetch from API [{str(e)}]')
+                        helper.warn_log(
+                            f'[Jameda] During fetch from API [{str(e)}]')
                         continue
                     if type(coupled_result) != list:
                         continue
@@ -199,8 +199,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         location_selection = None
@@ -236,8 +236,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         service_selection = None
@@ -281,8 +281,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         jameda_locations = []
@@ -304,8 +304,8 @@ def jameda_gather_locations(location):
                     f'[Jameda] API is currently not reachable [{str(e)}]')
                 return
             except Exception as e:
-                helper.error_log(
-                    f'[Jameda] Error during fetch from API [{str(e)}]')
+                helper.warn_log(
+                    f'[Jameda] During fetch from API [{str(e)}]')
                 return
 
             if type(service_result) != list:
