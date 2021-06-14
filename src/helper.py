@@ -16,7 +16,6 @@ from src import database, helios, doctolib, jameda
 
 # Global variables
 api_timeout_seconds = 10
-delayed_message_seconds = 0
 local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
@@ -118,34 +117,6 @@ def is_helios_enabled(city):
 
 def is_jameda_enabled(city):
     return conf[city]['city'] != ''
-
-
-def send_pushed_msg(msg, url):
-    if is_local():
-        return
-
-    payload = {
-        "app_key": "TtazyVM75BQPGTNH2bmv",
-        "app_secret": "ucUuJZ93BDgWYH8gLGEgZTHOM1ncxKw9cKEhyThKX8KOYVwCTz7RxwmvCj6RRwS6",
-        "target_type": "channel",
-        "target_alias": "ddwlGz",
-        "content_type": "url",
-        "content_extra": url,
-        "content": msg
-    }
-
-    try:
-        res = requests.post("https://api.pushed.co/1/push", data=payload)
-        res.raise_for_status()
-    except Exception as e:
-        warn_log(
-            f'[Pushed] Issue during sending of message [{str(e)}]')
-        return
-
-
-def delayed_send_channel_msg(city, type, msg):
-    time.sleep(delayed_message_seconds)
-    send_channel_msg(city, type, msg)
 
 
 def impfstatus_generate_progressbar(percentage):

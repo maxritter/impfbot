@@ -134,13 +134,11 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
         main_city = ''.join((x for x in city if not x.isdigit())).upper()
         if main_city == 'MUC':
-            helper.send_pushed_msg(
-                message, f'{doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any')
             t_all = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                target=helper.send_channel_msg, args=(city, 'all', message_long))
             t_all.start()
             t_mrna = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+                target=helper.send_channel_msg, args=(city, 'mrna', message_long))
             t_mrna.start()
         else:
             helper.send_channel_msg(city, 'mrna', message_long)

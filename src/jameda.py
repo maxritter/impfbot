@@ -149,12 +149,11 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                 main_city = ''.join(
                     (x for x in city if not x.isdigit())).upper()
                 if main_city == 'MUC':
-                    helper.send_pushed_msg(message, booking_url)
                     t_all = threading.Thread(
-                        target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+                        target=helper.send_channel_msg, args=(city, 'all', message_long))
                     t_all.start()
                     t_mrna = threading.Thread(
-                        target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+                        target=helper.send_channel_msg, args=(city, 'mrna', message_long))
                     t_mrna.start()
                 else:
                     helper.send_channel_msg(city, 'mrna', message_long)
