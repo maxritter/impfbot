@@ -27,7 +27,7 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'muc4': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
         'muc5': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
         'muc6': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': 48.13836, 'lng': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel', 'city': 'München'},
-        'nue': {'all_id': -1001159218767, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.4514, 'lng': 11.07471, 'address': '90402 Nuernberg Lorenz', 'city': 'Nürnberg'},
+        'nue': {'all_id': -1001159218767, 'mrna_id': -1001446237946, 'vec_id': -1001181035310, 'lat': 49.4514, 'lng': 11.07471, 'address': '90402 Nuernberg Lorenz', 'city': 'Nürnberg'},
         'str1': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': 48.7767, 'lng': 9.18015, 'address': '70173 Stuttgart Mitte', 'city': 'Stuttgart'},
         'str2': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
         'agb': {'all_id': -1001432733051, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.36989, 'lng': 10.90017, 'address': '86150 Augsburg Innenstadt', 'city': 'Augsburg'},
