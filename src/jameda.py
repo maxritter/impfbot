@@ -1,7 +1,6 @@
 import dateutil.parser
 import requests
 import urllib.parse
-import threading
 from src import helper, database
 from datetime import timedelta
 
@@ -53,8 +52,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         if type(result) != list:
@@ -104,8 +103,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
                             f'[Jameda] API is currently not reachable [{str(e)}]')
                         continue
                     except Exception as e:
-                        helper.error_log(
-                            f'[Jameda] Error during fetch from API [{str(e)}]')
+                        helper.warn_log(
+                            f'[Jameda] During fetch from API [{str(e)}]')
                         continue
                     if type(coupled_result) != list:
                         continue
@@ -144,28 +143,17 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
             # Print message out on server
             helper.info_log(message)
 
-           # Send message to telegram channels for the specific city
+           # Send message to telegram channels for the specific city and add to DB
             if vaccine == 'BioNTech' or vaccine == 'Moderna':
-                main_city = ''.join(
-                    (x for x in city if not x.isdigit())).upper()
-                if main_city == 'MUC':
-                    helper.send_pushed_msg(message, booking_url)
-                    t_all = threading.Thread(
-                        target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-                    t_all.start()
-                    t_mrna = threading.Thread(
-                        target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
-                    t_mrna.start()
-                else:
-                    helper.send_channel_msg(city, 'mrna', message_long)
-                    helper.send_channel_msg(city, 'all', message_long)
+                helper.send_channel_msg(city, 'mrna', message_long)
+                helper.send_channel_msg(city, 'all', message_long)
+                database.insert_vaccination(
+                    vaccine, spots["amount"], city, "jameda")
             elif vaccine == 'AstraZeneca' or vaccine == 'Johnson & Johnson':
                 helper.send_channel_msg(city, 'vec', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-
-            # Add to database
-            database.insert_vaccination(
-                vaccine, spots["amount"], city, "jameda")
+                database.insert_vaccination(
+                    vaccine, spots["amount"], city, "jameda")
 
     except Exception as e:
         helper.error_log(f'[Jameda] General error during check [{str(e)}]')
@@ -200,8 +188,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         location_selection = None
@@ -237,8 +225,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         service_selection = None
@@ -282,8 +270,8 @@ def jameda_gather_locations(location):
                 f'[Jameda] API is currently not reachable [{str(e)}]')
             return
         except Exception as e:
-            helper.error_log(
-                f'[Jameda] Error during fetch from API [{str(e)}]')
+            helper.warn_log(
+                f'[Jameda] During fetch from API [{str(e)}]')
             return
 
         jameda_locations = []
@@ -305,8 +293,8 @@ def jameda_gather_locations(location):
                     f'[Jameda] API is currently not reachable [{str(e)}]')
                 return
             except Exception as e:
-                helper.error_log(
-                    f'[Jameda] Error during fetch from API [{str(e)}]')
+                helper.warn_log(
+                    f'[Jameda] During fetch from API [{str(e)}]')
                 return
 
             if type(service_result) != list:

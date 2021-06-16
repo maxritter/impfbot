@@ -21,17 +21,16 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    helper.send_pushed_msg(message, booking_url)
     t_all = threading.Thread(
-        target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+        target=helper.send_channel_msg, args=(city, 'all', message_long))
     t_all.start()
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
         t_mrna = threading.Thread(
-            target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+            target=helper.send_channel_msg, args=(city, 'mrna', message_long))
         t_mrna.start()
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         t_vec = threading.Thread(
-            target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
+            target=helper.send_channel_msg, args=(city, 'vec', message_long))
         t_vec.start()
 
 

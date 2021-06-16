@@ -1,7 +1,6 @@
 import requests
 import datetime
 import arrow
-import threading
 from src import helper, database
 
 helios_session = None
@@ -251,11 +250,11 @@ def helios_check(city):
             if spots["amount"] > 0:
                 dates = ", ".join(sorted(set(spots["dates"])))
                 vaccine_name = location["purposeName"]
-                if "biontech" in vaccine_name.lower():
+                if "bion" in vaccine_name.lower():
                     vaccine_name = "BioNTech"
                 elif "astra" in vaccine_name.lower():
                     vaccine_name = "AstraZeneca"
-                elif "moderna" in vaccine_name.lower():
+                elif "modern" in vaccine_name.lower():
                     vaccine_name = "Moderna"
                 elif "johnson" in vaccine_name.lower() or "janssen" in vaccine_name.lower():
                     vaccine_name = "Johnson & Johnson"
@@ -277,28 +276,17 @@ def helios_check(city):
                 # Print message out on server
                 helper.info_log(message)
 
-                # Construct and send message
+                # Construct and send message and add to DB
                 if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
-                    main_city = ''.join(
-                        (x for x in city if not x.isdigit())).upper()
-                    if main_city == 'MUC':
-                        helper.send_pushed_msg(
-                            message, url)
-                        t_all = threading.Thread(
-                            target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-                        t_all.start()
-                        t_mrna = threading.Thread(
-                            target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
-                        t_mrna.start()
-                    else:
-                        helper.send_channel_msg(city, 'mrna', message_long)
-                        helper.send_channel_msg(city, 'all', message_long)
+                    helper.send_channel_msg(city, 'mrna', message_long)
+                    helper.send_channel_msg(city, 'all', message_long)
+                    database.insert_vaccination(
+                        vaccine_name, spots["amount"], city, "helios")
                 elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
                     helper.send_channel_msg(city, 'vec', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
-
-                # Add to database                    
-                database.insert_vaccination(vaccine_name, spots["amount"], city, "helios")
+                    database.insert_vaccination(
+                        vaccine_name, spots["amount"], city, "helios")
 
     except Exception as e:
         helper.error_log(f'[Helios] General error during check [{str(e)}]')

@@ -20,18 +20,21 @@ def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    helper.send_pushed_msg(message, booking_url)
     t_all = threading.Thread(
-        target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
+        target=helper.send_channel_msg, args=(city, 'all', message_long))
     t_all.start()
-    if vaccine_name == 'BioNTech':
+    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
         t_mrna = threading.Thread(
-            target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
+            target=helper.send_channel_msg, args=(city, 'mrna', message_long))
         t_mrna.start()
+        database.insert_vaccination(
+            vaccine_name, len(vaccine_dates), city, "samedi")
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         t_vec = threading.Thread(
-            target=helper.delayed_send_channel_msg, args=(city, 'vec', message_long))
+            target=helper.send_channel_msg, args=(city, 'vec', message_long))
         t_vec.start()
+        database.insert_vaccination(
+            vaccine_name, len(vaccine_dates), city, "samedi")
 
 
 def samedi_check(city):
@@ -111,13 +114,9 @@ def samedi_check(city):
             if len(vaccine_dates) == 0:
                 continue
 
-            # Send the message out
+            # Send the message out and add to DB
             samedi_send_message(city, len(vaccine_dates), vaccine_dates,
                                 event_names[event_counter], event_urls[event_counter])
-
-            # Add to database
-            database.insert_vaccination(
-                event_names[event_counter], len(vaccine_dates), city, "samedi")
 
     except Exception as e:
         helper.error_log(f'[Samedi] General Error [{str(e)}]')

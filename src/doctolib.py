@@ -1,8 +1,6 @@
 import requests
 import json
-import urllib
 import datetime
-import threading
 from src import helper, database
 
 
@@ -132,22 +130,17 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
 
     # Send message to telegram channels for the specific city
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
-        main_city = ''.join((x for x in city if not x.isdigit())).upper()
-        if main_city == 'MUC':
-            helper.send_pushed_msg(
-                message, f'{doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any')
-            t_all = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'all', message_long))
-            t_all.start()
-            t_mrna = threading.Thread(
-                target=helper.delayed_send_channel_msg, args=(city, 'mrna', message_long))
-            t_mrna.start()
-        else:
-            helper.send_channel_msg(city, 'mrna', message_long)
-            helper.send_channel_msg(city, 'all', message_long)
+        helper.send_channel_msg(city, 'mrna', message_long)
+        helper.send_channel_msg(city, 'all', message_long)
+        if vaccine_name == 'BioNTech (2. Impfung)':
+            vaccine_name = 'BioNTech'
+        database.insert_vaccination(
+            vaccine_name, slot_counter, city, "doctolib")
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         helper.send_channel_msg(city, 'vec', message_long)
         helper.send_channel_msg(city, 'all', message_long)
+        database.insert_vaccination(
+            vaccine_name, slot_counter, city, "doctolib")
 
 
 def doctolib_check(city):
@@ -255,16 +248,12 @@ def doctolib_check(city):
                     if slot_counter == 0:
                         continue
 
-                    # Construct and send message
+                    # Construct and send message and add to DB
                     vaccine_name = vaccine_names[vaccine_counter]
                     vaccine_day = vaccine_days[vaccine_counter]
                     vaccine_speciality = vaccine_specialities[vaccine_counter]
                     doctolib_send_message(
                         city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality)
-
-                    # Add to database
-                    database.insert_vaccination(
-                        vaccine_name, slot_counter, city, "doctolib")
 
                 vaccine_counter = vaccine_counter + 1
 
