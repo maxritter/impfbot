@@ -1,7 +1,6 @@
 import dateutil.parser
 import requests
 import urllib.parse
-import threading
 from src import helper, database
 from datetime import timedelta
 
@@ -146,18 +145,8 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
 
            # Send message to telegram channels for the specific city and add to DB
             if vaccine == 'BioNTech' or vaccine == 'Moderna':
-                main_city = ''.join(
-                    (x for x in city if not x.isdigit())).upper()
-                if main_city == 'MUC':
-                    t_all = threading.Thread(
-                        target=helper.send_channel_msg, args=(city, 'all', message_long))
-                    t_all.start()
-                    t_mrna = threading.Thread(
-                        target=helper.send_channel_msg, args=(city, 'mrna', message_long))
-                    t_mrna.start()
-                else:
-                    helper.send_channel_msg(city, 'mrna', message_long)
-                    helper.send_channel_msg(city, 'all', message_long)
+                helper.send_channel_msg(city, 'mrna', message_long)
+                helper.send_channel_msg(city, 'all', message_long)
                 database.insert_vaccination(
                     vaccine, spots["amount"], city, "jameda")
             elif vaccine == 'AstraZeneca' or vaccine == 'Johnson & Johnson':
