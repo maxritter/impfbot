@@ -61,13 +61,15 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'ul': {'all_id': -1001346082516, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.40137, 'lng': 9.99204, 'address': '89073 Ulm Mitte', 'city': 'Ulm'},
         'dui': {'all_id': -1001481729705, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.43501, 'lng': 6.76115, 'address': '47051 Duisburg Altstadt', 'city': 'Duisburg'},
         'ms': {'all_id': -1001427604433, 'mrna_id': -1, 'vec_id': -1, 'lat': 51.9622, 'lng': 7.62719, 'address': '48143 Muenster Centrum', 'city': 'Münster'},
-        'bn': {'all_id': -1001391425907, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.72194, 'lng': 7.08833, 'address': '53115 Bonn Poppelsdorf', 'city': 'Bonn'}
+        'bn': {'all_id': -1001391425907, 'mrna_id': -1, 'vec_id': -1, 'lat': 50.72194, 'lng': 7.08833, 'address': '53115 Bonn Poppelsdorf', 'city': 'Bonn'},
+        'rgb': {'all_id': -1, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.017804, 'lng': 12.101659, 'address': '93047 Regensburg', 'city': 'Regensburg'}
         }
 
 
 def is_local():
-    if 'WSL2' in platform.platform():
+    if 'WSL2' or "Linux" in platform.platform():
         return True
+    print(platform.platform())
     return False
 
 
@@ -313,17 +315,17 @@ def init(city):
     info_log('Init Impfbot..')
 
     # Init Telegram and Twitter
-    telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
-    twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
-    twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
-    twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
-    if twitter_token and twitter_token_secret:
-        twitter_auth = tweepy.OAuthHandler(
-            os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
-        twitter_auth.set_access_token(twitter_token, twitter_token_secret)
-        twitter_bot = tweepy.API(twitter_auth)
-    else:
-        warn_log("Twitter is not enabled for this city..")
+    # telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
+    # twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
+    # twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
+    # twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
+    # if twitter_token and twitter_token_secret:
+    #     twitter_auth = tweepy.OAuthHandler(
+    #         os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
+    #     twitter_auth.set_access_token(twitter_token, twitter_token_secret)
+    #     twitter_bot = tweepy.API(twitter_auth)
+    # else:
+    #     warn_log("Twitter is not enabled for this city..")
 
     # Init Doctolib
     doctolib.doctolib_init(city)
