@@ -66,9 +66,8 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
 
 
 def is_local():
-    if 'WSL2' or "Linux" in platform.platform():
+    if 'WSL2' in platform.platform():
         return True
-    print(platform.platform())
     return False
 
 
