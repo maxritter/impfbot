@@ -286,17 +286,17 @@ def init(city):
     info_log('Init Impfbot..')
 
     # Init Telegram and Twitter
-    # telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
-    # twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
-    # twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
-    # twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
-    # if twitter_token and twitter_token_secret:
-    #     twitter_auth = tweepy.OAuthHandler(
-    #         os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
-    #     twitter_auth.set_access_token(twitter_token, twitter_token_secret)
-    #     twitter_bot = tweepy.API(twitter_auth)
-    # else:
-    #     warn_log("Twitter is not enabled for this city..")
+    telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
+    twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
+    twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
+    twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
+    if twitter_token and twitter_token_secret:
+        twitter_auth = tweepy.OAuthHandler(
+            os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
+        twitter_auth.set_access_token(twitter_token, twitter_token_secret)
+        twitter_bot = tweepy.API(twitter_auth)
+    else:
+        warn_log("Twitter is not enabled for this city..")
 
     # Init Doctolib
     doctolib.doctolib_init(city)
