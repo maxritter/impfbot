@@ -2,6 +2,7 @@
 const https = require("https")
 const prompt = require('prompt-sync')();
 const Distance = require('geo-distance');
+const fs = require("fs")
 
 const hostName = 'www.doctolib.de'
 
@@ -128,6 +129,7 @@ function removeDuplicates(arr) {
 
 async function startPulling() {
   const city = prompt('What is your city? (f. ex. muenchen): ');
+  const abbr = prompt('What should be the abbreviation for your city? ');
   const maxDistance = prompt('What should be the maximum distance in kilometers? (f. ex. 50): ');
   const latitude = prompt('What is the latitude of the city? (f. ex. 48.155004): ');
   const longitude = prompt('What is the longitude of the city? (f. ex. 11.4717963): ');
@@ -176,10 +178,13 @@ async function startPulling() {
   //Outprint results
   console.log("-------------------------------------------")
   console.log("")
+  const writeStream = fs.createWriteStream('../../../data/' + abbr + '.txt')
   centerURLs = removeDuplicates(centerURLs)
   centerURLs.forEach(async (centerURL) => {
     console.log(centerURL)
+    writeStream.write(`${centerURL}\n`)
   });
+  writeStream.end()
 }
 
 startPulling()

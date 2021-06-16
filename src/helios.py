@@ -52,7 +52,7 @@ def helios_init_session():
     # grab uuid for corona vaccinations
     try:
         res = helios_session.get(
-            "https://api.patienten.helios-gesundheit.de/api/appointment/specialty", timeout=helper.api_timeout_seconds
+            "https://api.patienten.helios-gesundheit.de/api/appointment/lookup/purposecategories", timeout=helper.api_timeout_seconds
         )
         res.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -68,10 +68,10 @@ def helios_init_session():
             f'[Helios] Error during fetch of UUID for Corona Vaccinations [{str(e)}]')
         return False
 
-    corona = [x for x in res.json() if x["name"] == "Corona-Impfung"].pop()
-    # c619bfb1-9e18-404d-b960-dfac6c072490
-    helios_config["specialtyUUID"] = corona["uuid"]
-    helios_config["treatmentID"] = corona["oid"]  # 58
+    corona = [x for x in res.json()['kvps'] if x["value"] == "Corona-Impfung"].pop()
+    # 341094cb-8239-4a8e-b526-828108e46a05
+    helios_config["purposeCategoryUUID"] = corona["key"]
+    helios_config["treatmentID"] = corona["oid"]  # 12
     helios_init_completed = True
     return True
 
@@ -93,7 +93,7 @@ def helios_gather_locations(lat, lng, address, radius=50):
         },
         "healthInsuranceTypeUUID": helios_config["healthInsuranceTypeUUID"],
         "radius": radius,
-        "specialtyUUID": helios_config["specialtyUUID"],
+        "purposeCategoryUUID": helios_config["purposeCategoryUUID"],
     }
 
     try:
