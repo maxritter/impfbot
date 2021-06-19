@@ -195,13 +195,22 @@ def dachau_check(city):
             except:
                 continue
             
+            # Check how many slots we have not yet sent out
+            slot_counter = 0
+            for time_str in json_data['times']:
+                vaccination_id = "{}.{}.{}".format(
+                        url, time_str, sln_list[i])
+                if vaccination_id not in helper.already_sent_ids:
+                    slot_counter = slot_counter + 1
+                    helper.already_sent_ids.append(vaccination_id)
+            if slot_counter == 0:
+                continue
+
             # Create metadata
             available_dates = []
             for date_str in json_data['dates']:
                 d = datetime.datetime.strptime(date_str, '%Y-%m-%d')
                 available_dates.append(datetime.date.strftime(d, "%d.%m.%y"))
-
-            slot_counter = len(json_data['times'])
 
             # Construct message
             if slot_counter == 1:
