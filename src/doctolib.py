@@ -132,8 +132,6 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
         helper.send_channel_msg(city, 'mrna', message_long)
         helper.send_channel_msg(city, 'all', message_long)
-        if vaccine_name == 'BioNTech (2. Impfung)':
-            vaccine_name = 'BioNTech'
         database.insert_vaccination(
             vaccine_name, slot_counter, city, "doctolib")
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':

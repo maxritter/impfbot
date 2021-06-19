@@ -7,6 +7,7 @@ from src.doctolib import doctolib_check
 from src.samedi import samedi_check
 from src.jameda import jameda_check
 from src.helios import helios_check
+from src.dachau import dachau_check
 from src import helper
 
 
@@ -29,6 +30,8 @@ def main(args=None):
             if city == 'muc6':
                 zollsoft_check(city)
                 samedi_check(city)
+            elif city == 'muc7':
+                dachau_check(city)
 
             # Check Helios clinics
             if helper.is_helios_enabled(city):
