@@ -258,7 +258,7 @@ def dachau_check(city):
                 message_long = message_long + "https://termin.dachau-med.de/impfungen02/"
             elif vaccine_name == "BioNTech":
                 message_long = message_long + "https://termin.dachau-med.de/impfungen03/"
-            elif vaccine_name == "BioNTech (NUR 2. IMPFUNG)":
+            elif vaccine_name == "BioNTech (2. Impfung)":
                 message_long = message_long + "https://termin.dachau-med.de/impfung/"
 
             # Print message out on server
