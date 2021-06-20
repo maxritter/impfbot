@@ -206,29 +206,20 @@ def dachau_check(city):
             if slot_counter == 0:
                 continue
 
-            # Create metadata
-            available_dates = []
-            for date_str in json_data['dates']:
-                d = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-                available_dates.append(datetime.date.strftime(d, "%d.%m.%y"))
-
             # Construct message
             if slot_counter == 1:
                 message = f'{slot_counter} freier Impftermin '
             else:
                 message = f'{slot_counter} freie Impftermine '
-            message = message + f'für {vaccine_name} in {location_list[i]}'
+            message = message + f'für {vaccine_name} in ->{location_list[i]}<-'
+            message_long = message + ". Hier klicken und ORT IN DER LISTE AUSWÄHLEN: "
 
-            verbose_dates = ", ".join(sorted(set(available_dates)))
-            message = message + \
-                f". Wählbare Tage: {verbose_dates}."
-            message_long = message + " Hier buchen und Praxis in der Liste auswählen: "
-
+            # Determine URL
             if vaccine_name == "Johnson & Johnson":
                 message_long = message_long + "https://termin.dachau-med.de/impfungen02/"
             elif vaccine_name == "BioNTech":
                 message_long = message_long + "https://termin.dachau-med.de/impfungen03/"
-            elif vaccine_name == "BioNTech (2. Impfung)":
+            elif vaccine_name == "BioNTech (NUR 2. IMPFUNG)":
                 message_long = message_long + "https://termin.dachau-med.de/impfung/"
 
             # Print message out on server
