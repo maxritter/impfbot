@@ -43,19 +43,7 @@ sln_list = [
     27,
     22448,
     29,
-    31,
-    18,
-    16069,
-    16072,
-    16075,
-    19,
-    27,
-    39,
-    35,
-    29,
-    31,
-    33,
-    16066
+    31
 ]
 vaccine_list = [
     "Johnson & Johnson",
@@ -81,19 +69,7 @@ vaccine_list = [
     "BioNTech",
     "BioNTech",
     "BioNTech",
-    "BioNTech",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)",
-    "BioNTech (2. Impfung)"
+    "BioNTech"
 ]
 
 practice_list = [
@@ -120,19 +96,7 @@ practice_list = [
     "Medizinisches Zentrum Eching",
     "MVZ Patientenzentrum",
     "Medizinisches Zentrum Neufahrn-Eching",
-    "Praxis Bergkirchen",
-    "MVZ Dachau (EG)",
-    "Praxis Bergkirchen",
-    "Praxis Sulzemoos",
-    "Praxis Rembold/Rinck-Pfister/Giuliani",
-    "MVZ Dachau (1. OG)",
-    "MVZ Dachau (2. OG)",
-    "MVZ Dachau (3. OG)",
-    "MVZ Patientenzentrum",
-    "Medizinisches Zentrum Allach",
-    "Medizinisches Zentrum Eching",
-    "Medizinisches Zentrum Neufahrn-Eching",
-    "Praxis Altstadt"
+    "Praxis Bergkirchen"
 ]
 
 location_list = [
@@ -159,20 +123,9 @@ location_list = [
     "85386 Eching",
     "85221 Dachau",
     "85375 Neufahrn",
-    "85232 Bergkirchen",
-    "85221 Dachau",
-    "85232 Bergkirchen",
-    "85254 Sulzemoos",
-    "85221 Dachau",
-    "85221 Dachau",
-    "85221 Dachau",
-    "85221 Dachau",
-    "85221 Dachau",
-    "80999 München",
-    "85386 Eching",
-    "85375 Neufahrn",
-    "85221 Dachau"
+    "85232 Bergkirchen"
 ]
+
 
 def dachau_check(city):
     global session
@@ -195,8 +148,6 @@ def dachau_check(city):
                 url = "impfungen02"
             elif vaccine_name == "BioNTech":
                 url = "impfungen03"
-            elif vaccine_name == "BioNTech (2. Impfung)":
-                url = "impfung"
             else:
                 continue
             try:
@@ -233,12 +184,12 @@ def dachau_check(city):
                 json_data = json.loads(string_data)
             except:
                 continue
-            
+
             # Check how many slots we have not yet sent out
             slot_counter = 0
             for time_str in json_data['times']:
                 vaccination_id = "{}.{}.{}".format(
-                        url, time_str, sln_list[i])
+                    url, time_str, sln_list[i])
                 if vaccination_id not in helper.already_sent_ids:
                     slot_counter = slot_counter + 1
                     helper.already_sent_ids.append(vaccination_id)
@@ -251,21 +202,20 @@ def dachau_check(city):
             else:
                 message = f'{slot_counter} freie Impftermine '
             message = message + f'für {vaccine_name} in {location_list[i]}.'
-            message_long = message + f" {practice_list[i].upper()} IN DER LISTE AUSWÄHLEN: "
+            message_long = message + \
+                f" {practice_list[i].upper()} IN DER LISTE AUSWÄHLEN: "
 
             # Determine URL
             if vaccine_name == "Johnson & Johnson":
                 message_long = message_long + "https://termin.dachau-med.de/impfungen02/"
             elif vaccine_name == "BioNTech":
                 message_long = message_long + "https://termin.dachau-med.de/impfungen03/"
-            elif vaccine_name == "BioNTech (2. Impfung)":
-                message_long = message_long + "https://termin.dachau-med.de/impfung/"
 
             # Print message out on server
             helper.info_log(message_long)
 
             # Send message to telegram channels for the specific city
-            if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)':
+            if vaccine_name == 'BioNTech':
                 helper.send_channel_msg(city, 'mrna', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
                 database.insert_vaccination(
