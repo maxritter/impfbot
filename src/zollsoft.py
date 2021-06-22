@@ -101,7 +101,8 @@ def zollsoft_check(city):
                     date, time, _, _, location, _, _, _, _, _ = entry
                     vaccination_id = "{}.{}.{}".format(
                         date, time, location)
-                    if vaccination_id not in helper.already_sent_ids and ("2. Corona-Impfung" not in location or "biontech" in location.lower()):
+                    if vaccination_id not in helper.already_sent_ids and ("2. Corona-Impfung" not in location or "biontech" in location.lower()) and \
+                        not "antigen" in location.lower() and not "antikörper" in location.lower() and not "pcr" in location.lower():
                         # Determine Vaccine
                         d = datetime.datetime.strptime(date, '%Y/%m/%d')
                         if "biontech" in location.lower() and not "2." in location.lower():

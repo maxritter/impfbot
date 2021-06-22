@@ -152,7 +152,9 @@ def doctolib_check(city):
             request_url = f'https://www.doctolib.de/booking/{center}.json'
             try:
                 raw_data = requests.get(
-                    request_url, timeout=helper.api_timeout_seconds)
+                    request_url, 
+                    headers=doctolib_headers,
+                    timeout=helper.api_timeout_seconds)
                 raw_data.raise_for_status()
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
