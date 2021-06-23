@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+import random
 from src import helper, database
 
 
@@ -14,9 +15,21 @@ doctolib_headers = {
     "referer": "https://www.doctolib.de/",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 }
+doctolib_socks = [
+    "amsterdam.nl.socks.nordhold.net",
+    "atlanta.us.socks.nordhold.net",
+    "dallas.us.socks.nordhold.net",
+    "dublin.ie.socks.nordhold.net",
+    "ie.socks.nordhold.net",
+    "los-angeles.us.socks.nordhold.net",
+    "nl.socks.nordhold.net",
+    "se.socks.nordhold.net",
+    "stockholm.se.socks.nordhold.net",
+    "us.socks.nordhold.net"
+]
 doctolib_proxy = {
-    'http' : "socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@amsterdam.nl.socks.nordhold.net:1080",
-    'https' : "socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@amsterdam.nl.socks.nordhold.net:1080"
+    'http': f"socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@{random.choice(doctolib_socks)}:1080",
+    'https': f"socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@{random.choice(doctolib_socks)}:1080"
 }
 
 
@@ -157,7 +170,7 @@ def doctolib_check(city):
             request_url = f'https://www.doctolib.de/booking/{center}.json'
             try:
                 raw_data = requests.get(
-                    request_url, 
+                    request_url,
                     headers=doctolib_headers,
                     timeout=helper.api_timeout_seconds,
                     proxies=doctolib_proxy)

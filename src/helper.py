@@ -19,7 +19,6 @@ api_timeout_seconds = 10
 local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
-twitter_bot = None
 logger = None
 conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
         'muc2': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
@@ -250,7 +249,7 @@ def send_daily_stats(city):
 
 
 def send_channel_msg(city, type, msg):
-    global telegram_bot, twitter_bot
+    global telegram_bot
 
     # Send to Telegram
     channel_id = conf[city][f'{type}_id']
@@ -260,20 +259,9 @@ def send_channel_msg(city, type, msg):
         except Exception as e:
             error_log(f'[Telegram] Error during message send [{str(e)}]')
 
-    # Send to Twitter
-    if not is_local() and twitter_bot is not None and len(msg) <= 225:
-        try:
-            twitter_bot.update_status(datetime.datetime.now().astimezone(local_timezone).strftime(
-                "%d.%m.%Y %H:%M:%S: ") + msg + " #Impfung #COVID19 #Corona #vaccine")
-        except tweepy.TweepError as e:
-            if e.api_code != 187:
-                error_log(f'[Twitter] Error during message send [{str(e)}]')
-        except Exception as e:
-            error_log(f'[Twitter] Error during message send [{str(e)}]')
-
 
 def init(city):
-    global telegram_bot, twitter_bot, already_sent_ids, conf
+    global telegram_bot, already_sent_ids, conf
 
     # Load secrets from file
     load_dotenv(verbose=True)
@@ -283,18 +271,8 @@ def init(city):
     init_logger(city)
     info_log('Init Impfbot..')
 
-    # Init Telegram and Twitter
+    # Init Telegram Bot
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
-    twitter_city = ''.join((x for x in city if not x.isdigit())).upper()
-    twitter_token = os.getenv(f'TWITTER_{twitter_city}_TOKEN')
-    twitter_token_secret = os.getenv(f'TWITTER_{twitter_city}_TOKEN_SECRET')
-    if twitter_token and twitter_token_secret:
-        twitter_auth = tweepy.OAuthHandler(
-            os.getenv('TWITTER_CUSTOMER_KEY'), os.getenv('TWITTER_CUSTOMER_SECRET'))
-        twitter_auth.set_access_token(twitter_token, twitter_token_secret)
-        twitter_bot = tweepy.API(twitter_auth)
-    else:
-        warn_log("Twitter is not enabled for this city..")
 
     # Init Doctolib
     doctolib.doctolib_init(city)
