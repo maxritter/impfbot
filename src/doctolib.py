@@ -7,12 +7,8 @@ from src import helper, database
 doctolib_urls = None
 doctolib_headers = {
     "accept": "*/*",
-    "accept-language": "de-DE,de;q=0.9",
-    "cache-control": "no-cache",
-    "origin": "https://www.doctolib.de/",
-    "pragma": "no-cache",
-    "referer": "https://www.doctolib.de/",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+    "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 }
 
 
