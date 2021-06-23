@@ -10,3 +10,5 @@ python-dotenv
 tweepy
 psycopg2-binary
 schedule
+requests[socks]
+pysocks

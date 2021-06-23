@@ -15,8 +15,8 @@ doctolib_headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 }
 doctolib_proxy = {
-    'http': "mail@maxritter.net:b6qCVaQyMDvXzFFx@de1004.nordvpn.com",
-    'https': "mail@maxritter.net:b6qCVaQyMDvXzFFx@de1004.nordvpn.com"
+    'http' : "socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@amsterdam.nl.socks.nordhold.net:1080",
+    'https' : "socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@amsterdam.nl.socks.nordhold.net:1080"
 }
 
 
