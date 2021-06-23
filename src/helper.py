@@ -5,11 +5,12 @@ import time
 import sys
 import os
 import csv
-from dotenv import load_dotenv
 import urllib.request
+from dotenv import load_dotenv
 import datetime
 import pytz
 import logging
+from nordvpn_connect import initialize_vpn, rotate_VPN
 from logging import Formatter
 from logging.handlers import SysLogHandler
 from src import database, helios, doctolib, jameda
@@ -275,13 +276,26 @@ def send_channel_msg(city, type, msg):
 def init(city):
     global telegram_bot, twitter_bot, already_sent_ids, conf
 
-    # Load secrets from .env file
+    # Load secrets from file
     load_dotenv(verbose=True)
 
     # General inits
     already_sent_ids = []
     init_logger(city)
     info_log('Init Impfbot..')
+
+    # On server, connect to VPN server
+    if not is_local():
+        info_log("Connecting to VPN..")
+        while True:
+            try:
+                settings = initialize_vpn("France")
+                rotate_VPN(settings)
+                break
+            except Exception:
+                error_log("Unable to connect to VPN, retry..")
+                time.sleep(10)
+        info_log("Connected to VPN!")
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))

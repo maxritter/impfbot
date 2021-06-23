@@ -10,3 +10,4 @@ python-dotenv
 tweepy
 psycopg2-binary
 schedule
+nordvpn-connect
