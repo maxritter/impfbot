@@ -12,3 +12,4 @@ psycopg2-binary
 schedule
 requests[socks]
 pysocks
+fake_headers

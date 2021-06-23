@@ -1,36 +1,14 @@
+from os import execlpe
 import requests
 import json
 import datetime
-import random
 from src import helper, database
+from fake_headers import Headers
 
-
+doctolib_headers = Headers(
+    headers=True
+)
 doctolib_urls = None
-doctolib_headers = {
-    "accept": "*/*",
-    "accept-language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
-    "cache-control": "no-cache",
-    "origin": "https://www.doctolib.de/",
-    "pragma": "no-cache",
-    "referer": "https://www.doctolib.de/",
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-}
-doctolib_socks = [
-    "amsterdam.nl.socks.nordhold.net",
-    "atlanta.us.socks.nordhold.net",
-    "dallas.us.socks.nordhold.net",
-    "dublin.ie.socks.nordhold.net",
-    "ie.socks.nordhold.net",
-    "los-angeles.us.socks.nordhold.net",
-    "nl.socks.nordhold.net",
-    "se.socks.nordhold.net",
-    "stockholm.se.socks.nordhold.net",
-    "us.socks.nordhold.net"
-]
-doctolib_proxy = {
-    'http': f"socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@{random.choice(doctolib_socks)}:1080",
-    'https': f"socks5://LjSsmoZ5g6YqMWN6T61NBpgf:Xht9tnfGaQRsUhq6iatwcsTo@{random.choice(doctolib_socks)}:1080"
-}
 
 
 def doctolib_init(city):
@@ -40,7 +18,6 @@ def doctolib_init(city):
     with open(f'data/{city}.txt') as url_txt:
         doctolib_urls = url_txt.readlines()
     doctolib_urls = [doctolib_url.strip() for doctolib_url in doctolib_urls]
-
 
 def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities):
     # Extract some information
@@ -105,9 +82,8 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
         response = requests.get(
             "https://www.doctolib.de/availabilities.json",
             params=params,
-            headers=doctolib_headers,
-            timeout=helper.api_timeout_seconds,
-            proxies=doctolib_proxy
+            headers=doctolib_headers.generate(),
+            timeout=helper.api_timeout_seconds
         )
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -167,27 +143,13 @@ def doctolib_check(city):
         for doctolib_url in doctolib_urls:
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
-            request_url = f'https://www.doctolib.de/booking/{center}.json'
             try:
-                raw_data = requests.get(
-                    request_url,
-                    headers=doctolib_headers,
-                    timeout=helper.api_timeout_seconds,
-                    proxies=doctolib_proxy)
-                raw_data.raise_for_status()
-            except requests.exceptions.HTTPError as e:
-                helper.warn_log(
-                    f'[Doctolib] HTTP issue during fetch of bookings for center {center} [{str(e)}]')
-                continue
-            except requests.exceptions.Timeout as e:
-                helper.warn_log(
-                    f'[Doctolib] Timeout during fetch of bookings for center {center} [{str(e)}]')
-                continue
+                with open(f'json/{center}.txt') as json_file:
+                    json_data = json.load(json_file)
             except Exception as e:
-                helper.warn_log(
-                    f'[Doctolib] General issue during fetch of bookings for center {center} [{str(e)}]')
+                helper.error_log(
+                    f"Unable to load JSON for center {center}, continue..")
                 continue
-            json_data = raw_data.json()
             data = json_data["data"]
             visit_motives = [
                 visit_motive for visit_motive in data["visit_motives"]]
