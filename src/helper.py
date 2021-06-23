@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 import datetime
 import pytz
 import logging
-from nordvpn_connect import initialize_vpn, rotate_VPN
 from logging import Formatter
 from logging.handlers import SysLogHandler
 from src import database, helios, doctolib, jameda
@@ -283,19 +282,6 @@ def init(city):
     already_sent_ids = []
     init_logger(city)
     info_log('Init Impfbot..')
-
-    # On server, connect to VPN server
-    if not is_local():
-        info_log("Connecting to VPN..")
-        while True:
-            try:
-                settings = initialize_vpn("Germany")
-                rotate_VPN(settings)
-                break
-            except Exception as e:
-                error_log("Unable to connect to VPN: " + str(e))
-                time.sleep(10)
-        info_log("Connected to VPN!")
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
