@@ -147,7 +147,7 @@ def doctolib_check(city):
     try:
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
-            time.sleep((60 * 5 + (random.random() * 60)) / 300)
+            time.sleep((60 * 5 + (random.random() * 60)) / 1000)
 
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
