@@ -5,6 +5,7 @@ import time
 import sys
 import os
 import csv
+from dotenv import load_dotenv
 import urllib.request
 import datetime
 import pytz
@@ -274,10 +275,8 @@ def send_channel_msg(city, type, msg):
 def init(city):
     global telegram_bot, twitter_bot, already_sent_ids, conf
 
-    # For local env, load secrets from file
-    if is_local():
-        from dotenv import load_dotenv
-        load_dotenv(verbose=True)
+    # Load secrets from .env file
+    load_dotenv(verbose=True)
 
     # General inits
     already_sent_ids = []
