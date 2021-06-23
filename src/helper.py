@@ -289,11 +289,11 @@ def init(city):
         info_log("Connecting to VPN..")
         while True:
             try:
-                settings = initialize_vpn("France")
+                settings = initialize_vpn("Germany")
                 rotate_VPN(settings)
                 break
-            except Exception:
-                error_log("Unable to connect to VPN, retry..")
+            except Exception as e:
+                error_log("Unable to connect to VPN: " + str(e))
                 time.sleep(10)
         info_log("Connected to VPN!")
 
