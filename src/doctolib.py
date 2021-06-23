@@ -14,6 +14,10 @@ doctolib_headers = {
     "referer": "https://www.doctolib.de/",
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 }
+doctolib_proxy = {
+    'http': "mail@maxritter.net:b6qCVaQyMDvXzFFx@de1004.nordvpn.com",
+    'https': "mail@maxritter.net:b6qCVaQyMDvXzFFx@de1004.nordvpn.com"
+}
 
 
 def doctolib_init(city):
@@ -89,7 +93,8 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
             "https://www.doctolib.de/availabilities.json",
             params=params,
             headers=doctolib_headers,
-            timeout=helper.api_timeout_seconds
+            timeout=helper.api_timeout_seconds,
+            proxies=doctolib_proxy
         )
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
@@ -154,7 +159,8 @@ def doctolib_check(city):
                 raw_data = requests.get(
                     request_url, 
                     headers=doctolib_headers,
-                    timeout=helper.api_timeout_seconds)
+                    timeout=helper.api_timeout_seconds,
+                    proxies=doctolib_proxy)
                 raw_data.raise_for_status()
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
