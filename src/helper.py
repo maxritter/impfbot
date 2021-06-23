@@ -285,7 +285,7 @@ def init(city):
     init_logger(city)
     info_log('Init Impfbot..')
 
-    # On server, connect to VPN
+    # On server, connect to VPN server
     if not is_local():
         info_log("Connecting to VPN..")
         #settings = initialize_vpn("France", "mail@maxritter.net", os.getenv("VPN_PASSWORD"))  # starts nordvpn and stuff
