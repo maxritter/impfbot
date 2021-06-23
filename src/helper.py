@@ -288,8 +288,8 @@ def init(city):
     # On server, connect to VPN
     if not is_local():
         info_log("Connecting to VPN..")
-        settings = initialize_vpn("France", "mail@maxritter.net", os.getenv("VPN_PASSWORD"))  # starts nordvpn and stuff
-        rotate_VPN(settings)  # actually connect to server
+        #settings = initialize_vpn("France", "mail@maxritter.net", os.getenv("VPN_PASSWORD"))  # starts nordvpn and stuff
+        #rotate_VPN(settings)  # actually connect to server
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
