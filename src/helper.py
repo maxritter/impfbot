@@ -9,7 +9,7 @@ import urllib.request
 import datetime
 import pytz
 import logging
-import requests
+from nordvpn_connect import initialize_vpn, rotate_VPN, close_vpn_connection
 from logging import Formatter
 from logging.handlers import SysLogHandler
 from src import database, helios, doctolib, jameda
@@ -284,6 +284,12 @@ def init(city):
     already_sent_ids = []
     init_logger(city)
     info_log('Init Impfbot..')
+
+    # On server, connect to VPN
+    if not is_local():
+        info_log("Connecting to VPN..")
+        settings = initialize_vpn("France", "mail@maxritter.net", os.getenv("VPN_PASSWORD"))  # starts nordvpn and stuff
+        rotate_VPN(settings)  # actually connect to server
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))
