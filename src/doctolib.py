@@ -6,8 +6,12 @@ from src import helper, database
 from fake_headers import Headers
 
 doctolib_headers = Headers(
-    headers=True
+    headers=False
 )
+doctolib_proxy = {
+    'http': "socks5://nugwbaeg-rotate:9kz0yqnrp9l5@p.webshare.io:80",
+    'https': "socks5://nugwbaeg-rotate:9kz0yqnrp9l5@p.webshare.io:80"
+}
 doctolib_urls = None
 
 
@@ -18,6 +22,7 @@ def doctolib_init(city):
     with open(f'data/{city}.txt') as url_txt:
         doctolib_urls = url_txt.readlines()
     doctolib_urls = [doctolib_url.strip() for doctolib_url in doctolib_urls]
+
 
 def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities):
     # Extract some information
@@ -78,27 +83,26 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
         "limit": 14
     }
 
-    try:
-        response = requests.get(
-            "https://www.doctolib.de/availabilities.json",
-            params=params,
-            headers=doctolib_headers.generate(),
-            timeout=helper.api_timeout_seconds
-        )
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        helper.warn_log(f'[Doctolib] HTTP issue during fetch of availabilities for start date {start_date},\
-                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
-        return None
-    except requests.exceptions.Timeout as e:
-        helper.warn_log(f'[Doctolib] Timeout during fetch of availabilities for start date {start_date},\
-                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
-        return None
-    except Exception as e:
-        helper.warn_log(f'[Doctolib] General issue during fetch of availabilities for start date {start_date},\
-                        motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
-        return None
-    return response.json()
+    repeat_counter = 0
+    while True:
+        if repeat_counter == 100:
+            helper.warn_log(f'[Doctolib] Timeout during fetch of availabilities for start date {start_date},\
+                            motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids} [{str(e)}]')
+            return None
+
+        try:
+            response = requests.get(
+                "https://www.doctolib.de/availabilities.json",
+                params=params,
+                headers=doctolib_headers.generate(),
+                timeout=1,
+                proxies=doctolib_proxy
+            )
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            repeat_counter = repeat_counter + 1
+            continue
 
 
 def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality):
@@ -244,4 +248,4 @@ def doctolib_check(city):
     except KeyError as e:
         helper.error_log(f'[Doctolib] Key Error [{str(e)}]')
     except Exception as e:
-        helper.error_log(f'[Doctolib] General Error [{str(e)}]')
+        helper.error_log(f'[Doctolib] General Error {center} [{str(e)}]')

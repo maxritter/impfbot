@@ -73,8 +73,6 @@ def samedi_check(city):
                     url, headers=headers, timeout=helper.api_timeout_seconds)
                 res.raise_for_status()
             except requests.exceptions.HTTPError as e:
-                helper.warn_log(
-                    f'[Samedi] HTTP issue during fetching data [{str(e)}]')
                 continue
             except requests.exceptions.Timeout as e:
                 helper.warn_log(
