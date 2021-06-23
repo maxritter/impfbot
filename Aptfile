@@ -1,2 +1,3 @@
-https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb
+:repo:deb https://repo.nordvpn.com/deb/nordvpn/debian stable main
+apt-transport-https
 nordvpn
