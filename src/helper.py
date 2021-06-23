@@ -9,7 +9,6 @@ import urllib.request
 import datetime
 import pytz
 import logging
-from nordvpn_connect import initialize_vpn, rotate_VPN, close_vpn_connection
 from logging import Formatter
 from logging.handlers import SysLogHandler
 from src import database, helios, doctolib, jameda
@@ -284,12 +283,6 @@ def init(city):
     already_sent_ids = []
     init_logger(city)
     info_log('Init Impfbot..')
-
-    # On server, connect to VPN server
-    if not is_local():
-        info_log("Connecting to VPN..")
-        settings = initialize_vpn("Germany")
-        rotate_VPN(settings)
 
     # Init Telegram and Twitter
     telegram_bot = telegram.Bot(token=os.getenv('TELEGRAM_TOKEN'))

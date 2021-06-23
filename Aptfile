@@ -1,3 +1,0 @@
-:repo:deb [trusted=yes] https://repo.nordvpn.com/deb/nordvpn/debian stable main
-apt-transport-https
-nordvpn
