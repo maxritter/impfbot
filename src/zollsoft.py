@@ -59,7 +59,7 @@ def zollsoft_check(city):
             }
 
             try:
-                res = requests.post(
+                res = helper.post(
                     url, headers=headers, data=payload, timeout=helper.api_timeout_seconds)
                 res.raise_for_status()
             except requests.exceptions.HTTPError as e:

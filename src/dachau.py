@@ -17,7 +17,7 @@ headers = {
     "x-requested-with": "XMLHttpRequest",
 }
 
-session = requests.Session()
+session = helper.DelayedSession()
 
 sln_list = [
     23865,
@@ -157,17 +157,17 @@ def dachau_check(city):
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
                     f'[Dachau] HTTP issue during API check [{str(e)}]')
-                session = requests.Session()
+                session = helper.DelayedSession()
                 continue
             except requests.exceptions.Timeout as e:
                 helper.warn_log(
                     f'[Dachau] Timeout during API check [{str(e)}]')
-                session = requests.Session()
+                session = helper.DelayedSession()
                 continue
             except Exception as e:
                 helper.error_log(
                     f'[Dachau] Error during API check [{str(e)}]')
-                session = requests.Session()
+                session = helper.DelayedSession()
                 continue
 
             # Parse response and check if it has appointments

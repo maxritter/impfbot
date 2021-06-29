@@ -375,7 +375,7 @@ def jameda_gather_locations(location):
 def jameda_init(city):
     global jameda_session
 
-    jameda_session = requests.Session()
+    jameda_session = helper.DelayedSession()
     jameda_session.headers = {
         "accept": "*/*",
         "accept-language": "en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7",

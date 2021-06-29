@@ -93,7 +93,7 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
             return None
 
         try:
-            response = requests.get(
+            response = helper.get(
                 "https://www.doctolib.de/availabilities.json",
                 params=params,
                 headers=doctolib_headers.generate(),

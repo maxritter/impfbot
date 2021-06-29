@@ -69,7 +69,7 @@ def samedi_check(city):
 
             # Send the GET request
             try:
-                res = requests.get(
+                res = helper.get(
                     url, headers=headers, timeout=helper.api_timeout_seconds)
                 res.raise_for_status()
             except requests.exceptions.HTTPError as e:

@@ -13,7 +13,7 @@ helios_locations_fetched = False
 def helios_init_session():
     global helios_session, helios_config, helios_init_completed
 
-    helios_session = requests.Session()
+    helios_session = helper.DelayedSession()
     helios_session.headers = {
         "accept": "*/*",
         "accept-language": "en-US,en;q=0.9,de-DE;q=0.8,de;q=0.7",

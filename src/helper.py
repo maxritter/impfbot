@@ -1,6 +1,8 @@
 import platform
+from requests.sessions import Session
 import telegram
 import tweepy
+import random
 import time
 import sys
 import os
@@ -64,9 +66,8 @@ conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': 
         'rgb': {'all_id': -1, 'mrna_id': -1, 'vec_id': -1, 'lat': 49.017804, 'lng': 12.101659, 'address': '93047 Regensburg', 'city': 'Regensburg'}
         }
 
-
 def is_local():
-    if 'WSL2' in platform.platform():
+    if 'WSL2' or 'manjaro' in platform.platform():
         return True
     return False
 
@@ -284,3 +285,35 @@ def init(city):
     # Try to init Jameda API
     if is_jameda_enabled(city):
         jameda.jameda_init(city)
+
+
+# Wrapper class to provide delayed requests to avoid ip bans
+class DelayedSession(Session):
+    def __init__(self, min_delay_ms=200, max_delay_ms=1500):
+        super().__init__()
+        self.min_delay_ms = min_delay_ms
+        self.max_delay_ms = max_delay_ms
+
+    def get(self, url, **kwargs):
+        self.random_delay()
+        kwargs.setdefault('allow_redirects', True)
+        return self.request('GET', url, **kwargs)
+
+    def post(self, url, data=None, json=None, **kwargs):
+        self.random_delay()
+        return self.request('POST', url, data=data, json=json, **kwargs)
+
+    def random_delay(self):
+        sleep_time = random.randint(self.min_delay_ms, self.max_delay_ms)
+        time.sleep(sleep_time/1000 + random.random())
+
+def request(method, url, **kwargs):
+    with DelayedSession() as session:
+        return session.request(method=method, url=url, **kwargs)
+
+def get(url, params=None, **kwargs):
+    kwargs.setdefault('allow_redirects', True)
+    return request('get', url, params=params, **kwargs)
+
+def post(url, data=None, json=None, **kwargs):
+    return request('post', url, data=data, json=json, **kwargs)
