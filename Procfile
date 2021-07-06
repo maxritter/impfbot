@@ -1,0 +1,4 @@
+alpha: python main.py muc1 & python main.py muc2 & python main.py muc3 & python main.py muc4 & python main.py muc5 & python main.py muc6 & python main.py muc7 & python main.py agb & wait -n
+beta: python main.py ber1 & python main.py ber2 & python main.py ber3 & python main.py cgn1 & python main.py cgn2 & python main.py dus & python main.py ffm & python main.py hh & python main.py lej & python main.py wue & wait -n
+gamma: python main.py bre & python main.py h & python main.py drs & python main.py dtm & python main.py ess & python main.py bs & python main.py erf & python main.py md & python main.py ul & python main.py str1 & python main.py ka & wait -n
+delta: python main.py bfe & python main.py co & python main.py da & python main.py dui & python main.py goe & python main.py ko & python main.py ms & python main.py sn & python main.py str2 & python main.py nue & python main.py bn & wait -n
