@@ -19,6 +19,6 @@ In the tools folder, the following additional scripts exist:
 - Doctolib Puller (allows to find all practices from Doctolib in a specific geolocation)
 - Doctolib JSON (downloads json files for those found practices so traffic over the proxy is decreased)
 
-For some cities like Munich, the lists have been split so one roundtrip does not take more than 60 seconds. The servers are currently hosted in Heroku. 
+The servers are currently hosted on two free Tiers in Heroku. 
 
 The remaining information is on the [website](https://www.corona-impftermine.net/) or in the Telegram groups for the specific city. If you want to get in touch with me, contact me over my [personal website](https://maxritter.net/).
