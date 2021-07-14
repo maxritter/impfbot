@@ -21,4 +21,4 @@ In the tools folder, the following additional scripts exist:
 
 For some cities like Munich, the lists have been split so one roundtrip does not take more than 60 seconds. The servers are currently hosted in Heroku. 
 
-The live statistics for the bots can be found [here](http://corona-impftermine-stats.herokuapp.com/public/dashboard/ec3f6ace-828d-4653-934f-e11b23cc2ff2). The remaining information is on the [website](https://www.corona-impftermine.net/) or in the Telegram groups for the specific city. If you want to get in touch with me, contact me over my [personal website](https://maxritter.net/).
+The remaining information is on the [website](https://www.corona-impftermine.net/) or in the Telegram groups for the specific city. If you want to get in touch with me, contact me over my [personal website](https://maxritter.net/).
