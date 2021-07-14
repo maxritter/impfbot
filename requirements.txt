@@ -2,7 +2,6 @@ requests
 python-telegram-bot
 arrow
 python-dotenv
-psycopg2-binary
 schedule
 requests[socks]
 pysocks

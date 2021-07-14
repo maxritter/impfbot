@@ -2,8 +2,7 @@ import requests
 import html
 import re
 import json
-import datetime
-from src import helper, database
+from src import helper
 
 headers = {
     "accept": "*/*",
@@ -218,12 +217,8 @@ def dachau_check(city):
             if vaccine_name == 'BioNTech':
                 helper.send_channel_msg(city, 'mrna', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-                database.insert_vaccination(
-                    vaccine_name, slot_counter, city, "dachau")
             elif vaccine_name == 'Johnson & Johnson':
                 helper.send_channel_msg(city, 'vec', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-                database.insert_vaccination(
-                    vaccine_name, slot_counter, city, "dachau")
     except Exception as e:
         helper.error_log(f'[Dachau] General Error [{str(e)}]')

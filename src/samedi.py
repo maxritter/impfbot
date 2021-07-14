@@ -2,7 +2,7 @@ import arrow
 import requests
 import threading
 import datetime
-from src import helper, database
+from src import helper
 
 
 def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking_url):
@@ -27,14 +27,10 @@ def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking
         t_mrna = threading.Thread(
             target=helper.send_channel_msg, args=(city, 'mrna', message_long))
         t_mrna.start()
-        database.insert_vaccination(
-            vaccine_name, len(vaccine_dates), city, "samedi")
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         t_vec = threading.Thread(
             target=helper.send_channel_msg, args=(city, 'vec', message_long))
         t_vec.start()
-        database.insert_vaccination(
-            vaccine_name, len(vaccine_dates), city, "samedi")
 
 
 def samedi_check(city):

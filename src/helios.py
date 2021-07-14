@@ -1,8 +1,7 @@
 import requests
 import datetime
 import arrow
-from src import helper, database
-
+from src import helper
 helios_session = None
 helios_config = None
 helios_locations = None
@@ -280,13 +279,9 @@ def helios_check(city):
                 if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
                     helper.send_channel_msg(city, 'mrna', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
-                    database.insert_vaccination(
-                        vaccine_name, spots["amount"], city, "helios")
                 elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
                     helper.send_channel_msg(city, 'vec', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
-                    database.insert_vaccination(
-                        vaccine_name, spots["amount"], city, "helios")
 
     except Exception as e:
         helper.error_log(f'[Helios] General error during check [{str(e)}]')

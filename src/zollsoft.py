@@ -1,6 +1,6 @@
 import datetime
 import requests
-from src import helper, database
+from src import helper
 import threading
 
 
@@ -131,30 +131,20 @@ def zollsoft_check(city):
 
                         helper.already_sent_ids.append(vaccination_id)
 
-                # Eventually send out appointments and add to database
+                # Eventually send out appointments
                 if biontech_counter > 0:
-                    database.insert_vaccination(
-                        "BioNTech", biontech_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, biontech_counter, biontech_dates, "BioNTech", booking_url)
                 if biontech_second_counter > 0:
-                    database.insert_vaccination(
-                        "BioNTech", biontech_second_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, biontech_second_counter, biontech_second_dates, "BioNTech (2. Impfung)", booking_url)
                 if astra_counter > 0:
-                    database.insert_vaccination(
-                        "AstraZeneca", astra_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, astra_counter, astra_dates, "AstraZeneca", booking_url)
                 if moderna_counter > 0:
-                    database.insert_vaccination(
-                        "Moderna", moderna_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, moderna_counter, moderna_dates, "Moderna", booking_url)
                 if johnson_counter > 0:
-                    database.insert_vaccination(
-                        "Johnson", johnson_counter, city, "zollsoft")
                     zollsoft_send_message(
                         city, johnson_counter, johnson_dates, "Johnson & Johnson", booking_url)
 

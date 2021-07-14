@@ -13,7 +13,7 @@ import pytz
 import logging
 from logging import Formatter
 from logging.handlers import SysLogHandler
-from src import database, helios, doctolib, jameda
+from src import helios, doctolib, jameda
 
 # Global variables
 api_timeout_seconds = 10
@@ -21,23 +21,13 @@ local_timezone = pytz.timezone('Europe/Berlin')
 already_sent_ids = None
 telegram_bot = None
 logger = None
-conf = {'muc1': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc2': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc3': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc4': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc5': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc6': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'muc7': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': 48.13836, 'lng': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel', 'city': 'München'},
+conf = {'muc': {'all_id': -1001464001536, 'mrna_id': -1001126966895, 'vec_id': -1001161931395, 'lat': 48.13836, 'lng': 11.57939, 'address': '80333 Muenchen Altstadt-Lehel', 'city': 'München'},
         'nue': {'all_id': -1001159218767, 'mrna_id': -1001446237946, 'vec_id': -1001181035310, 'lat': 49.4514, 'lng': 11.07471, 'address': '90402 Nuernberg Lorenz', 'city': 'Nürnberg'},
-        'str1': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': 48.7767, 'lng': 9.18015, 'address': '70173 Stuttgart Mitte', 'city': 'Stuttgart'},
-        'str2': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
+        'str': {'all_id': -1001315735957, 'mrna_id': -1001374316872, 'vec_id': -1001347549449, 'lat': 48.7767, 'lng': 9.18015, 'address': '70173 Stuttgart Mitte', 'city': 'Stuttgart'},
         'agb': {'all_id': -1001432733051, 'mrna_id': -1, 'vec_id': -1, 'lat': 48.36989, 'lng': 10.90017, 'address': '86150 Augsburg Innenstadt', 'city': 'Augsburg'},
-        'cgn1': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': 50.93893, 'lng': 6.95752, 'address': '50667 Koeln Altstadt-Nord', 'city': 'Köln'},
-        'cgn2': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
+        'cgn': {'all_id': -1001439806320, 'mrna_id': -1001346411243, 'vec_id': -1001440545907, 'lat': 50.93893, 'lng': 6.95752, 'address': '50667 Koeln Altstadt-Nord', 'city': 'Köln'},
         'dus': {'all_id': -1001441637885, 'mrna_id': -1001170209652, 'vec_id': -1001371958170, 'lat': 51.22591, 'lng': 6.77356, 'address': '40213 Duesseldorf Altstadt', 'city': 'Düsseldorf'},
-        'ber1': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': 52.52003, 'lng': 13.40489, 'address': '10178 Berlin Mitte', 'city': 'Berlin'},
-        'ber2': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
-        'ber3': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': -1, 'lng': -1, 'address': '', 'city': ''},
+        'ber': {'all_id': -1001311147212, 'mrna_id': -1001238768507, 'vec_id': -1001407959008, 'lat': 52.52003, 'lng': 13.40489, 'address': '10178 Berlin Mitte', 'city': 'Berlin'},
         'ffm': {'all_id': -1001238323633, 'mrna_id': -1001314044312, 'vec_id': -1001150816653, 'lat': 50.1126, 'lng': 8.68343, 'address': '60311 Frankfurt am Main Innenstadt', 'city': 'Frankfurt'},
         'hh': {'all_id': -1001237010945, 'mrna_id': -1001251036735, 'vec_id': -1001235895701, 'lat': 53.55, 'lng': 10, 'address': '20457 Hamburg Hamburg-Altstadt', 'city': 'Hamburg'},
         'lej': {'all_id': -1001487955448, 'mrna_id': -1001460759342, 'vec_id': -1001451326581, 'lat': 51.33983, 'lng': 12.37541, 'address': '04109 Leipzig Zentrum', 'city': 'Leipzig'},
@@ -148,85 +138,13 @@ def send_daily_stats(city):
         return
     info_log(f"Sending out daily stats for city {city_name}..")
 
-    vaccinations_all = database.get_vaccinations_last_day(city)
-    if not vaccinations_all:
-        return
-    msg = f"💉 TÄGLICHE STATISTIK {datetime.datetime.today().strftime('%d.%m.%Y')} 💉\n\n"
-    msg = msg + f"Der Bot hat für euch in {city_name} in den letzten 24h "
-    msg = msg + \
-        f"insgesamt {vaccinations_all} Impftermine gefunden, darunter\n"
-
-    vaccinations_astra = database.get_vaccinations_last_day(
-        city, 'AstraZeneca')
-    if vaccinations_astra:
-        astra_perc = (vaccinations_astra / (vaccinations_all * 1.0)) * 100.0
-        msg = msg + \
-            f"{vaccinations_astra} ({str(round(astra_perc, 1)).replace('.', ',')}%) Impftermin(e) mit AstraZeneca 🇬🇧\n"
-
-    vaccinations_biontech = database.get_vaccinations_last_day(
-        city, 'BioNTech')
-    if vaccinations_biontech:
-        biontech_perc = (vaccinations_biontech /
-                         (vaccinations_all * 1.0)) * 100.0
-        msg = msg + \
-            f"{vaccinations_biontech} ({str(round(biontech_perc, 1)).replace('.', ',')}%) Impftermin(e) mit BioNTech 🇩🇪\n"
-
-    vaccinations_johnson = database.get_vaccinations_last_day(city, 'Johnson')
-    if vaccinations_johnson:
-        johnson_perc = (vaccinations_johnson /
-                        (vaccinations_all * 1.0)) * 100.0
-        msg = msg + \
-            f"{vaccinations_johnson} ({str(round(johnson_perc, 1)).replace('.', ',')}%) Impftermin(e) mit Johnson & Johnson 🇧🇪\n"
-
-    vaccinations_moderna = database.get_vaccinations_last_day(city, 'Moderna')
-    if vaccinations_moderna:
-        moderna_perc = (vaccinations_moderna /
-                        (vaccinations_all * 1.0)) * 100.0
-        msg = msg + \
-            f"{vaccinations_moderna} ({str(round(moderna_perc, 1)).replace('.', ',')}%) Impftermin(e) mit Moderna 🇺🇸\n"
-
-    vaccinations_yesterday = database.get_vaccinations_previous_day(city)
-    if vaccinations_yesterday:
-        diff = abs(vaccinations_all - vaccinations_yesterday)
-        if vaccinations_all >= vaccinations_yesterday:
-            comp = "mehr"
-            symbol = "📈"
-            perc = str(round(
-                (vaccinations_all / (vaccinations_yesterday * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
-        else:
-            comp = "weniger"
-            symbol = "📉"
-            perc = str(round((vaccinations_yesterday /
-                              (vaccinations_all * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
-        msg = msg + \
-            f"Das sind {diff} Impftermine ({perc}%) {comp} als gestern {symbol}"
-
-    vaccinations_last_week = database.get_vaccinations_previous_week(city)
-    if vaccinations_last_week:
-        diff = abs(vaccinations_all - vaccinations_last_week)
-        if vaccinations_all >= vaccinations_last_week:
-            comp = "mehr"
-            symbol = "📈"
-            perc = str(round(
-                (vaccinations_all / (vaccinations_last_week * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
-        else:
-            comp = "weniger"
-            symbol = "📉"
-            perc = str(round((vaccinations_last_week /
-                              (vaccinations_all * 1.0) * 100.0) - 100.0, 1)).replace('.', ',')
-        msg = msg + \
-            f" und {diff} Impftermine ({perc}%) {comp} als vor einer Woche {symbol}"
-
-    msg = msg + f"\n\nHier findet ihr die Live-Statistik über alle von den Bots gefundenen Impftermine pro Tag, Stadt und Typ 📊:"
-    msg = msg + "https://bit.ly/2ShKt41"
-
+    msg = f"💉 TÄGLICHE STATISTIK {datetime.datetime.today().strftime('%d.%m.%Y')} FÜR 🇩🇪 💉\n\n"
     impfstatus_data = impfstatus_get_current_data(
         "https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv")
     bar_erst = impfstatus_generate_progressbar(
         float(impfstatus_data.get('impf_quote_erst')))
     bar_voll = impfstatus_generate_progressbar(
         float(impfstatus_data.get('impf_quote_voll')))
-    msg = msg + f"\n\nDie Impfstatistik für ganz Deutschland 🇩🇪:\n"
     msg = msg + f"{bar_erst} haben mindestens eine Impfdosis\n"
     msg = msg + f"{bar_voll} sind bereits vollständig geimpft\n\n"
 
@@ -243,9 +161,6 @@ def send_daily_stats(city):
                 telegram_bot.sendMessage(chat_id=channel_id, text=msg)
             except Exception as e:
                 error_log(f'[Telegram] Error during message send [{str(e)}]')
-
-    # Wait some time, so people can read the message
-    time.sleep(120)
 
 
 def send_channel_msg(city, type, msg):

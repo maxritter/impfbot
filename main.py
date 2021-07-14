@@ -19,7 +19,7 @@ def main(args=None):
 
     # Initialization
     helper.init(city)
-    schedule.every().day.at("20:15:00").do(helper.send_daily_stats, city)
+    schedule.every().day.at("20:00:00").do(helper.send_daily_stats, city)
 
     # Continously check the various APIs
     helper.info_log('Searching for appointments now..')
@@ -27,10 +27,9 @@ def main(args=None):
     while True:
         try:
             # For Munich, we have additional APIs to check
-            if city == 'muc6':
+            if city == 'muc':
                 zollsoft_check(city)
                 samedi_check(city)
-            elif city == 'muc7':
                 dachau_check(city)
 
             # Check Helios clinics

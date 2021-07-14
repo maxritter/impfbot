@@ -3,7 +3,7 @@ import json
 import datetime
 import time
 import random
-from src import helper, database
+from src import helper
 from fake_headers import Headers
 
 doctolib_headers = Headers(
@@ -139,13 +139,9 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
         helper.send_channel_msg(city, 'mrna', message_long)
         helper.send_channel_msg(city, 'all', message_long)
-        database.insert_vaccination(
-            vaccine_name, slot_counter, city, "doctolib")
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
         helper.send_channel_msg(city, 'vec', message_long)
         helper.send_channel_msg(city, 'all', message_long)
-        database.insert_vaccination(
-            vaccine_name, slot_counter, city, "doctolib")
 
 
 def doctolib_check(city):

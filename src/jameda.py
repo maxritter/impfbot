@@ -1,7 +1,7 @@
 import dateutil.parser
 import requests
 import urllib.parse
-from src import helper, database
+from src import helper
 from datetime import timedelta
 
 jameda_session = None
@@ -147,13 +147,9 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
             if vaccine == 'BioNTech' or vaccine == 'Moderna':
                 helper.send_channel_msg(city, 'mrna', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-                database.insert_vaccination(
-                    vaccine, spots["amount"], city, "jameda")
             elif vaccine == 'AstraZeneca' or vaccine == 'Johnson & Johnson':
                 helper.send_channel_msg(city, 'vec', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-                database.insert_vaccination(
-                    vaccine, spots["amount"], city, "jameda")
 
     except Exception as e:
         helper.error_log(f'[Jameda] General error during check [{str(e)}]')
