@@ -10,7 +10,6 @@ from src.helios import helios_check
 from src.dachau import dachau_check
 from src import helper
 
-
 def main(args=None):
     # Parameters
     if args is None:
@@ -48,7 +47,7 @@ def main(args=None):
 
             # Print out elapsed time
             end = time.time()
-            helper.info_log(f"Round time: {round(end-start)} seconds")
+            helper.info_log(f"Round completed in {round(end-start)} seconds..")
             start = time.time()
 
         except Exception as e:

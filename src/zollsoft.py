@@ -14,8 +14,6 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     message = message + \
         f'für {vaccine_name}. Wählbare Tage: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}\n'
-    if "bd763" in booking_url:
-        message_long = message_long + 'Falls auf der Seite nur "2. Impfung mit AstraZeneca" angezeigt wird sind die Termine zur Erstimpfung mit J&J oder Astra schon wieder ausgebucht'
 
     # Print message out on server
     helper.info_log(message)
@@ -24,7 +22,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     t_all = threading.Thread(
         target=helper.send_channel_msg, args=(city, 'all', message_long))
     t_all.start()
-    if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
+    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
         t_mrna = threading.Thread(
             target=helper.send_channel_msg, args=(city, 'mrna', message_long))
         t_mrna.start()
@@ -82,15 +80,12 @@ def zollsoft_check(city):
                 vaccination_counter = 0
                 for entry in result["termine"]:
                     _, _, _, _, location, _, _, _, _, _ = entry
-                    if "2. Corona-Impfung" not in location or "biontech" in location.lower():
-                        vaccination_counter = vaccination_counter + 1
+                    vaccination_counter = vaccination_counter + 1
                 if vaccination_counter <= 1:
                     continue
                 # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
                 biontech_dates = []
                 biontech_counter = 0
-                biontech_second_dates = []
-                biontech_second_counter = 0
                 astra_dates = []
                 astra_counter = 0
                 moderna_dates = []
@@ -101,17 +96,14 @@ def zollsoft_check(city):
                     date, time, _, _, location, _, _, _, _, _ = entry
                     vaccination_id = "{}.{}.{}".format(
                         date, time, location)
-                    if vaccination_id not in helper.already_sent_ids and ("2. Corona-Impfung" not in location or "biontech" in location.lower()) and \
-                            not "antigen" in location.lower() and not "antikörper" in location.lower() and not "pcr" in location.lower():
+                    if vaccination_id not in helper.already_sent_ids and \
+                            not "antigen" in location.lower() and not "antikörper" in location.lower() and \
+                            not "pcr" in location.lower() and not "test" in location.lower():
                         # Determine Vaccine
                         d = datetime.datetime.strptime(date, '%Y/%m/%d')
-                        if "biontech" in location.lower() and not "2." in location.lower():
+                        if "biontech" in location.lower():
                             biontech_counter = biontech_counter + 1
                             biontech_dates.append(
-                                datetime.date.strftime(d, "%d.%m.%y"))
-                        elif "biontech" in location.lower() and "2." in location.lower():
-                            biontech_second_counter = biontech_second_counter + 1
-                            biontech_second_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         elif "astrazeneca" in location.lower() or "impfungen" in location.lower():
                             astra_counter = astra_counter + 1
@@ -121,7 +113,7 @@ def zollsoft_check(city):
                             moderna_counter = moderna_counter + 1
                             moderna_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
-                        elif "johnson" in location.lower() or "janssen" in location.lower():
+                        elif ("johnson" in location.lower() or "janssen" in location.lower()) and not "bion" in location.lower():
                             johnson_counter = johnson_counter + 1
                             johnson_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
@@ -135,9 +127,6 @@ def zollsoft_check(city):
                 if biontech_counter > 0:
                     zollsoft_send_message(
                         city, biontech_counter, biontech_dates, "BioNTech", booking_url)
-                if biontech_second_counter > 0:
-                    zollsoft_send_message(
-                        city, biontech_second_counter, biontech_second_dates, "BioNTech (2. Impfung)", booking_url)
                 if astra_counter > 0:
                     zollsoft_send_message(
                         city, astra_counter, astra_dates, "AstraZeneca", booking_url)

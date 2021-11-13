@@ -25,7 +25,7 @@ def doctolib_init(city):
     doctolib_urls = [doctolib_url.strip() for doctolib_url in doctolib_urls]
 
 
-def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities):
+def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccine_specialities):
     # Extract some information
     visit_motive_name = visit_motive['name'].lower()
     visit_motive_id = visit_motive['id']
@@ -40,15 +40,13 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
     if (visit_motive_covid_vaccination or
         "impfung" in visit_motive_name) and \
         (("bion" in visit_motive_name) or
-            ("astra" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
-            ("modern" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
-            ("johnson" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name) or
-            ("janssen" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name)):
+            ("astra" in visit_motive_name) or
+            ("modern" in visit_motive_name) or
+            ("johnson" in visit_motive_name) or
+            ("janssen" in visit_motive_name)):
 
-        if "bion" in visit_motive_name and not "zweit" in visit_motive_name and not "2." in visit_motive_name:
+        if "bion" in visit_motive_name:
             vaccine_names.append("BioNTech")
-        elif "bion" in visit_motive_name and ("zweit" in visit_motive_name or "2." in visit_motive_name):
-            vaccine_names.append("BioNTech (2. Impfung)")
         elif "astra" in visit_motive_name:
             vaccine_names.append("AstraZeneca")
         elif "modern" in visit_motive_name:
@@ -61,14 +59,6 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
 
         vaccine_ids.append(visit_motive_id)
         vaccine_specialities.append(speciality_id)
-
-        visit_motive_day = 0
-        try:
-            if(visit_motive['vaccination_days_range'] is not None and visit_motive['vaccination_days_range'] > 0):
-                visit_motive_day = visit_motive['vaccination_days_range']
-        except:
-            pass
-        vaccine_days.append(visit_motive_day)
 
 
 def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practice_ids):
@@ -86,7 +76,7 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
 
     repeat_counter = 0
     while True:
-        if repeat_counter == 100:
+        if repeat_counter == 10:
             helper.warn_log(f'[Doctolib] Timeout during fetch of availabilities for start date {start_date},\
                             motives {visit_motive_ids}, agendas {agenda_ids} and practice {practice_ids}..')
             return None
@@ -114,15 +104,12 @@ def doctolib_check_availability(start_date, visit_motive_ids, agenda_ids, practi
             continue
 
 
-def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality):
+def doctolib_send_message(city, slot_counter, vaccine_name, place_address, available_dates, doctolib_url, vaccine_speciality):
     if slot_counter == 1:
         message = f'{slot_counter} freier Impftermin '
     else:
         message = f'{slot_counter} freie Impftermine '
     message = message + f'für {vaccine_name} '
-    if vaccine_day != 0:
-        message = message + \
-            f'mit Abstand zur 2. Impfung von {vaccine_day} Tagen '
     if len(place_address.split(",")) == 2:
         place_address_str = place_address.split(",")[1].strip()
         message = message + f'in {place_address_str}'
@@ -136,7 +123,7 @@ def doctolib_send_message(city, slot_counter, vaccine_name, vaccine_day, place_a
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    if vaccine_name == 'BioNTech' or vaccine_name == 'BioNTech (2. Impfung)' or vaccine_name == 'Moderna':
+    if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
         helper.send_channel_msg(city, 'mrna', message_long)
         helper.send_channel_msg(city, 'all', message_long)
     elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
@@ -150,7 +137,7 @@ def doctolib_check(city):
     try:
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
-            time.sleep((60 * 5 + (random.random() * 60)) / 1000)
+            time.sleep((60 * 5 + (random.random() * 60)) / 100)
 
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
@@ -171,7 +158,6 @@ def doctolib_check(city):
             vaccine_names = []
             vaccine_ids = []
             vaccine_specialities = []
-            vaccine_days = []
             for visit_motive in visit_motives:
                 # If new patients are not allowed, we can not take this one
                 try:
@@ -182,7 +168,7 @@ def doctolib_check(city):
 
                 # Get information about name, ID and days
                 doctolib_determine_vaccines(
-                    visit_motive, vaccine_names, vaccine_ids, vaccine_days, vaccine_specialities)
+                    visit_motive, vaccine_names, vaccine_ids, vaccine_specialities)
             if len(vaccine_ids) == 0 or len(vaccine_names) == 0:
                 continue
 
@@ -240,12 +226,11 @@ def doctolib_check(city):
                     if slot_counter == 0:
                         continue
 
-                    # Construct and send message and add to DB
+                    # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
-                    vaccine_day = vaccine_days[vaccine_counter]
                     vaccine_speciality = vaccine_specialities[vaccine_counter]
                     doctolib_send_message(
-                        city, slot_counter, vaccine_name, vaccine_day, place_address, available_dates, doctolib_url, vaccine_speciality)
+                        city, slot_counter, vaccine_name, place_address, available_dates, doctolib_url, vaccine_speciality)
 
                 vaccine_counter = vaccine_counter + 1
 
