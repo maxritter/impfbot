@@ -101,11 +101,11 @@ def zollsoft_check(city):
                             not "pcr" in location.lower() and not "test" in location.lower():
                         # Determine Vaccine
                         d = datetime.datetime.strptime(date, '%Y/%m/%d')
-                        if "biontech" in location.lower():
+                        if "biontech" in location.lower() or "impfungen" in location.lower():
                             biontech_counter = biontech_counter + 1
                             biontech_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
-                        elif "astrazeneca" in location.lower() or "impfungen" in location.lower():
+                        elif "astrazeneca" in location.lower():
                             astra_counter = astra_counter + 1
                             astra_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
