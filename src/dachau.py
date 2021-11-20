@@ -8,7 +8,7 @@ headers = {
     "accept": "*/*",
     "accept-language": "en-US,en;q=0.9",
     "cache-control": "no-cache",
-    "cookie": "PHPSESSID=f3jcojijof3kjlr52ri9f5ld17",
+    "cookie": "PHPSESSID=fnj8qu0r38q3qi4gh2pdq0s1to",
     "origin": "https://termin.dachau-med.de",
     "pragma": "no-cache",
     "referer": "https://termin.dachau-med.de/impfung/",
@@ -19,100 +19,41 @@ headers = {
 session = helper.DelayedSession()
 
 sln_list = [
-    23865,
-    15087,
-    27,
-    29,
-    33,
-    23839,
     18,
-    23842,
+    19,
+    27,
     39,
-    19,
+    16072,
+    16069,
+    16066,
+    42608,
     31,
-    35,
-    22445,
-    23799,
-    19,
-    23796,
     33,
-    22456,
-    18,
-    23792,
-    27,
-    22448,
     29,
-    31
-]
-vaccine_list = [
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "Johnson & Johnson",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech",
-    "BioNTech"
+    16075,
+    35
 ]
 
 practice_list = [
     "MVZ Dachau (EG)",
-    "Praxis Rembold/Rinck-Pfister/Giuliani",
-    "Medizinisches Zentrum Eching",
-    "Medizinisches Zentrum Neufahrn-Eching",
     "MVZ Dachau (1. OG)",
     "MVZ Dachau (2. OG)",
     "MVZ Dachau (3. OG)",
-    "MVZ Patientenzentrum",
-    "Medizinisches Zentrum Allach",
-    "Praxis Altstadt",
-    "Praxis Bergkirchen",
     "Praxis Sulzemoos",
-    "MVZ Dachau (EG)",
-    "Praxis Sulzemoos",
-    "Praxis Altstadt",
-    "Praxis Rembold/Rinck-Pfister/Giuliani",
-    "MVZ Dachau (1. OG)",
-    "MVZ Dachau (2. OG)",
-    "MVZ Dachau (3. OG)",
-    "Medizinisches Zentrum Allach",
-    "Medizinisches Zentrum Eching",
-    "MVZ Patientenzentrum",
-    "Medizinisches Zentrum Neufahrn-Eching",
     "Praxis Bergkirchen"
+    "Praxis Altstadt 01",
+    "Praxis Altstadt 02",
+    "Medizinisches Zentrum Eching",
+    "Medizinisches Zentrum Neufahrn",
+    "Medizinisches Zentrum Allach",
+    "Praxis Rembold/Rinck-Pfister/Giuliani",
+    "MVZ Patientenzentrum"
 ]
 
 location_list = [
     "85221 Dachau",
-    "85221 Dachau",
-    "85386 Eching",
-    "85375 Neufahrn",
-    "85221 Dachau",
-    "85221 Dachau",
-    "85221 Dachau",
-    "85221 Dachau",
-    "80999 München",
-    "85221 Dachau",
-    "85232 Bergkirchen",
     "85254 Sulzemoos",
     "85221 Dachau",
-    "85254 Sulzemoos",
     "85221 Dachau",
     "85221 Dachau",
     "85221 Dachau",
@@ -142,16 +83,9 @@ def dachau_check(city):
                        }
 
             # Do the POST request
-            vaccine_name = vaccine_list[i]
-            if vaccine_name == "Johnson & Johnson":
-                url = "impfungen02"
-            elif vaccine_name == "BioNTech":
-                url = "impfungen03"
-            else:
-                continue
             try:
                 res = session.post(
-                    f'https://termin.dachau-med.de/{url}/wp-admin/admin-ajax.php', headers=headers, data=payload)
+                    f'https://termin.dachau-med.de/impfung/wp-admin/admin-ajax.php', headers=headers, data=payload)
                 res.raise_for_status()
             except requests.exceptions.HTTPError as e:
                 helper.warn_log(
@@ -187,8 +121,8 @@ def dachau_check(city):
             # Check how many slots we have not yet sent out
             slot_counter = 0
             for time_str in json_data['times']:
-                vaccination_id = "{}.{}.{}".format(
-                    url, time_str, sln_list[i])
+                vaccination_id = "{}.{}".format(
+                    time_str, sln_list[i])
                 if vaccination_id not in helper.already_sent_ids:
                     slot_counter = slot_counter + 1
                     helper.already_sent_ids.append(vaccination_id)
@@ -200,25 +134,16 @@ def dachau_check(city):
                 message = f'{slot_counter} freier Impftermin '
             else:
                 message = f'{slot_counter} freie Impftermine '
-            message = message + f'für {vaccine_name} in {location_list[i]}.'
+            message = message + f'für BioNTech in {location_list[i]}.'
             message_long = message + \
                 f" {practice_list[i].upper()} IN DER LISTE AUSWÄHLEN: "
-
-            # Determine URL
-            if vaccine_name == "Johnson & Johnson":
-                message_long = message_long + "https://termin.dachau-med.de/impfungen02/"
-            elif vaccine_name == "BioNTech":
-                message_long = message_long + "https://termin.dachau-med.de/impfungen03/"
+            message_long = message_long + "https://termin.dachau-med.de/impfung/"
 
             # Print message out on server
             helper.info_log(message_long)
 
             # Send message to telegram channels for the specific city
-            if vaccine_name == 'BioNTech':
-                helper.send_channel_msg(city, 'mrna', message_long)
-                helper.send_channel_msg(city, 'all', message_long)
-            elif vaccine_name == 'Johnson & Johnson':
-                helper.send_channel_msg(city, 'vec', message_long)
-                helper.send_channel_msg(city, 'all', message_long)
+            helper.send_channel_msg(city, 'mrna', message_long)
+            helper.send_channel_msg(city, 'all', message_long)
     except Exception as e:
         helper.error_log(f'[Dachau] General Error [{str(e)}]')
