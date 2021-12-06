@@ -7,12 +7,12 @@ import threading
 def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking_url):
     # Construct message
     if slot_counter == 1:
-        message = f'{slot_counter} freier Impftermin '
+        message = f'{slot_counter} Termin '
     else:
-        message = f'{slot_counter} freie Impftermine '
+        message = f'{slot_counter} Termine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {vaccine_name}. Wählbare Tage: {vaccine_dates_str}.'
+        f'für {str(vaccine_name).upper()}. Wählbare Tage: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}\n'
 
     # Print message out on server

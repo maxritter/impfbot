@@ -265,11 +265,11 @@ def helios_check(city):
 
                 # Construct message
                 if spots["amount"] == 1:
-                    message = f'{spots["amount"]} freier Impftermin '
+                    message = f'{spots["amount"]} Termin '
                 else:
-                    message = f'{spots["amount"]} freie Impftermine '
+                    message = f'{spots["amount"]} Termine '
                 message = message + \
-                    f"für {vaccine_name} in {location['name']}. Wählbare Tage: {dates}."
+                    f"für {str(vaccine_name).upper()} in {str(location['name']).upper()}. Wählbare Tage: {dates}."
                 message_long = message + f" Hier buchen: {url}"
 
                 # Print message out on server

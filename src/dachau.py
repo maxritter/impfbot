@@ -131,10 +131,10 @@ def dachau_check(city):
 
             # Construct message
             if slot_counter == 1:
-                message = f'{slot_counter} freier Impftermin '
+                message = f'{slot_counter} Termin '
             else:
-                message = f'{slot_counter} freie Impftermine '
-            message = message + f'für BioNTech in {location_list[i]}.'
+                message = f'{slot_counter} Termine '
+            message = message + f'für BIONTECH in {str(location_list[i]).upper()}.'
             message_long = message + \
                 f" {practice_list[i].upper()} IN DER LISTE AUSWÄHLEN: "
             message_long = message_long + "https://termin.dachau-med.de/impfung/"
