@@ -20,7 +20,7 @@ def main():
         break
 
     for city_file in city_files:
-        print(f"PROCESSING CITY FILE: {city_file}..")
+        print(f"\n\n*** PROCESSING CITY FILE: {city_file} ***\n\n")
 
         # Load URLs from File
         with open(f'../../data/{city_file}') as url_txt:
