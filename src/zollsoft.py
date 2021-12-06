@@ -118,7 +118,7 @@ def zollsoft_check(city):
                             johnson_dates.append(
                                 datetime.date.strftime(d, "%d.%m.%y"))
                         else:
-                            helper.error_log(
+                            helper.warn_log(
                                 f'[Zollsoft] Unknown vaccination: {location.lower()}')
 
                         helper.already_sent_ids.append(vaccination_id)

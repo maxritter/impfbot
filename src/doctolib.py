@@ -54,7 +54,7 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
         elif "johnson" in visit_motive_name or "janssen" in visit_motive_name:
             vaccine_names.append("Johnson & Johnson")
         else:
-            helper.error_log(
+            helper.warn_log(
                 f'[Doctolib] Unknown vaccination: {visit_motive_name}')
 
         vaccine_ids.append(visit_motive_id)
@@ -137,7 +137,8 @@ def doctolib_check(city):
     try:
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
-            time.sleep((60 * 5 + (random.random() * 60)) / 100)
+            sleep_time = random.randint(200, 1500)
+            time.sleep(sleep_time/1000 + random.random())
 
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
