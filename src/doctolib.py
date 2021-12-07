@@ -44,7 +44,7 @@ def doctolib_determine_vaccines(visit_motive, vaccine_names, vaccine_ids, vaccin
             ("modern" in visit_motive_name) or
             ("johnson" in visit_motive_name) or
             ("janssen" in visit_motive_name)):
-        vaccine_names.append(visit_motive_name.upper())
+        vaccine_names.append(visit_motive_name)
         vaccine_ids.append(visit_motive_id)
         vaccine_specialities.append(speciality_id)
 
@@ -97,7 +97,7 @@ def doctolib_send_message(city, slot_counter, vaccine_name, place_address, avail
         message = f'{slot_counter} Termin '
     else:
         message = f'{slot_counter} Termine '
-    message = message + f'für {vaccine_name} '
+    message = message + f'für {str(vaccine_name).upper()} '
     if len(place_address.split(",")) == 2:
         place_address_str = place_address.split(",")[1].strip()
         message = message + f'in {place_address_str.upper()}'
@@ -111,15 +111,12 @@ def doctolib_send_message(city, slot_counter, vaccine_name, place_address, avail
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    if "bion" in vaccine_name.lower() or "modern" in vaccine_name.lower():
+    if "bion" in vaccine_name or "modern" in vaccine_name:
         helper.send_channel_msg(city, 'mrna', message_long)
         helper.send_channel_msg(city, 'all', message_long)
-    elif "astra" in vaccine_name.lower() or "johnson" in vaccine_name.lower() or "janssen" in vaccine_name.lower():
+    elif "astra" in vaccine_name or "johnson" in vaccine_name or "janssen" in vaccine_name:
         helper.send_channel_msg(city, 'vec', message_long)
         helper.send_channel_msg(city, 'all', message_long)
-    else:
-        helper.warn_log(
-            f'[Doctolib] Unknown vaccination: {vaccine_name}')
 
 
 def doctolib_check(city):

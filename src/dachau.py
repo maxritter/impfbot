@@ -134,13 +134,13 @@ def dachau_check(city):
                 message = f'{slot_counter} Termin '
             else:
                 message = f'{slot_counter} Termine '
-            message = message + f'für BIONTECH in {str(location_list[i]).upper()}.'
+            message = message + f'für BIONTECH (ERST-, ZWEIT- ODER AUFFRISCHUNGSIMPFUNG) in {str(location_list[i]).upper()}.'
             message_long = message + \
                 f" {practice_list[i].upper()} IN DER LISTE AUSWÄHLEN: "
             message_long = message_long + "https://termin.dachau-med.de/impfung/"
 
             # Print message out on server
-            helper.info_log(message_long)
+            helper.info_log(message)
 
             # Send message to telegram channels for the specific city
             helper.send_channel_msg(city, 'mrna', message_long)

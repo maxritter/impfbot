@@ -249,16 +249,8 @@ def helios_check(city):
 
             if spots["amount"] > 0:
                 dates = ", ".join(sorted(set(spots["dates"])))
-                vaccine_name = location["purposeName"]
-                if "bion" in vaccine_name.lower():
-                    vaccine_name = "BioNTech"
-                elif "astra" in vaccine_name.lower():
-                    vaccine_name = "AstraZeneca"
-                elif "modern" in vaccine_name.lower():
-                    vaccine_name = "Moderna"
-                elif "johnson" in vaccine_name.lower() or "janssen" in vaccine_name.lower():
-                    vaccine_name = "Johnson & Johnson"
-                else:
+                vaccine_name = str(location["purposeName"]).lower()
+                if not "bion" in vaccine_name and not "astra" in vaccine_name and not "modern" in vaccine_name and not "johnson" in vaccine_name and not "janssen" in vaccine_name:
                     continue
 
                 url = f"https://patienten.helios-gesundheit.de/appointments/book-appointment?facility={location['facilityID']}&physician={location['physicianID']}&purpose={location['purposeID']}&resource={helios_config['treatmentID']}"
@@ -276,10 +268,10 @@ def helios_check(city):
                 helper.info_log(message)
 
                 # Construct and send message and add to DB
-                if vaccine_name == 'BioNTech' or vaccine_name == 'Moderna':
+                if "bion" in vaccine_name or "modern" in vaccine_name:
                     helper.send_channel_msg(city, 'mrna', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
-                elif vaccine_name == 'AstraZeneca' or vaccine_name == 'Johnson & Johnson':
+                elif "astra" in vaccine_name or "johnson" in vaccine_name or "janssen" in vaccine_name:
                     helper.send_channel_msg(city, 'vec', message_long)
                     helper.send_channel_msg(city, 'all', message_long)
 

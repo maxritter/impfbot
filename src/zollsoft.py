@@ -12,7 +12,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
         message = f'{slot_counter} Termine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {str(vaccine_name).upper()}. Wählbare Tage: {vaccine_dates_str}.'
+        f'für {str(vaccine_name).upper()} (ERST-, ZWEIT- ODER AUFFRISCHUNGSIMPFUNG). Wählbare Tage: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}\n'
 
     # Print message out on server

@@ -143,11 +143,11 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, **kwargs):
             # Print message out on server
             helper.info_log(message)
 
-           # Send message to telegram channels for the specific city and add to DB
-            if vaccine == 'BioNTech' or vaccine == 'Moderna':
+           # Send message to telegram channels for the specific city
+            if "bion" in vaccine or "modern" in vaccine:
                 helper.send_channel_msg(city, 'mrna', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
-            elif vaccine == 'AstraZeneca' or vaccine == 'Johnson & Johnson':
+            elif "astra" in vaccine or "johnson" in vaccine or "janssen" in vaccine:
                 helper.send_channel_msg(city, 'vec', message_long)
                 helper.send_channel_msg(city, 'all', message_long)
 
@@ -299,7 +299,6 @@ def jameda_gather_locations(location):
                 continue
 
             couplings = []
-            vaccines = []
             for service in service_result:
                 service_id = service["id"]
                 if service_id in couplings:
@@ -307,25 +306,8 @@ def jameda_gather_locations(location):
                     continue
 
                 title = service["title"].lower()
-                if "corona" in title and not "antikörper" in title and \
-                        not "test" in title and not "beratung" in title and \
-                        not "nur" in title and not "außer" in title and \
-                        not "zweitimpfung" in title and not "test" in title and \
-                        not "impfberatung" in title:
-                    if "johnson" in title or "janssen" in title:
-                        vaccine = "Johnson & Johnson"
-                    elif "astra" in title:
-                        vaccine = "AstraZeneca"
-                    elif "bion" in title:
-                        vaccine = "BioNTech"
-                    elif "modern" in title:
-                        vaccine = "Moderna"
-                    else:
-                        vaccine = service["title"]
-                        helper.warn_log(
-                            f'[Jameda] Unknown vaccination for URL https://www.jameda.de/profil/{entry["ref_id"]}/ ({vaccine})')
-                        continue
-
+                if "impfung" in title and ("johnson" in title or "janssen" in title or "astra" in title or "bion" in title or "modern" in title):
+                    vaccine = service["title"].lower()
                     location = {
                         "profile_id": profile_id,
                         "location": f"{entry['plz']} {entry['ort']}",
@@ -350,15 +332,11 @@ def jameda_gather_locations(location):
                             couplings.append(coupling["serviceId"])
                     location["vaccine"] = vaccine
 
-                    if vaccine in vaccines:
-                        # some locations have overlapping vaccinations they offer
-                        # e.g. https://www.jameda.de/profil/80085713/ has 2x Zweitimpfung and 1x Erstimpfung on the API *shrug
-                        continue
                     if service["insuranceType"] != 'STATUTORY_AND_PRIVATE':
                         continue
                     jameda_locations.append(location)
                     helper.info_log(
-                        f'Jameda Clinic {entry["name_kurz"]} at {entry["plz"]} {entry["ort"]} added!')
+                        f'Jameda: {str(entry["name_kurz"]).upper()} with {str(location["vaccine"]).upper()} added!')
 
         jameda_locations_fetched = True
         return True

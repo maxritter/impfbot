@@ -13,7 +13,7 @@ def samedi_send_message(city, slot_counter, vaccine_dates, vaccine_name, booking
         message = f'{slot_counter} Termine '
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
     message = message + \
-        f'für {str(vaccine_name).upper()}. Verfügbare Termine: {vaccine_dates_str}.'
+        f'für {str(vaccine_name).upper()} (ERST-, ZWEIT- ODER AUFFRISCHUNGSIMPFUNG). Verfügbare Termine: {vaccine_dates_str}.'
     message_long = message + f' Hier buchen: {booking_url}'
 
     # Print message out on server
