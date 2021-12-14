@@ -1,4 +1,5 @@
 import requests
+import time
 import json
 import sys
 from os import walk
@@ -13,9 +14,10 @@ doctolib_headers = {
     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
 }
 
+
 def main():
     city_files = []
-    for (_, _, filenames) in walk('../../data/'):
+    for (_, _, filenames) in walk("../../data/"):
         city_files.extend(filenames)
         break
 
@@ -23,30 +25,45 @@ def main():
         print(f"\n\n*** PROCESSING CITY FILE: {city_file} ***\n\n")
 
         # Load URLs from File
-        with open(f'../../data/{city_file}') as url_txt:
+        with open(f"../../data/{city_file}") as url_txt:
             print(f"Opening: ../../data/{city_file}")
             doctolib_urls = url_txt.readlines()
         doctolib_urls = [doctolib_url.strip() for doctolib_url in doctolib_urls]
 
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
-            # Get the center and do some basic checks
-            center = doctolib_url.split("/")[5]
-            print(center)
-            request_url = f'https://www.doctolib.de/booking/{center}.json'
-            try:
-                raw_data = requests.get(
-                    request_url,
-                    headers=doctolib_headers,
-                    timeout=10)
-                raw_data.raise_for_status()
-            except Exception as e:
-                print(
-                    f'[Doctolib] General issue during fetch of bookings for center {center} [{str(e)}]')
-                continue
-            json_data = raw_data.json()
-            with open(f'../../json/{center}.txt', 'w') as outfile:
-                json.dump(json_data, outfile)
+            while True:
+                try:
+                    # Get the center and do some basic checks
+                    center = doctolib_url.split("/")[5]
+                    print(center)
+                    request_url = f"https://www.doctolib.de/booking/{center}.json"
+                    while True:
+                        try:
+                            raw_data = requests.get(
+                                request_url, headers=doctolib_headers, timeout=10
+                            )
+                            raw_data.raise_for_status()
+                            break
+                        except Exception as e:
+                            if "503" in str(e):
+                                print(
+                                    "YOUR IP IS BLOCKED. Please catch another IP, retrying after 10s.."
+                                )
+                                time.sleep(10)
+                            else:
+                                print(
+                                    f"[Doctolib] General issue during fetch of bookings for center {center} [{str(e)}]"
+                                )
+                                break
+                    json_data = raw_data.json()
+                    with open(f"../../json/{center}.txt", "w") as outfile:
+                        json.dump(json_data, outfile)
+                        break
+                except Exception as e:
+                    print(f"Error reading JSON file, repeat: {str(e)}")
+                    continue
+
 
 if __name__ == "__main__":
     sys.exit(main())
