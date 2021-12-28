@@ -26,18 +26,18 @@ def main(args=None):
     while True:
         try:
             # For Munich, we have additional APIs to check
-            if city == 'muc':
-                zollsoft_check(city)
-                samedi_check(city)
-                dachau_check(city)
+            #if city == 'muc':
+            #    zollsoft_check(city)
+            #    samedi_check(city)
+            #    dachau_check(city)
 
             # Check Helios clinics
-            if helper.is_helios_enabled(city):
-                helios_check(city)
+            #if helper.is_helios_enabled(city):
+            #    helios_check(city)
 
             # Check Jameda
-            if helper.is_jameda_enabled(city):
-                jameda_check(city)
+            #if helper.is_jameda_enabled(city):
+            #    jameda_check(city)
 
             # Check Doctolib list
             doctolib_check(city)

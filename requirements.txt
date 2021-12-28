@@ -6,3 +6,4 @@ schedule
 requests[socks]
 pysocks
 fake_headers
+pyairtable
