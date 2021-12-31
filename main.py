@@ -47,7 +47,7 @@ def main(args=None):
 
             # Print out elapsed time
             end = time.time()
-            helper.info_log(f"Round completed in {round(end-start)} seconds..")
+            helper.info_log(f"*** Round completed in {round(end-start)} seconds ***")
             start = time.time()
 
         except Exception as e:

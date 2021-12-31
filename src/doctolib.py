@@ -45,7 +45,7 @@ def doctolib_determine_vaccines(
         or ("johnson" in visit_motive_name)
         or ("janssen" in visit_motive_name)
     ):
-        vaccine_names.append(visit_motive_name)
+        vaccine_names.append(visit_motive["name"])
         vaccine_ids.append(visit_motive_id)
         vaccine_specialities.append(speciality_id)
 
@@ -99,38 +99,34 @@ def doctolib_send_message(
     city,
     slot_counter,
     vaccine_name,
-    place_address,
-    date,
+    place_city,
+    available_dates,
     doctolib_url,
     vaccine_speciality,
+    vaccine_compound,
 ):
     if slot_counter == 1:
         message = f"{slot_counter} Termin "
     else:
         message = f"{slot_counter} Termine "
-    message = message + f"für {str(vaccine_name).upper()} am {date}"
-    if len(place_address.split(",")) == 2:
-        place_address_str = place_address.split(",")[1].strip()
-        message = message + f" in {place_address_str.upper()}."
+    message = message + f"für {vaccine_name} in {place_city}"
+    verbose_dates = ", ".join(sorted(set(available_dates)))
+    message = message + f". Wählbare Tage: {verbose_dates}."
     message_long = (
         message
-        + f". Hier buchen: {doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any"
+        + f" Hier buchen: {doctolib_url}?speciality_id={vaccine_speciality}&practitioner_id=any"
     )
 
     # Print message out on server
     helper.info_log(message)
 
     # Send message to telegram channels for the specific city
-    if "bion" in vaccine_name or "modern" in vaccine_name:
+    helper.send_channel_msg(city, "all", message_long)
+    if vaccine_compound == "BioNTech" or vaccine_compound == "Moderna":
         helper.send_channel_msg(city, "mrna", message_long)
-        helper.send_channel_msg(city, "all", message_long)
-    elif (
-        "astra" in vaccine_name
-        or "johnson" in vaccine_name
-        or "janssen" in vaccine_name
-    ):
+
+    elif vaccine_compound == "AstraZeneca" or vaccine_compound == "Johnson & Johnson":
         helper.send_channel_msg(city, "vec", message_long)
-        helper.send_channel_msg(city, "all", message_long)
 
 
 def doctolib_check(city):
@@ -139,9 +135,6 @@ def doctolib_check(city):
     try:
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
-            # sleep_time = random.randint(200, 1500)
-            # time.sleep(sleep_time / 1000 + random.random())
-
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
             try:
@@ -187,7 +180,8 @@ def doctolib_check(city):
                     start_date = datetime.datetime.today().date().isoformat()
                     visit_motive_ids = vaccine_id
                     practice_ids = place["practice_ids"][0]
-                    place_address = place["full_address"]
+                    place_address = place["address"]
+                    place_city = place["zipcode"] + " " + place["city"]
                     practice_name = place["formal_name"]
 
                     # Create agends IDs
@@ -209,29 +203,29 @@ def doctolib_check(city):
                     if response_json is None:
                         continue
                     nb_availabilities = response_json["total"]
+
+                    # Lookup vaccination count
+                    vaccination_id = f"{visit_motive_ids}.{agenda_ids}.{practice_ids}"
+                    if not vaccination_id in helper.airtable_id_count_dict:
+                        helper.airtable_id_count_dict[vaccination_id] = 0
+                    vaccination_count = helper.airtable_id_count_dict[vaccination_id]
+
+                    # No availabilities
                     if nb_availabilities == 0:
+                        if vaccination_count > 0:
+                            helper.delete_airtable_entry(vaccination_id)
                         continue
 
-                    total_dict = {}
-                    unsent_dict = {}
+                    # Parse availabilities
+                    slot_counter = 0
+                    available_dates = []
                     for availability in response_json["availabilities"]:
-                        available_date = datetime.datetime.strptime(
-                            availability.get("date"), "%Y-%m-%d"
-                        ).strftime("%d.%m.%Y")
-                        unsent_dict[available_date] = 0
-                        total_dict[available_date] = 0
-                        for slot in availability["slots"]:
-                            vaccination_id = "{}.{}.{}.{}".format(
-                                visit_motive_ids, agenda_ids, practice_ids, slot
-                            )
-
-                            if vaccination_id not in helper.already_sent_ids:
-                                unsent_dict[available_date] = (
-                                    unsent_dict[available_date] + 1
-                                )
-                                helper.already_sent_ids.append(vaccination_id)
-
-                            total_dict[available_date] = total_dict[available_date] + 1
+                        if len(availability["slots"]) > 0:
+                            available_date = datetime.datetime.strptime(
+                                availability.get("date"), "%Y-%m-%d"
+                            ).strftime("%d.%m.%Y")
+                            available_dates.append(available_date)
+                            slot_counter = slot_counter + len(availability["slots"])
 
                     # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
@@ -239,39 +233,41 @@ def doctolib_check(city):
                     vaccine_compound = helper.get_vaccine_compound(vaccine_name)
                     vaccine_type = helper.get_vaccine_type(vaccine_name)
 
-                    # Send unsent appointments to Doctolib
-                    for date in unsent_dict:
-                        if unsent_dict[date] > 0:
-                            slot_counter = total_dict[date]
+                    if slot_counter > 0:
+                        # Update Airtable
+                        if vaccination_count == 0:
+                            helper.create_airtable_entry(
+                                vaccination_id,
+                                vaccine_name,
+                                slot_counter,
+                                doctolib_url,
+                                practice_name,
+                                vaccine_type,
+                                vaccine_compound,
+                                available_dates,
+                                place_address,
+                                place_city,
+                                "Doctolib",
+                            )
+                        elif slot_counter != vaccination_count:
+                            helper.update_airtable_entry(
+                                vaccination_id,
+                                slot_counter,
+                                available_dates,
+                            )
+
+                        # Send appointments to Doctolib
+                        if vaccination_count == 0 or slot_counter > vaccination_count:
                             doctolib_send_message(
                                 city,
                                 slot_counter,
                                 vaccine_name,
-                                place_address,
-                                date,
+                                place_city,
+                                available_dates,
                                 doctolib_url,
                                 vaccine_speciality,
+                                vaccine_compound,
                             )
-
-                    # Update all airtable entries
-                    for date in total_dict:
-                        slot_counter = total_dict[date]
-                        id = "{}.{}.{}.{}".format(
-                            visit_motive_ids, agenda_ids, practice_ids, date
-                        )
-                        current_date = datetime.datetime.strptime(date, "%d.%m.%Y")
-                        helper.update_airtable_entry(
-                            id,
-                            city,
-                            slot_counter,
-                            doctolib_url,
-                            practice_name,
-                            vaccine_type,
-                            vaccine_compound,
-                            current_date,
-                            place_address,
-                            "Doctolib",
-                        )
 
                 vaccine_counter = vaccine_counter + 1
 

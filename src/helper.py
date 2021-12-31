@@ -22,9 +22,10 @@ from src import helios, doctolib, jameda
 api_timeout_seconds = 10
 airtable_api_key = os.environ["AIRTABLE_API_KEY"]
 airtable_base_id = "appLWz5gLNlhjhN94"
+airtable_id_count_dict = {}
 local_timezone = pytz.timezone("Europe/Berlin")
-already_sent_ids = None
 telegram_bot = None
+airtable_table = None
 logger = None
 conf = {
     "agb": {
@@ -373,48 +374,111 @@ def send_daily_stats(city):
                 error_log(f"[Telegram] Error during message send [{str(e)}]")
 
 
-def update_airtable_entry(
-    id, city, count, url, practice, type, compound, date, address, platform
-):
-    airtable_table_id = conf[city]["table_id"]
-    if not airtable_api_key or not airtable_base_id or not airtable_table_id:
+def get_airtable_entries():
+    if not airtable_table:
         return
 
-    table = Table(airtable_api_key, airtable_base_id, airtable_table_id)
     try:
-        formula = match({"ID": id})
-        entry = table.first(formula=formula)
-        # Delete existing record
-        if entry and count == 0:
-            info_log(f"Deleting {platform} Airtable record with ID {id}..")
-            table.delete(entry["id"])
-        # Update existing record
-        if entry and count > 0:
-            info_log(f"Updating {platform} Airtable record with ID {id}..")
-            table.update(
-                entry["id"],
-                {
-                    "Anzahl": count,
-                },
-            )
-        # Create new record
-        if not entry and count > 0:
-            info_log(f"Creating {platform} Airtable record with ID {id}..")
-            table.create(
-                {
-                    "Adresse": address,
-                    "Impfstoff": compound,
-                    "Impftyp": type,
-                    "Datum": datetime_to_iso_str(date),
-                    "Praxis": practice,
-                    "Anzahl": count,
-                    "Link": url,
-                    "Plattform": platform,
-                    "ID": id,
-                }
+        airtable_entries = airtable_table.all()
+        for entry in airtable_entries:
+            try:
+                airtable_id_count_dict[entry["fields"]["ID"]] = entry["fields"][
+                    "Anzahl"
+                ]
+            except Exception as e:
+                error_log(f"[Airtable] Error during get entry: [{str(e)}]")
+
+    except Exception as e:
+        error_log(f"[Airtable] Error during get entries: [{str(e)}]")
+
+
+def delete_airtable_entry(vaccination_id):
+    global airtable_id_count_dict, airtable_table
+
+    if not airtable_table:
+        return
+
+    try:
+        formula = match({"ID": vaccination_id})
+        entry = airtable_table.first(formula=formula)
+        if entry:
+            info_log(f"Deleting {platform} Airtable record with ID {vaccination_id}..")
+            airtable_table.delete(entry["ID"])
+            airtable_id_count_dict[vaccination_id] = 0
+        else:
+            warn_log(
+                f"Unable to delete {platform} Airtable record with ID {vaccination_id}.."
             )
     except Exception as e:
-        error_log(f"[Airtable] Error during update: [{str(e)}]")
+        error_log(f"[Airtable] Error during delete: [{str(e)}]")
+
+
+def update_airtable_entry(vaccination_id, count, available_dates):
+    global airtable_id_count_dict, airtable_table
+
+    if not airtable_table:
+        return
+
+    try:
+        formula = match({"ID": vaccination_id})
+        entry = airtable_table.first(formula=formula)
+        if entry:
+            info_log(f"Updating {platform} Airtable record with ID {vaccination_id}..")
+            airtable_table.update(
+                entry["ID"],
+                {
+                    "Anzahl": count,
+                    "Termine": ", ".join(sorted(set(available_dates))),
+                },
+            )
+            airtable_id_count_dict[vaccination_id] = count
+        else:
+            warn_log(
+                f"Unable to update {platform} Airtable record with ID {vaccination_id}.."
+            )
+    except Exception as e:
+        error_log(f"[Airtable] Error during delete: [{str(e)}]")
+
+
+def create_airtable_entry(
+    vaccination_id,
+    name,
+    count,
+    url,
+    practice,
+    type,
+    compound,
+    available_dates,
+    address,
+    city,
+    platform,
+):
+    global airtable_id_count_dict, airtable_table
+
+    if not airtable_table:
+        return
+
+    try:
+        info_log(f"Creating {platform} Airtable record with ID {vaccination_id}..")
+        airtable_table.create(
+            {
+                "Name": name,
+                "Adresse": address,
+                "Stadt": city,
+                "Impfstoff": compound,
+                "Impftyp": type,
+                "Termine": ", ".join(sorted(set(available_dates))),
+                "Praxis": practice,
+                "Anzahl": count,
+                "Link": url,
+                "Plattform": platform,
+                "ID": vaccination_id,
+                "Kinder": check_kinder(name),
+            }
+        )
+        airtable_id_count_dict[vaccination_id] = count
+    except Exception as e:
+        error_log(f"[Airtable] Error during create: [{str(e)}]")
 
 
 def send_channel_msg(city, type, msg):
@@ -430,31 +494,55 @@ def send_channel_msg(city, type, msg):
 
 
 def get_vaccine_compound(vaccine_name):
-    if "bion" in vaccine_name:
+    if "bion" in vaccine_name.lower() or "pfizer" in vaccine_name.lower():
         vaccine_compound = "BioNTech"
-    elif "modern" in vaccine_name:
+    elif "modern" in vaccine_name.lower():
         vaccine_compound = "Moderna"
-    elif "astra" in vaccine_name:
+    elif "astra" in vaccine_name.lower():
         vaccine_compound = "AstraZeneca"
-    elif "janssen" in vaccine_name or "johnson" in vaccine_name:
+    elif "janssen" in vaccine_name.lower() or "johnson" in vaccine_name.lower():
         vaccine_compound = "Johnson & Johnson"
     else:
         vaccine_compound = "Unbekannt"
     return vaccine_compound
 
 
+def check_vaccine(condition, vaccine_name):
+    return condition in vaccine_name.lower()
+
+
+def check_kinder(vaccine_name):
+    has_kinder = (
+        "kinder" in vaccine_name.lower()
+        or "5" in vaccine_name.lower()
+        or "11" in vaccine_name.lower()
+        or "12" in vaccine_name.lower()
+        or "16" in vaccine_name.lower()
+    )
+    return has_kinder
+
+
 def get_vaccine_type(vaccine_name):
     if (
-        ("1." or "erst" in vaccine_name.lower())
-        and ("2." or "zweit" in vaccine_name.lower())
-        or ("alle" in vaccine_name.lower())
-    ):
+        (check_vaccine("1.", vaccine_name) or check_vaccine("erst", vaccine_name))
+        and (check_vaccine("2.", vaccine_name) or check_vaccine("zweit", vaccine_name))
+        and (check_vaccine("3.", vaccine_name) or check_vaccine("dritt", vaccine_name))
+    ) or check_vaccine("alle", vaccine_name):
         vaccine_type = "Alle Impfungen"
-    elif "1." or "erst" in vaccine_name.lower():
+    elif (
+        check_vaccine("1.", vaccine_name) or check_vaccine("erst", vaccine_name)
+    ) and (check_vaccine("2.", vaccine_name) or check_vaccine("zweit", vaccine_name)):
+        vaccine_type = "Erst- & Zweitimpfung"
+    elif check_vaccine("1.", vaccine_name) or check_vaccine("erst", vaccine_name):
         vaccine_type = "Erstimpfung"
-    elif "2." or "zweit" in vaccine_name.lower():
+    elif check_vaccine("2.", vaccine_name) or check_vaccine("zweit", vaccine_name):
         vaccine_type = "Zweitimpfung"
-    elif "booster" or "auffrischung" or "dritte" or "3." in vaccine_name.lower():
+    elif (
+        check_vaccine("3.", vaccine_name)
+        or check_vaccine("dritt", vaccine_name)
+        or check_vaccine("auffrischung", vaccine_name)
+        or check_vaccine("booster", vaccine_name)
+    ):
         vaccine_type = "Auffrischungsimpfung"
     else:
         vaccine_type = "Unbekannt"
@@ -462,15 +550,18 @@ def get_vaccine_type(vaccine_name):
 
 
 def init(city):
-    global telegram_bot, already_sent_ids, conf
+    global telegram_bot, conf, airtable_table
 
     # Load secrets from file
     load_dotenv(verbose=True)
 
     # General inits
-    already_sent_ids = []
     init_logger(city)
     info_log("Init Impfbot..")
+    airtable_table_id = conf[city]["table_id"]
+    if airtable_api_key and airtable_base_id and airtable_table_id:
+        airtable_table = Table(airtable_api_key, airtable_base_id, airtable_table_id)
+        get_airtable_entries()
 
     # Init Telegram Bot
     if not is_local():
