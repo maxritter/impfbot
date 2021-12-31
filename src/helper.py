@@ -401,13 +401,13 @@ def delete_airtable_entry(vaccination_id):
         formula = match({"ID": vaccination_id})
         entry = airtable_table.first(formula=formula)
         if entry:
-            info_log(f"Deleting {platform} Airtable record with ID {vaccination_id}..")
+            info_log(f"Deleting Airtable record with ID {vaccination_id}..")
             if not is_local():
                 airtable_table.delete(entry["id"])
             airtable_id_count_dict[vaccination_id] = 0
         else:
             warn_log(
-                f"Unable to delete {platform} Airtable record with ID {vaccination_id}.."
+                f"Unable to delete Airtable record with ID {vaccination_id}.."
             )
     except Exception as e:
         error_log(f"[Airtable] Error during delete: [{str(e)}]")
@@ -423,7 +423,7 @@ def update_airtable_entry(
     compound,
     available_dates,
     address,
-    city,
+    city
 ):
     global airtable_id_count_dict, airtable_table
 
@@ -434,7 +434,7 @@ def update_airtable_entry(
         formula = match({"ID": vaccination_id})
         entry = airtable_table.first(formula=formula)
         if entry:
-            info_log(f"Updating {platform} Airtable record with ID {vaccination_id}..")
+            info_log(f"Updating Airtable record with ID {vaccination_id}..")
             if not is_local():
                 airtable_table.update(
                     entry["id"],
@@ -453,7 +453,7 @@ def update_airtable_entry(
                 )
         else:
             warn_log(
-                f"Unable to update {platform} Airtable record with ID {vaccination_id}.."
+                f"Unable to update Airtable record with ID {vaccination_id}.."
             )
     except Exception as e:
         error_log(f"[Airtable] Error during update: [{str(e)}]")
@@ -478,7 +478,7 @@ def create_airtable_entry(
         return
 
     try:
-        info_log(f"Creating {platform} Airtable record with ID {vaccination_id}..")
+        info_log(f"Creating Airtable record with ID {vaccination_id}..")
         if not is_local():
             airtable_table.create(
                 {
