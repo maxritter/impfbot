@@ -48,9 +48,9 @@ def main():
                         except Exception as e:
                             if "503" in str(e):
                                 print(
-                                    "YOUR IP IS BLOCKED. Please catch another IP, retrying after 10s.."
+                                    "YOUR IP IS BLOCKED. Please catch another IP, retrying after 60s.."
                                 )
-                                time.sleep(10)
+                                time.sleep(60)
                             else:
                                 print(
                                     f"[Doctolib] General issue during fetch of bookings for center {center} [{str(e)}]"

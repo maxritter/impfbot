@@ -135,17 +135,20 @@ def doctolib_check(city):
     try:
         # Check all URLs in the city list
         for doctolib_url in doctolib_urls:
+            sleep_time = random.randint(200, 1500)
+            time.sleep(sleep_time / 1000 + random.random())
+
             # Get the center and do some basic checks
             center = doctolib_url.split("/")[5]
             try:
                 with open(f"json/{center}.txt") as json_file:
                     json_data = json.load(json_file)
+                data = json_data["data"]
+                visit_motives = [visit_motive for visit_motive in data["visit_motives"]]
+                if not visit_motives:
+                    continue
             except Exception as e:
-                helper.error_log(f"Unable to load JSON for center {center}, continue..")
-                continue
-            data = json_data["data"]
-            visit_motives = [visit_motive for visit_motive in data["visit_motives"]]
-            if not visit_motives:
+                helper.warn_log(f"Unable to load JSON for center {center}, continue..")
                 continue
 
             # Determine Vaccine

@@ -9,7 +9,6 @@ import csv
 import urllib.request
 from pyairtable import Table
 from pyairtable.formulas import match
-from pyairtable.utils import datetime_to_iso_str
 from dotenv import load_dotenv
 import datetime
 import pytz
@@ -23,13 +22,14 @@ api_timeout_seconds = 10
 airtable_api_key = os.environ["AIRTABLE_API_KEY"]
 airtable_base_id = "appLWz5gLNlhjhN94"
 airtable_id_count_dict = {}
+already_sent_ids = []
 local_timezone = pytz.timezone("Europe/Berlin")
 telegram_bot = None
 airtable_table = None
 logger = None
 conf = {
     "agb": {
-        "table_id": "",
+        "table_id": "tblWu2oUn2k4KmVzs",
         "all_id": -1001432733051,
         "mrna_id": -1,
         "vec_id": -1,
@@ -39,7 +39,7 @@ conf = {
         "city": "Augsburg",
     },
     "ber": {
-        "table_id": "",
+        "table_id": "tblWSQ9lRQjSR1vrY",
         "all_id": -1001311147212,
         "mrna_id": -1001238768507,
         "vec_id": -1001407959008,
@@ -49,7 +49,7 @@ conf = {
         "city": "Berlin",
     },
     "bfe": {
-        "table_id": "",
+        "table_id": "tbl4xuMB8dfvpw7Sq",
         "all_id": -1001326829050,
         "mrna_id": -1,
         "vec_id": -1,
@@ -59,7 +59,7 @@ conf = {
         "city": "Bielefeld",
     },
     "bn": {
-        "table_id": "",
+        "table_id": "tblShufjKzCmESOyB",
         "all_id": -1001391425907,
         "mrna_id": -1,
         "vec_id": -1,
@@ -69,7 +69,7 @@ conf = {
         "city": "Bonn",
     },
     "bre": {
-        "table_id": "",
+        "table_id": "tblgw0gy4I5JlF18z",
         "all_id": -1001224145181,
         "mrna_id": -1,
         "vec_id": -1,
@@ -79,7 +79,7 @@ conf = {
         "city": "Bremen",
     },
     "cgn": {
-        "table_id": "",
+        "table_id": "tblMnfEDGdwpIRkI3",
         "all_id": -1001439806320,
         "mrna_id": -1001346411243,
         "vec_id": -1001440545907,
@@ -89,7 +89,7 @@ conf = {
         "city": "Köln",
     },
     "co": {
-        "table_id": "",
+        "table_id": "tbl7vbvyX4fxsOP0Z",
         "all_id": -1001290443403,
         "mrna_id": -1,
         "vec_id": -1,
@@ -99,7 +99,7 @@ conf = {
         "city": "Coburg",
     },
     "drs": {
-        "table_id": "",
+        "table_id": "tblcn27JmkgRLvwj0",
         "all_id": -1001165597953,
         "mrna_id": -1,
         "vec_id": -1,
@@ -109,7 +109,7 @@ conf = {
         "city": "Dresden",
     },
     "dtm": {
-        "table_id": "",
+        "table_id": "tblZGNlEHN4OLgBJp",
         "all_id": -1001168900922,
         "mrna_id": -1001312226933,
         "vec_id": -1001163809419,
@@ -119,7 +119,7 @@ conf = {
         "city": "Dortmund",
     },
     "dus": {
-        "table_id": "",
+        "table_id": "tblpXiQ8SgCngeLLK",
         "all_id": -1001441637885,
         "mrna_id": -1001170209652,
         "vec_id": -1001371958170,
@@ -129,7 +129,7 @@ conf = {
         "city": "Düsseldorf",
     },
     "erf": {
-        "table_id": "",
+        "table_id": "tblVmGYPancDHUuS6",
         "all_id": -1001183027974,
         "mrna_id": -1,
         "vec_id": -1,
@@ -139,7 +139,7 @@ conf = {
         "city": "Erfurt",
     },
     "ess": {
-        "table_id": "",
+        "table_id": "tbl4SkHZHPSSGaKpe",
         "all_id": -1001398889913,
         "mrna_id": -1001230771678,
         "vec_id": -1001435263461,
@@ -149,7 +149,7 @@ conf = {
         "city": "Essen",
     },
     "ffm": {
-        "table_id": "",
+        "table_id": "tblAKfzNRHildk6Q3",
         "all_id": -1001238323633,
         "mrna_id": -1001314044312,
         "vec_id": -1001150816653,
@@ -159,7 +159,7 @@ conf = {
         "city": "Frankfurt",
     },
     "goe": {
-        "table_id": "",
+        "table_id": "tblVskOGZP8TUxnqn",
         "all_id": -1001428055753,
         "mrna_id": -1,
         "vec_id": -1,
@@ -169,7 +169,7 @@ conf = {
         "city": "Göttingen",
     },
     "hh": {
-        "table_id": "",
+        "table_id": "tblOMrxuTFRDYDXYg",
         "all_id": -1001237010945,
         "mrna_id": -1001251036735,
         "vec_id": -1001235895701,
@@ -179,7 +179,7 @@ conf = {
         "city": "Hamburg",
     },
     "ka": {
-        "table_id": "",
+        "table_id": "tbl3gXTmGtpH6PTgo",
         "all_id": -1001436511356,
         "mrna_id": -1,
         "vec_id": -1,
@@ -189,7 +189,7 @@ conf = {
         "city": "Karlsruhe",
     },
     "ko": {
-        "table_id": "",
+        "table_id": "tblXDkqewnS4zkqAZ",
         "all_id": -1001473711809,
         "mrna_id": -1,
         "vec_id": -1,
@@ -199,7 +199,7 @@ conf = {
         "city": "Koblenz",
     },
     "lej": {
-        "table_id": "",
+        "table_id": "tblua8aYOFXo1ckyF",
         "all_id": -1001487955448,
         "mrna_id": -1001460759342,
         "vec_id": -1001451326581,
@@ -209,7 +209,7 @@ conf = {
         "city": "Leipzig",
     },
     "md": {
-        "table_id": "",
+        "table_id": "tbl0c6QH3LBZ4EHpD",
         "all_id": -1001183191239,
         "mrna_id": -1,
         "vec_id": -1,
@@ -219,7 +219,7 @@ conf = {
         "city": "Magdeburg",
     },
     "ms": {
-        "table_id": "",
+        "table_id": "tblRqSz9O8529G5Ux",
         "all_id": -1001427604433,
         "mrna_id": -1,
         "vec_id": -1,
@@ -229,7 +229,7 @@ conf = {
         "city": "Münster",
     },
     "muc": {
-        "table_id": "tbl2PfaIRejQjdF5o",
+        "table_id": "tblc5cYM4bputqPyf",
         "all_id": -1001464001536,
         "mrna_id": -1001126966895,
         "vec_id": -1001161931395,
@@ -239,7 +239,7 @@ conf = {
         "city": "München",
     },
     "nue": {
-        "table_id": "",
+        "table_id": "tblg4MsEmObYEUNQx",
         "all_id": -1001159218767,
         "mrna_id": -1001446237946,
         "vec_id": -1001181035310,
@@ -249,7 +249,7 @@ conf = {
         "city": "Nürnberg",
     },
     "str": {
-        "table_id": "",
+        "table_id": "tbltzZiRg9DdIOFwG",
         "all_id": -1001315735957,
         "mrna_id": -1001374316872,
         "vec_id": -1001347549449,
@@ -375,8 +375,7 @@ def send_daily_stats(city):
 
 
 def get_airtable_entries():
-    if not airtable_table:
-        return
+    global airtable_id_count_dict, airtable_table
 
     try:
         airtable_entries = airtable_table.all()
@@ -562,6 +561,8 @@ def init(city):
     if airtable_api_key and airtable_base_id and airtable_table_id:
         airtable_table = Table(airtable_api_key, airtable_base_id, airtable_table_id)
         get_airtable_entries()
+    else:
+        error_log(f"[Airtable] Settings could not be loaded for city: {city}")
 
     # Init Telegram Bot
     if not is_local():
@@ -571,12 +572,12 @@ def init(city):
     doctolib.doctolib_init(city)
 
     # Try to init Helios API
-    # if is_helios_enabled(city):
-    #    helios.helios_init(city)
+    if is_helios_enabled(city):
+        helios.helios_init(city)
 
     # Try to init Jameda API
-    # if is_jameda_enabled(city):
-    #    jameda.jameda_init(city)
+    if is_jameda_enabled(city):
+        jameda.jameda_init(city)
 
 
 # Wrapper class to provide delayed requests to avoid ip bans
