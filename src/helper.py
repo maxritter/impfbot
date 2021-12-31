@@ -424,7 +424,6 @@ def update_airtable_entry(
     available_dates,
     address,
     city,
-    platform,
 ):
     global airtable_id_count_dict, airtable_table
 
@@ -449,11 +448,9 @@ def update_airtable_entry(
                         "Praxis": practice,
                         "Anzahl": count,
                         "Link": url,
-                        "Plattform": platform,
                         "Kinder": check_kinder(name),
                     },
                 )
-            airtable_id_count_dict[vaccination_id] = count
         else:
             warn_log(
                 f"Unable to update {platform} Airtable record with ID {vaccination_id}.."
@@ -499,7 +496,6 @@ def create_airtable_entry(
                     "Kinder": check_kinder(name),
                 }
             )
-        airtable_id_count_dict[vaccination_id] = count
     except Exception as e:
         error_log(f"[Airtable] Error during create: [{str(e)}]")
 
