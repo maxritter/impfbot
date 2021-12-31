@@ -406,24 +406,15 @@ def delete_airtable_entry(vaccination_id):
                 airtable_table.delete(entry["id"])
             airtable_id_count_dict[vaccination_id] = 0
         else:
-            warn_log(
-                f"Unable to delete Airtable record with ID {vaccination_id}.."
-            )
+            warn_log(f"Unable to delete Airtable record with ID {vaccination_id}..")
     except Exception as e:
         error_log(f"[Airtable] Error during delete: [{str(e)}]")
 
 
 def update_airtable_entry(
     vaccination_id,
-    name,
     count,
-    url,
-    practice,
-    type,
-    compound,
     available_dates,
-    address,
-    city
 ):
     global airtable_id_count_dict, airtable_table
 
@@ -439,22 +430,12 @@ def update_airtable_entry(
                 airtable_table.update(
                     entry["id"],
                     {
-                        "Name": name,
-                        "Adresse": address,
-                        "Stadt": city,
-                        "Impfstoff": compound,
-                        "Impftyp": type,
                         "Termine": ", ".join(sorted(set(available_dates))),
-                        "Praxis": practice,
                         "Anzahl": count,
-                        "Link": url,
-                        "Kinder": check_kinder(name),
                     },
                 )
         else:
-            warn_log(
-                f"Unable to update Airtable record with ID {vaccination_id}.."
-            )
+            warn_log(f"Unable to update Airtable record with ID {vaccination_id}..")
     except Exception as e:
         error_log(f"[Airtable] Error during update: [{str(e)}]")
 

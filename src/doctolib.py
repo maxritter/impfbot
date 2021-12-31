@@ -255,15 +255,8 @@ def doctolib_check(city):
                         elif slot_counter != vaccination_count:
                             helper.update_airtable_entry(
                                 vaccination_id,
-                                vaccine_name,
                                 slot_counter,
-                                doctolib_url,
-                                practice_name,
-                                vaccine_type,
-                                vaccine_compound,
                                 available_dates,
-                                place_address,
-                                place_city,
                             )
 
                         # Send appointments to Doctolib
