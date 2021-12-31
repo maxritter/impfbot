@@ -402,7 +402,8 @@ def delete_airtable_entry(vaccination_id):
         entry = airtable_table.first(formula=formula)
         if entry:
             info_log(f"Deleting {platform} Airtable record with ID {vaccination_id}..")
-            airtable_table.delete(entry["ID"])
+            if not is_local():
+                airtable_table.delete(entry["id"])
             airtable_id_count_dict[vaccination_id] = 0
         else:
             warn_log(
@@ -412,7 +413,19 @@ def delete_airtable_entry(vaccination_id):
         error_log(f"[Airtable] Error during delete: [{str(e)}]")
 
 
-def update_airtable_entry(vaccination_id, count, available_dates):
+def update_airtable_entry(
+    vaccination_id,
+    name,
+    count,
+    url,
+    practice,
+    type,
+    compound,
+    available_dates,
+    address,
+    city,
+    platform,
+):
     global airtable_id_count_dict, airtable_table
 
     if not airtable_table:
@@ -423,20 +436,30 @@ def update_airtable_entry(vaccination_id, count, available_dates):
         entry = airtable_table.first(formula=formula)
         if entry:
             info_log(f"Updating {platform} Airtable record with ID {vaccination_id}..")
-            airtable_table.update(
-                entry["ID"],
-                {
-                    "Anzahl": count,
-                    "Termine": ", ".join(sorted(set(available_dates))),
-                },
-            )
+            if not is_local():
+                airtable_table.update(
+                    entry["id"],
+                    {
+                        "Name": name,
+                        "Adresse": address,
+                        "Stadt": city,
+                        "Impfstoff": compound,
+                        "Impftyp": type,
+                        "Termine": ", ".join(sorted(set(available_dates))),
+                        "Praxis": practice,
+                        "Anzahl": count,
+                        "Link": url,
+                        "Plattform": platform,
+                        "Kinder": check_kinder(name),
+                    },
+                )
             airtable_id_count_dict[vaccination_id] = count
         else:
             warn_log(
                 f"Unable to update {platform} Airtable record with ID {vaccination_id}.."
             )
     except Exception as e:
-        error_log(f"[Airtable] Error during delete: [{str(e)}]")
+        error_log(f"[Airtable] Error during update: [{str(e)}]")
 
 
 def create_airtable_entry(
@@ -459,22 +482,23 @@ def create_airtable_entry(
 
     try:
         info_log(f"Creating {platform} Airtable record with ID {vaccination_id}..")
-        airtable_table.create(
-            {
-                "Name": name,
-                "Adresse": address,
-                "Stadt": city,
-                "Impfstoff": compound,
-                "Impftyp": type,
-                "Termine": ", ".join(sorted(set(available_dates))),
-                "Praxis": practice,
-                "Anzahl": count,
-                "Link": url,
-                "Plattform": platform,
-                "ID": vaccination_id,
-                "Kinder": check_kinder(name),
-            }
-        )
+        if not is_local():
+            airtable_table.create(
+                {
+                    "Name": name,
+                    "Adresse": address,
+                    "Stadt": city,
+                    "Impfstoff": compound,
+                    "Impftyp": type,
+                    "Termine": ", ".join(sorted(set(available_dates))),
+                    "Praxis": practice,
+                    "Anzahl": count,
+                    "Link": url,
+                    "Plattform": platform,
+                    "ID": vaccination_id,
+                    "Kinder": check_kinder(name),
+                }
+            )
         airtable_id_count_dict[vaccination_id] = count
     except Exception as e:
         error_log(f"[Airtable] Error during create: [{str(e)}]")
@@ -543,6 +567,8 @@ def get_vaccine_type(vaccine_name):
         or check_vaccine("booster", vaccine_name)
     ):
         vaccine_type = "Auffrischungsimpfung"
+    elif check_vaccine("einzel", vaccine_name):
+        vaccine_type = "Einzelimpfung"
     else:
         vaccine_type = "Unbekannt"
     return vaccine_type
