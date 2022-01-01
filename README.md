@@ -4,18 +4,16 @@ Finding COVID-19 vaccination appointments in Germany for https://www.corona-impf
 
 ![](https://d33wubrfki0l68.cloudfront.net/1d37f117dcdc6c37dbddba2828cf74d487f3d1be/cd1bb/images/header_new.png)
 
-This Python project implements various crawlers to automatically fetch free vaccination appointments and sends them to the users in the Telegram groups. The currently implemented platforms are:
+This Python project implements various crawlers to automatically fetch free vaccination appointments. The currently implemented platforms are:
 
 - Doctolib
 - Jameda
 - Helios Clinics
 - MVZ Dachau Verbund
-- Samedi
 - Zollsoft
 
 In the tools folder, the following additional scripts exist:
 
-- Randstad API / Impf-Finder (currently not used because of low number of appointments)
 - Doctolib Puller (allows to find all practices from Doctolib in a specific geolocation)
 - Doctolib JSON (downloads json files for those found practices so traffic over the proxy is decreased)
 

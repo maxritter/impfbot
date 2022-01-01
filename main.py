@@ -3,7 +3,6 @@ import time
 import schedule
 from src.zollsoft import zollsoft_check
 from src.doctolib import doctolib_check
-from src.samedi import samedi_check
 from src.jameda import jameda_check
 from src.helios import helios_check
 from src.dachau import dachau_check
@@ -25,10 +24,10 @@ def main(args=None):
     start = time.time()
     while True:
         try:
-            # For Munich, we have additional APIs to check
+            # Additional APIs to check
             if city == "muc":
                 zollsoft_check(city)
-                samedi_check(city)
+            if city == "muc" or city == "agb":
                 dachau_check(city)
 
             # Check Helios clinics

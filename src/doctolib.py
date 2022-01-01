@@ -230,47 +230,52 @@ def doctolib_check(city):
                             available_dates.append(available_date)
                             slot_counter = slot_counter + len(availability["slots"])
 
+                    # No slots
+                    if slot_counter == 0:
+                        if vaccination_count > 0:
+                            helper.delete_airtable_entry(vaccination_id)
+                        continue
+
                     # Construct and send message
                     vaccine_name = vaccine_names[vaccine_counter]
                     vaccine_speciality = vaccine_specialities[vaccine_counter]
                     vaccine_compound = helper.get_vaccine_compound(vaccine_name)
                     vaccine_type = helper.get_vaccine_type(vaccine_name)
 
-                    if slot_counter > 0:
-                        # Update Airtable
-                        if vaccination_count == 0:
-                            helper.create_airtable_entry(
-                                vaccination_id,
-                                vaccine_name,
-                                slot_counter,
-                                doctolib_url,
-                                practice_name,
-                                vaccine_type,
-                                vaccine_compound,
-                                available_dates,
-                                place_address,
-                                place_city,
-                                "Doctolib",
-                            )
-                        elif slot_counter != vaccination_count:
-                            helper.update_airtable_entry(
-                                vaccination_id,
-                                slot_counter,
-                                available_dates,
-                            )
+                    # Update Airtable
+                    if vaccination_count == 0:
+                        helper.create_airtable_entry(
+                            vaccination_id,
+                            vaccine_name,
+                            slot_counter,
+                            doctolib_url,
+                            practice_name,
+                            vaccine_type,
+                            vaccine_compound,
+                            available_dates,
+                            place_address,
+                            place_city,
+                            "Doctolib",
+                        )
+                    elif slot_counter != vaccination_count:
+                        helper.update_airtable_entry(
+                            vaccination_id,
+                            slot_counter,
+                            available_dates,
+                        )
 
-                        # Send appointments to Doctolib
-                        if vaccination_count == 0 or slot_counter > vaccination_count:
-                            doctolib_send_message(
-                                city,
-                                slot_counter,
-                                vaccine_name,
-                                place_city,
-                                available_dates,
-                                doctolib_url,
-                                vaccine_speciality,
-                                vaccine_compound,
-                            )
+                    # Send appointments to Doctolib
+                    if vaccination_count == 0 or slot_counter > vaccination_count:
+                        doctolib_send_message(
+                            city,
+                            slot_counter,
+                            vaccine_name,
+                            place_city,
+                            available_dates,
+                            doctolib_url,
+                            vaccine_speciality,
+                            vaccine_compound,
+                        )
 
                         helper.airtable_id_count_dict[vaccination_id] = slot_counter
 

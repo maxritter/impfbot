@@ -22,7 +22,6 @@ api_timeout_seconds = 10
 airtable_api_key = os.environ["AIRTABLE_API_KEY"]
 airtable_base_id = "appLWz5gLNlhjhN94"
 airtable_id_count_dict = {}
-already_sent_ids = []
 local_timezone = pytz.timezone("Europe/Berlin")
 telegram_bot = None
 airtable_table = None
@@ -476,7 +475,7 @@ def create_airtable_entry(
                     "ID": vaccination_id,
                     "Kinder": check_kinder(name),
                 }
-            )
+        )
     except Exception as e:
         error_log(f"[Airtable] Error during create: [{str(e)}]")
 
@@ -526,7 +525,12 @@ def get_vaccine_type(vaccine_name):
     if (
         (check_vaccine("1.", vaccine_name) or check_vaccine("erst", vaccine_name))
         and (check_vaccine("2.", vaccine_name) or check_vaccine("zweit", vaccine_name))
-        and (check_vaccine("3.", vaccine_name) or check_vaccine("dritt", vaccine_name))
+        and (
+            check_vaccine("3.", vaccine_name)
+            or check_vaccine("dritt", vaccine_name)
+            or check_vaccine("auffrischung", vaccine_name)
+            or check_vaccine("booster", vaccine_name)
+        )
     ) or check_vaccine("alle", vaccine_name):
         vaccine_type = "Alle Impfungen"
     elif (
@@ -547,7 +551,7 @@ def get_vaccine_type(vaccine_name):
     elif check_vaccine("einzel", vaccine_name):
         vaccine_type = "Einzelimpfung"
     else:
-        vaccine_type = "Unbekannt"
+        vaccine_type = "Alle Impfungen"
     return vaccine_type
 
 
