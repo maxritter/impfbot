@@ -318,6 +318,18 @@ def is_jameda_enabled(city):
     return conf[city]["city"] != ""
 
 
+def title_is_vaccination(title, doctolib_motive_vaccination=False):
+    if doctolib_motive_vaccination or "impfung" in title.lower() and (
+        "johnson" in title.lower()
+        or "janssen" in title.lower()
+        or "astra" in title.lower()
+        or "bion" in title.lower()
+        or "modern" in title.lower()
+    ):
+        return True
+    return False
+
+
 def impfstatus_generate_progressbar(percentage):
     num_chars = 10
     num_filled = round(percentage * num_chars)
@@ -475,7 +487,7 @@ def create_airtable_entry(
                     "ID": vaccination_id,
                     "Kinder": check_kinder(name),
                 }
-        )
+            )
     except Exception as e:
         error_log(f"[Airtable] Error during create: [{str(e)}]")
 

@@ -28,7 +28,7 @@ def doctolib_determine_vaccines(
     visit_motive, vaccine_names, vaccine_ids, vaccine_specialities
 ):
     # Extract some information
-    visit_motive_name = visit_motive["name"].lower()
+    visit_motive_name = visit_motive["name"]
     visit_motive_id = visit_motive["id"]
     speciality_id = visit_motive["speciality_id"]
     visit_motive_covid_vaccination = False
@@ -38,14 +38,8 @@ def doctolib_determine_vaccines(
         pass
 
     # Check if this is a Covid vaccination
-    if (visit_motive_covid_vaccination or "impfung" in visit_motive_name) and (
-        ("bion" in visit_motive_name)
-        or ("astra" in visit_motive_name)
-        or ("modern" in visit_motive_name)
-        or ("johnson" in visit_motive_name)
-        or ("janssen" in visit_motive_name)
-    ):
-        vaccine_names.append(visit_motive["name"])
+    if helper.title_is_vaccination(visit_motive_name, visit_motive_covid_vaccination):
+        vaccine_names.append(visit_motive_name)
         vaccine_ids.append(visit_motive_id)
         vaccine_specialities.append(speciality_id)
 

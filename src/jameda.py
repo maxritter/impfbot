@@ -23,7 +23,9 @@ def jameda_check(city):
         jameda_check_api(city, **location)
 
 
-def jameda_check_api(city, profile_id, service_id, location, vaccine, practice_name, street, **kwargs):
+def jameda_check_api(
+    city, profile_id, service_id, location, vaccine, practice_name, street, **kwargs
+):
     global jameda_session
 
     try:
@@ -184,7 +186,7 @@ def jameda_check_api(city, profile_id, service_id, location, vaccine, practice_n
                 or vaccine_compound == "Johnson & Johnson"
             ):
                 helper.send_channel_msg(city, "vec", message_long)
-    
+
         helper.airtable_id_count_dict[vaccination_id] = slot_counter
 
     except Exception as e:
@@ -333,14 +335,7 @@ def jameda_gather_locations(location):
                     # this is not a service we can book on our own, it depends on us having booked another service first
                     continue
 
-                title = service["title"].lower()
-                if "impfung" in title and (
-                    "johnson" in title
-                    or "janssen" in title
-                    or "astra" in title
-                    or "bion" in title
-                    or "modern" in title
-                ):
+                if helper.title_is_vaccination(service["title"]):
                     location = {
                         "profile_id": profile_id,
                         "location": f"{entry['plz']} {entry['ort']}",

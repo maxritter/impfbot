@@ -11,10 +11,7 @@ def zollsoft_send_message(city, slot_counter, vaccine_dates, vaccine_name, booki
     else:
         message = f"{slot_counter} Termine "
     vaccine_dates_str = ", ".join(sorted(set(vaccine_dates)))
-    message = (
-        message
-        + f"für {vaccine_name} (Alle Impfungen) in München. Wählbare Tage: {vaccine_dates_str}."
-    )
+    message = message + f"für {vaccine_name}. Wählbare Tage: {vaccine_dates_str}."
     message_long = message + f" Hier buchen: {booking_url}\n"
 
     # Print message out on server
@@ -85,206 +82,90 @@ def zollsoft_check(city):
                 helper.error_log(f"[Zollsoft] Error during fetch from API [{str(e)}]")
                 continue
 
-            slot_counter = 0
+            # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
+            vaccination_names_dict = {}
+            available_dates_dict = {}
+            vaccination_counter_dict = {}
             for entry in result["termine"]:
-                _, _, _, _, location, _, _, _, _, _ = entry
-                slot_counter = slot_counter + 1
+                date, _, _, _, title, _, _, _, _, _ = entry
+                if not helper.title_is_vaccination(title):
+                    continue
+                available_date = datetime.datetime.strptime(date, "%Y/%m/%d").strftime(
+                    "%d.%m.%Y"
+                )
+                if not title in available_dates_dict:
+                    available_dates_dict[title] = []
+                available_dates_dict[title].append(available_date)
+                if not title in vaccination_names_dict:
+                    vaccination_names_dict[title] = []
+                vaccination_names_dict[title].append(title)
+                if not title in vaccination_counter_dict:
+                    vaccination_counter_dict[title] = 0
+                vaccination_counter_dict[title] = vaccination_counter_dict[title] + 1
 
-            if slot_counter > 0:
-                # termine: [["2021\/05\/19", "12:28", "18172348282", "Lisa Schultes", "Pasing (Institutstra\u00dfe 14) | Corona-Impfung (AstraZeneca)", "7", "", "f", "f", "2021-05-16 18:44:22"]]
-                biontech_dates = []
-                biontech_counter = 0
-                astra_dates = []
-                astra_counter = 0
-                moderna_dates = []
-                moderna_counter = 0
-                johnson_dates = []
-                johnson_counter = 0
-                for entry in result["termine"]:
-                    date, time, _, _, location, _, _, _, _, _ = entry
-                    vaccination_id = "{}.{}.{}".format(date, time, location)
-                    if (
-                        not "antigen" in location.lower()
-                        and not "antikörper" in location.lower()
-                        and not "pcr" in location.lower()
-                        and not "test" in location.lower()
-                    ):
-                        # Determine Vaccine
-                        d = datetime.datetime.strptime(date, "%Y/%m/%d")
-                        if (
-                            "biontech" in location.lower()
-                            or "impfungen" in location.lower()
-                        ):
-                            biontech_counter = biontech_counter + 1
-                            biontech_dates.append(datetime.date.strftime(d, "%d.%m.%Y"))
-                        elif "astrazeneca" in location.lower():
-                            astra_counter = astra_counter + 1
-                            astra_dates.append(datetime.date.strftime(d, "%d.%m.%Y"))
-                        elif "moderna" in location.lower():
-                            moderna_counter = moderna_counter + 1
-                            moderna_dates.append(datetime.date.strftime(d, "%d.%m.%Y"))
-                        elif (
-                            "johnson" in location.lower()
-                            or "janssen" in location.lower()
-                        ) and not "bion" in location.lower():
-                            johnson_counter = johnson_counter + 1
-                            johnson_dates.append(datetime.date.strftime(d, "%d.%m.%Y"))
-                        else:
-                            helper.warn_log(
-                                f"[Zollsoft] Unknown vaccination: {location.lower()}"
-                            )
+            for vaccine_name in vaccination_names_dict.keys():
+                # Lookup vaccination count
+                slot_counter = vaccination_counter_dict[vaccine_name]
+                available_dates = available_dates_dict[vaccine_name]
+                vaccination_id = f"zollsoft.{unique_id}.{vaccine_name}"
+                if not vaccination_id in helper.airtable_id_count_dict:
+                    helper.airtable_id_count_dict[vaccination_id] = 0
+                vaccination_count = helper.airtable_id_count_dict[vaccination_id]
 
-            # BioNTech
-            vaccination_id = f"zollsoft.{unique_id}.biontech"
-            if not vaccination_id in helper.airtable_id_count_dict:
-                helper.airtable_id_count_dict[vaccination_id] = 0
-            vaccination_count = helper.airtable_id_count_dict[vaccination_id]
-            if biontech_counter > 0:
+                # No slots
+                if slot_counter == 0:
+                    if vaccination_count > 0:
+                        helper.delete_airtable_entry(vaccination_id)
+                    continue
+
+                vaccine_compound = helper.get_vaccine_compound(vaccine_name)
+                vaccine_type = helper.get_vaccine_type(vaccine_name)
+                if "|" in vaccine_name:
+                    try:
+                        practice_address = vaccine_name.split("|")[0]
+                        vaccine_name = vaccine_name.split("|")[1]
+                        practice = practice_address.split("(")[0]
+                        address = practice_address.split("(")[1].split(")")[0]
+                    except Exception:
+                        practice = "Verschiedene Praxen"
+                        address = "Verschiedene Standorte"
+                else:
+                    practice = "Verschiedene Praxen"
+                    address = "Verschiedene Standorte"
+
                 # Update Airtable
                 if vaccination_count == 0:
                     helper.create_airtable_entry(
                         vaccination_id,
-                        "Alle Impfungen (BioNTech)",
-                        biontech_counter,
+                        vaccine_name,
+                        slot_counter,
                         booking_url,
-                        "",
-                        "Alle Impfungen",
-                        "BioNTech",
-                        biontech_dates,
-                        "",
-                        "München",
+                        practice,
+                        vaccine_type,
+                        vaccine_compound,
+                        available_dates,
+                        address,
+                        "80331 München",
                         "Zollsoft",
                     )
-                elif biontech_counter != vaccination_count:
+                elif slot_counter != vaccination_count:
                     helper.update_airtable_entry(
                         vaccination_id,
-                        biontech_counter,
-                        biontech_dates,
+                        slot_counter,
+                        available_dates,
                     )
 
                 # Send appointments to Doctolib
-                if vaccination_count == 0 or biontech_counter > vaccination_count:
-                    zollsoft_send_message(
-                        city, biontech_counter, biontech_dates, "BioNTech", booking_url
-                    )
-                helper.airtable_id_count_dict[vaccination_id] = biontech_counter
-            elif vaccination_count > 0:
-                helper.delete_airtable_entry(vaccination_id)
-
-            # AstraZeneca
-            vaccination_id = f"zollsoft.{unique_id}.astra"
-            if not vaccination_id in helper.airtable_id_count_dict:
-                helper.airtable_id_count_dict[vaccination_id] = 0
-            vaccination_count = helper.airtable_id_count_dict[vaccination_id]
-            if astra_counter > 0:
-                # Update Airtable
-                if vaccination_count == 0:
-                    helper.create_airtable_entry(
-                        vaccination_id,
-                        "Alle Impfungen (AstraZeneca)",
-                        astra_counter,
-                        booking_url,
-                        "",
-                        "Alle Impfungen",
-                        "AstraZeneca",
-                        astra_dates,
-                        "",
-                        "München",
-                        "Zollsoft",
-                    )
-                elif astra_counter != vaccination_count:
-                    helper.update_airtable_entry(
-                        vaccination_id,
-                        astra_counter,
-                        astra_dates,
-                    )
-
-                # Send appointments to Doctolib
-                if vaccination_count == 0 or astra_counter > vaccination_count:
-                    zollsoft_send_message(
-                        city, astra_counter, astra_dates, "AstraZeneca", booking_url
-                    )
-                helper.airtable_id_count_dict[vaccination_id] = astra_counter
-            elif vaccination_count > 0:
-                helper.delete_airtable_entry(vaccination_id)
-
-            # Moderna
-            vaccination_id = f"zollsoft.{unique_id}.moderna"
-            if not vaccination_id in helper.airtable_id_count_dict:
-                helper.airtable_id_count_dict[vaccination_id] = 0
-            vaccination_count = helper.airtable_id_count_dict[vaccination_id]
-            if moderna_counter > 0:
-                # Update Airtable
-                if vaccination_count == 0:
-                    helper.create_airtable_entry(
-                        vaccination_id,
-                        "Alle Impfungen (Moderna)",
-                        moderna_counter,
-                        booking_url,
-                        "",
-                        "Alle Impfungen",
-                        "Moderna",
-                        moderna_dates,
-                        "",
-                        "München",
-                        "Zollsoft",
-                    )
-                elif moderna_counter != vaccination_count:
-                    helper.update_airtable_entry(
-                        vaccination_id,
-                        moderna_counter,
-                        moderna_dates,
-                    )
-
-                # Send appointments to Doctolib
-                if vaccination_count == 0 or moderna_counter > vaccination_count:
-                    zollsoft_send_message(
-                        city, moderna_counter, moderna_dates, "Moderna", booking_url
-                    )
-                helper.airtable_id_count_dict[vaccination_id] = moderna_counter
-            elif vaccination_count > 0:
-                helper.delete_airtable_entry(vaccination_id)
-
-            # Johnson & Johnson
-            vaccination_id = f"zollsoft.{unique_id}.johnson"
-            if not vaccination_id in helper.airtable_id_count_dict:
-                helper.airtable_id_count_dict[vaccination_id] = 0
-            vaccination_count = helper.airtable_id_count_dict[vaccination_id]
-            if johnson_counter > 0:
-                # Update Airtable
-                if vaccination_count == 0:
-                    helper.create_airtable_entry(
-                        vaccination_id,
-                        "Alle Impfungen (Johnson & Johnson)",
-                        johnson_counter,
-                        booking_url,
-                        "",
-                        "Alle Impfungen",
-                        "Johnson & Johnson",
-                        johnson_dates,
-                        "",
-                        "München",
-                        "Zollsoft",
-                    )
-                elif johnson_counter != vaccination_count:
-                    helper.update_airtable_entry(
-                        vaccination_id,
-                        johnson_counter,
-                        johnson_dates,
-                    )
-
-                # Send appointments to Doctolib
-                if vaccination_count == 0 or johnson_counter > vaccination_count:
+                if vaccination_count == 0 or slot_counter > vaccination_count:
                     zollsoft_send_message(
                         city,
-                        johnson_counter,
-                        johnson_dates,
-                        "Johnson & Johnson",
+                        slot_counter,
+                        available_dates,
+                        vaccine_name,
                         booking_url,
                     )
-                helper.airtable_id_count_dict[vaccination_id] = johnson_counter
-            elif vaccination_count > 0:
-                helper.delete_airtable_entry(vaccination_id)
+
+                helper.airtable_id_count_dict[vaccination_id] = slot_counter
 
     except Exception as e:
         helper.error_log(f"[Zollsoft] General Error [{str(e)}]")

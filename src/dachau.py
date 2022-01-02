@@ -102,7 +102,7 @@ def dachau_check(city):
                 remove_end = section_of_text.split('">', 1)[0]
                 string_data = remove_end.split('data-intervals="')[1]
                 json_data = json.loads(string_data)
-            except:
+            except Exception as e:
                 continue
 
             # Lookup vaccination count
@@ -117,7 +117,7 @@ def dachau_check(city):
                 if vaccination_count > 0:
                     helper.delete_airtable_entry(vaccination_id)
                 continue
-            
+
             # Parse dates
             available_dates = []
             for date in json_data["dates"]:
